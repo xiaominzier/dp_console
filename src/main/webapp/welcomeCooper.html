@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>合作机构</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header"><h1 style="display: inline;">合作机构信息</h1>&nbsp;&nbsp;<a
+                        href="javascript:updateInfo()" style="color: blue;">修改</a>
+                </div>
+                <div class="layui-card-body ">
+                    <table class="layui-table">
+                        <tbody>
+                        <tr>
+                            <th width="20%">名称</th>
+                            <td width="30%" id="name"></td>
+                            <th width="20%">合作时间</th>
+                            <td width="30%" id="coopDate"></td>
+                        </tr>
+                        <tr>
+                            <th>地区</th>
+                            <td id="area"></td>
+                            <th>等级</th>
+                            <td id="grade"></td>
+                        </tr>
+                        <tr>
+                            <th>公司名称</th>
+                            <td id="compName"></td>
+                            <th>详细地址</th>
+                            <td id="addressDetail"></td>
+                        </tr>
+                        <tr>
+                            <th>联系人</th>
+                            <td id="contactName"></td>
+                            <th>联系人电话</th>
+                            <td id="contactPhone"></td>
+                        </tr>
+                        <tr>
+                            <th>归属运营商</th>
+                            <td id="sysOperatorName"></td>
+                            <th>邮箱</th>
+                            <td id="contactEmail"></td>
+                        </tr>
+                        <tr>
+                            <th>二维码</th>
+                            <td id="">
+                                <div class=" layui-photos-demo" id="layui-photos-demo" style="padding: 7px;">
+                                    <img layer-src="" layer-pid src="" alt="二维码" layer-index="0" id="qrPath">
+                                    <a id="obsKey">下载</a>
+                                </div>
+                            </td>
+                            <th>客服电话</th>
+                            <td id="userPhone"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row">
+            <div class="layui-col-xs12">
+                <div class="layui-card">
+                    <div class="layui-card-header">数据统计</div>
+                    <div class="layui-card-body ">
+                        <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
+                            <li class="layui-col-md6 layui-col-xs12" style="">
+                                <a href="javascript:;" class="x-admin-backlog-body"
+                                   style="text-align: center;color: white;background-color: rgba(255, 184, 0, 1);">
+                                    <h3>用户</h3>
+                                    <p>
+                                        <cite style="color: white;" id="userCount">0</cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-md6 layui-col-xs12">
+                                <a href="javascript:;" class="x-admin-backlog-body"
+                                   style="text-align: center;color: white;background-color: rgba(255, 87, 34, 1);">
+                                    <h3>累计分成金额</h3>
+                                    <p>
+                                        <cite style="color: white;" id="coopShareRatioTotal">0</cite></p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>
+<script>
+    var loginUser = JSON.parse(localStorage.getItem("loginUser"));
+    var cooperId;
+    if (loginUser) {
+        $.ajax({
+            type: "POST",
+            url: "/cooperative/getDetailByUserId?userId=" + loginUser.id,
+            success: function (res) {
+                if (res.code == 0) {
+                    var data = getAjaxData(res);
+                    cooperId = data.id;
+                    var beginStr = "";
+                    if (data.cooperativeBeginTime) {
+                        beginStr = new Date(data.cooperativeBeginTime).format("yyyy-MM-dd");
+                    }
+
+                    var endStr = "";
+                    if (data.cooperativeEndTime) {
+                        endStr = new Date(data.cooperativeEndTime).format("yyyy-MM-dd");
+                    }
+                    $("#coopDate").html(beginStr + " - " + endStr + " &nbsp;<a href=\"javascript:openRenewLog()\" style=\"color: blue;\">历史</a>");
+                    $("#name").text(data.name);
+                    $("#area").text(data.area);
+                    var grade = data.grade;
+                    var gradeStr = "";
+                    if (grade) {
+                        if (grade == 0) {
+                            gradeStr = "总公司";
+                        } else if (grade == 1) {
+                            gradeStr = "省级";
+                        } else if (grade == 2) {
+                            gradeStr = "市级";
+                        } else if (grade == 3) {
+                            gradeStr = "区级";
+                        }
+                    }
+                    $("#grade").text(gradeStr);
+                    $("#compName").text(data.compName);
+                    $("#addressDetail").text(data.addressDetail);
+                    $("#contactName").text(data.contactName);
+                    $("#contactPhone").text(data.contactPhone);
+                    $("#sysOperatorName").html(data.sysOperatorName + " &nbsp;<a href=\"javascript:openBelong()\" style=\"color: blue;\">历史</a>");
+                    $("#contactEmail").text(data.contactEmail);
+                    layui.config({
+                        base: "/staticResource/lib/layui/lay/modules/"
+                    }).use(['layer'], function () {
+                        var layer = layui.layer;
+                        layer.photos({
+                            photos: "#layui-photos-demo",
+                            anim: 5,
+
+                        });
+                    });
+                    $("#qrPath").attr("src", data.qrPathDomainPath);
+                    $("#obsKey").attr("href", "/downloadObs?obsKey=" + data.qrPath);
+                    $("#userPhone").text(data.servicePhone);
+                    /*var data = res.data;
+                    $("#coopShareRatioTotal").text(parseInt(data.coopShareRatioTotal / 100));
+                    $("#userCount").text(data.userCount);*/
+                } else {
+                    top.layer.msg("获取数据失败！");
+                }
+            }
+        })
+    }
+    $.ajax({
+        type: "POST",
+        url: "/user/statisCooperAdminDatas",
+        success: function (res) {
+            if (res.code == 0) {
+                var data = res.data;
+                $("#coopShareRatioTotal").text(parseInt(data.coopShareRatioTotal / 100));
+                $("#userCount").text(data.userCount);
+            } else {
+                top.layer.msg("获取数据失败！");
+            }
+        }
+    })
+
+    function openBelong() {
+        layui.use(['table', 'element'], function () {
+            var table = layui.table;
+            var $ = layui.jquery;
+            var form = layui.form;
+            var element = layui.element;
+            layer.open({
+                title: '归属历史',
+                type: 2,
+                area: ['800px', '380px'],
+                content: '/cooperativeAgency/belongLog.html?id=' + cooperId,
+            })
+        });
+    }
+
+    function openRenewLog() {
+        layui.use(['table', 'element'], function () {
+            var table = layui.table;
+            var $ = layui.jquery;
+            var form = layui.form;
+            var element = layui.element;
+            layer.open({
+                title: '合作历史',
+                type: 2,
+                area: ['800px', '380px'],
+                content: '/cooperativeAgency/renewLog.html?id=' + cooperId,
+            })
+        });
+    }
+
+    function updateInfo() {
+        top.xadmin.add_tab("修改基本信息", '/cooperativeAgency/modify.html');
+    }
+</script>

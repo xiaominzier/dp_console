@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>系统管理员、运营商</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header"><h1 style="display: inline;">用户信息</h1>&nbsp;&nbsp;<a
+                        href="javascript:updateInfo()" style="color: blue;">修改</a></div>
+                <div class="layui-card-body ">
+                    <table class="layui-table">
+                        <tbody>
+                        <tr>
+                            <th width="20%">角色</th>
+                            <td width="30%" id="roleName"></td>
+                            <th width="20%">部门</th>
+                            <td width="30%" id="orgName"></td>
+                        </tr>
+                        <tr>
+                            <th>姓名</th>
+                            <td id="nickName"></td>
+                            <th>登陆账号</th>
+                            <td id="userName"></td>
+                        </tr>
+                        <tr>
+                            <th>邮箱</th>
+                            <td id="email"></td>
+                            <th>联系电话</th>
+                            <td id="userPhone"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row">
+            <div class="layui-col-xs6">
+                <div class="layui-card">
+                    <div class="layui-card-header">用户</div>
+                    <div class="layui-card-body ">
+                        <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
+                            <li class="layui-col-md6 layui-col-xs12" style="">
+                                <a href="javascript:;" class="x-admin-backlog-body"
+                                   style="text-align: center;color: white;background-color: rgba(255, 184, 0, 1);">
+                                    <h3>运营商数量</h3>
+                                    <p>
+                                        <cite style="color: white;" id="opCount">0</cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-md6 layui-col-xs12">
+                                <a href="javascript:;" class="x-admin-backlog-body"
+                                   style="text-align: center;color: white;background-color: rgba(255, 87, 34, 1);">
+                                    <h3>合作机构数量</h3>
+                                    <p>
+                                        <cite style="color: white;" id="cooperCount">0</cite></p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs6">
+                <div class="layui-card">
+                    <div class="layui-card-header">业务</div>
+                    <div class="layui-card-body ">
+                        <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
+                            <li class="layui-col-md6 layui-col-xs12">
+                                <a href="javascript:;" class="x-admin-backlog-body"
+                                   style="text-align: center;color: white;background-color: rgba(95, 184, 120, 1);">
+                                    <h3>业务数量</h3>
+                                    <p>
+                                        <cite style="color: white;" id="categoryCount">0</cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-md6 layui-col-xs12">
+                                <a href="javascript:;" class="x-admin-backlog-body"
+                                   style="text-align: center;color: white;background-color: rgba(255, 87, 34, 1);">
+                                    <h3>子业务数量</h3>
+                                    <p>
+                                        <cite style="color: white;" id="childCategoryCount">0</cite></p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">神通卡</div>
+                <div class="layui-card-body ">
+                    <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body"
+                               style="text-align: center;color: white;background-color: rgba(95, 184, 120, 1);">
+                                <h3>已开卡数量</h3>
+                                <p>
+                                    <cite style="color: white;" id="cartCount">0</cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body"
+                               style="text-align: center;color: white;background-color: rgba(255, 87, 34, 1);">
+                                <h3>累计充值总金额</h3>
+                                <p>
+                                    <cite style="color: white;" id="rechargeTotal">0</cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body"
+                               style="text-align: center;color: white;background-color: rgba(1, 170, 237, 1);">
+                                <h3>当前神通卡总额</h3>
+                                <p>
+                                    <cite style="color: white;" id="cardBalanceTotal">0</cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body"
+                               style="text-align: center;color: white;background-color: rgba(47, 64, 86, 1);">
+                                <h3>消费总金额</h3>
+                                <p>
+                                    <cite style="color: white;" id="consumeTotal">0</cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body"
+                               style="text-align: center;color: white;background-color: rgba(0, 150, 136, 1);">
+                                <h3>退费总金额</h3>
+                                <p>
+                                    <cite style="color: white;" id="refaundTotal">0</cite></p>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>
+<script>
+    var loginUser = JSON.parse(localStorage.getItem("loginUser"));
+    $("#roleName").text(loginUser.roleName);
+    $("#orgName").text(loginUser.orgName);
+    $("#nickName").text(loginUser.nickName);
+    $("#userName").text(loginUser.userName);
+    $("#email").text(loginUser.email);
+    $("#userPhone").text(loginUser.userPhone);
+    $.ajax({
+        type: "POST",
+        url: "/user/statisAdminDatas",
+        success: function (res) {
+            if (res.code == 0) {
+                var data = res.data;
+                $("#refaundTotal").text(parseInt(data.refaundTotal / 100));
+                $("#rechargeTotal").text(parseInt(data.rechargeTotal / 100));
+                $("#opCount").text(data.opCount);
+                $("#cooperCount").text(data.cooperCount);
+                $("#refaundTotal").text(parseInt(data.refaundTotal / 100));
+                $("#consumeTotal").text(parseInt(data.consumeTotal / 100));
+                $("#childCategoryCount").text(data.childCategoryCount);
+                $("#categoryCount").text(data.categoryCount);
+                $("#cartCount").text(data.cartCount);
+                $("#cardBalanceTotal").text(parseInt(data.cardBalanceTotal / 100));
+            } else {
+                layer.msg("获取数据失败！");
+            }
+        }
+    })
+
+    function updateInfo() {
+        top.xadmin.add_tab("修改信息", '/adminManager/user/update.html');
+    }
+</script>

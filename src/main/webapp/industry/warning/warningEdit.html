@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>编辑预警等级</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card" style="padding: 50px;">
+                <form class="layui-form" lay-filter="userForm">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">行业</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="industryName" id="industryName"
+                                   autocomplete="off" readonly="readonly"
+                                   class="layui-input">
+                            <input type="hidden" name="industryId" id="industryId">
+                            <input type="hidden" name="creator" id="creator">
+                            <input type="hidden" name="updater" id="updater">
+                            <input type="hidden" name="userId" id="userId">
+                            <input type="hidden" name="userName" id="userName">
+                            <input type="hidden" name="createTime" id="createTime">
+                            <input type="hidden" name="updateTime" id="updateTime" >
+                        </div>
+                    </div>
+                    <fieldset class="layui-elem-field" style="padding-top: 15px">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">预警等级</label>
+                            <div class="layui-input-block">
+                                <select lay-filter="warningLevel0" disabled="true">
+                                    <option value="0" selected>默认</option>
+                                    <option value="1">低</option>
+                                    <option value="2">中</option>
+                                    <option value="3">高</option>
+                                </select>
+                                <input type="hidden" id="warningLevel0" value="0" name="warningLevel0" >
+                                <input type="hidden" id="allWarningFrequency0" name="allWarningFrequency0" >
+                                <input type="hidden" id="id0" name="id0" >
+                            </div>
+                        </div>
+                        <div class="layui-form-item" pane="">
+                            <label class="layui-form-label">预警频率</label>
+                            <div class="layui-input-block">
+                                <input type="radio" name="warningFrequency0" value="0" title="无" ><br/>
+                                <input type="radio" name="warningFrequency0" value="1" title="每月"><br/>
+                                <input type="radio" name="warningFrequency0" value="2" title="每年"><br/>
+                                <input type="radio" name="warningFrequency0" value="5" title="自定义">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">每</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="warningComment0" id="warningComment0" autocomplete="off" class="layui-input" placeholder="数字">
+                                    </div>
+                                    <div class="layui-input-inline">
+                                        <select name="warningData0" id="warningData0" lay-verify="required" lay-search="">
+                                            <option value="3">天</option>
+                                            <option value="4">周</option>
+                                            <option value="1">月</option>
+                                            <option value="2">年</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="layui-elem-field" style="padding-top: 15px">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">预警等级</label>
+                            <div class="layui-input-block">
+                                <select name="warningLevel1" lay-filter="warningLevel1" disabled="true">
+                                    <option value="0">默认</option>
+                                    <option value="1" selected>低</option>
+                                    <option value="2">中</option>
+                                    <option value="3">高</option>
+                                </select>
+                                <input type="hidden" id="warningLevel1" value="1" name="warningLevel1">
+                                <input type="hidden" id="allWarningFrequency1" name="allWarningFrequency1" >
+                                <input type="hidden" id="id1" name="id1" >
+                            </div>
+                        </div>
+                        <div class="layui-form-item" pane="">
+                            <label class="layui-form-label">预警频率</label>
+                            <div class="layui-input-block">
+                                <input type="radio" name="warningFrequency1" value="0" title="无" ><br/>
+                                <input type="radio" name="warningFrequency1" value="1" title="每月"><br/>
+                                <input type="radio" name="warningFrequency1" value="2" title="每年"><br/>
+                                <input type="radio" name="warningFrequency1" value="5" title="自定义">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">每</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="warningComment1" id="warningComment1" autocomplete="off" class="layui-input" placeholder="数字">
+                                    </div>
+                                    <div class="layui-input-inline">
+                                        <select name="warningData1" id="warningData1" lay-verify="required" lay-search="">
+                                            <option value="3">天</option>
+                                            <option value="4">周</option>
+                                            <option value="1">月</option>
+                                            <option value="2">年</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="layui-elem-field" style="padding-top: 15px">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">预警等级</label>
+                            <div class="layui-input-block">
+                                <select name="warningLevel2" lay-filter="warningLevel2" disabled="true">
+                                    <option value="0">默认</option>
+                                    <option value="1">低</option>
+                                    <option value="2" selected>中</option>
+                                    <option value="3">高</option>
+                                </select>
+                                <input type="hidden" id="warningLevel2" value="2" name="warningLevel2">
+                                <input type="hidden" id="allWarningFrequency2" name="allWarningFrequency2" >
+                                <input type="hidden" id="id2" name="id2" >
+                            </div>
+                        </div>
+                        <div class="layui-form-item" pane="">
+                            <label class="layui-form-label">预警频率</label>
+                            <div class="layui-input-block">
+                                <input type="radio" name="warningFrequency2" value="0" title="无" ><br/>
+                                <input type="radio" name="warningFrequency2" value="1" title="每月"><br/>
+                                <input type="radio" name="warningFrequency2" value="2" title="每年"><br/>
+                                <input type="radio" name="warningFrequency2" value="5" title="自定义">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">每</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="warningComment2" id="warningComment2" autocomplete="off" class="layui-input" placeholder="数字">
+                                    </div>
+                                    <div class="layui-input-inline">
+                                        <select name="warningData2" id="warningData2" lay-verify="required" lay-search="">
+                                            <option value="3">天</option>
+                                            <option value="4">周</option>
+                                            <option value="1">月</option>
+                                            <option value="2">年</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="layui-elem-field" style="padding-top: 15px">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">预警等级</label>
+                            <div class="layui-input-block">
+                                <select name="warningLevel3" lay-filter="warningLevel3" disabled="true">
+                                    <option value="0">默认</option>
+                                    <option value="1">低</option>
+                                    <option value="2">中</option>
+                                    <option value="3" selected>高</option>
+                                </select>
+                                <input type="hidden" id="warningLevel3" value="3" name="warningLevel3">
+                                <input type="hidden" id="allWarningFrequency3" name="allWarningFrequency3" >
+                                <input type="hidden" id="id3" name="id3" >
+                            </div>
+                        </div>
+                        <div class="layui-form-item" pane="">
+                            <label class="layui-form-label">预警频率</label>
+                            <div class="layui-input-block">
+                                <input type="radio" name="warningFrequency3" value="0" title="无"><br/>
+                                <input type="radio" name="warningFrequency3" value="1" title="每月"><br/>
+                                <input type="radio" name="warningFrequency3" value="2" title="每年"><br/>
+                                <input type="radio" name="warningFrequency3" value="5" title="自定义">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">每</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="warningComment3" id="warningComment3" autocomplete="off" class="layui-input" placeholder="数字">
+                                    </div>
+                                    <div class="layui-input-inline">
+                                        <select name="warningData3" id="warningData3" lay-verify="required" lay-search="">
+                                            <option value="3">天</option>
+                                            <option value="4">周</option>
+                                            <option value="1">月</option>
+                                            <option value="2">年</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="layui-form-item" style="text-align: right;">
+                        <div class="layui-input-block" style="text-align: right;">
+                            <button class="layui-btn layui-btn-danger" id="chancelBtn" lay-filter="cancel"><i
+                                    class="layui-icon">&#x1006;</i>取消
+                            </button>
+                            <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>确认保存
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+    console.log(id);
+    layui.use(['form', 'jquery', 'laydate'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+        $.ajax({
+            type: 'get',
+            url: apiPath + '/industry/impIndustryWarningInfo/getList/' + id,
+            async: false,
+            success: function (data) {
+                var json = getAjaxData(data);
+                if(json){
+                    $(json).each(function(index,ele){
+                        if(ele.warningLevel == "0"){  //自定义
+                            $("#industryName").val(ele.industryName);
+                            $("#industryId").val(ele.industryId);
+                            $("#creator").val(ele.creator);
+                            $("#updater").val(ele.updater);
+                            $("#userId").val(ele.userId);
+                            $("#userName").val(ele.userName);
+                            $("#createTime").val(ele.createTime);
+                            $("#updateTime").val(ele.updateTime);
+                            $("input[name=warningFrequency0][value='"+ele.warningFrequency+"']").prop("checked",'true');
+                            if(ele.warningComment){
+                                $("#warningComment0").val(ele.warningComment);
+                            }
+                            if(ele.warningData){
+                                $("#warningData0").val(ele.warningData);
+                            }
+                            $("#allWarningFrequency0").val(ele.allWarningFrequency);
+                            $("#id0").val(ele.id);
+                            form.render();
+                        }else if(ele.warningLevel == "1"){  //低
+                            $("input[name=warningFrequency1][value="+ele.warningFrequency+"]").prop("checked",'true');
+                            if(ele.warningComment){
+                                $("#warningComment1").val(ele.warningComment);
+                            }
+                            if(ele.warningData){
+                                $("#warningData1").val(ele.warningData);
+                            }
+                            $("#allWarningFrequency1").val(ele.allWarningFrequency);
+                            $("#id1").val(ele.id);
+                            form.render();
+                        }else if(ele.warningLevel == "2"){  //中
+                            $("input[name=warningFrequency2][value="+ele.warningFrequency+"]").prop("checked",'true');
+                            if(ele.warningComment){
+                                $("#warningComment2").val(ele.warningComment);
+                            }
+                            if(ele.warningData){
+                                $("#warningData2").val(ele.warningData);
+                            }
+                            $("#allWarningFrequency2").val(ele.allWarningFrequency);
+                            $("#id2").val(ele.id);
+                            form.render();
+                        }else if(ele.warningLevel == "3"){  //高
+                            $("input[name=warningFrequency3][value="+ele.warningFrequency+"]").prop("checked",'true');
+                            if(ele.warningComment){
+                                $("#warningComment3").val(ele.warningComment);
+                            }
+                            if(ele.warningData){
+                                $("#warningData3").val(ele.warningData);
+                            }
+                            $("#allWarningFrequency3").val(ele.allWarningFrequency);
+                            $("#id3").val(ele.id);
+                            form.render();
+                        }
+                    })
+                    form.render();
+                }
+            }
+        });
+        form.on('submit(add)', function (data) {
+            data = data.field;
+            var impIndustryWarningInfos = [];
+            var industryObj0 = {};
+            var industryObj1 = {};
+            var industryObj2 = {};
+            var industryObj3 = {};
+            //对象1
+            industryObj0.createTime = data.createTime;
+            industryObj0.creator = data.creator;
+            industryObj0.industryId = data.industryId;
+            industryObj0.industryName = data.industryName;
+            industryObj0.updater = data.updater;
+            industryObj0.updateTime = data.updateTime;
+            industryObj0.userId = data.userId;
+            industryObj0.userName = data.userName;
+            industryObj0.id = data.id0;
+            industryObj0.allWarningFrequency = data.allWarningFrequency0;
+            industryObj0.warningLevel = data.warningLevel0;
+            industryObj0.warningFrequency = data.warningFrequency0;
+            industryObj0.warningComment = data.warningComment0;
+            if(data.warningComment0 != ""){
+                industryObj0.warningData = data.warningData0;
+            }
+            //对象2
+            industryObj1.createTime = data.createTime;
+            industryObj1.creator = data.creator;
+            industryObj1.industryId = data.industryId;
+            industryObj1.industryName = data.industryName;
+            industryObj1.updater = data.updater;
+            industryObj1.updateTime = data.updateTime;
+            industryObj1.userId = data.userId;
+            industryObj1.userName = data.userName;
+            industryObj1.id = data.id1;
+            industryObj1.allWarningFrequency = data.allWarningFrequency1;
+            industryObj1.warningLevel = data.warningLevel1;
+            industryObj1.warningFrequency = data.warningFrequency1;
+            industryObj1.warningComment = data.warningComment1;
+            if(data.warningComment1 != ""){
+                industryObj1.warningData = data.warningData1;
+            }
+            //对象3
+            industryObj2.createTime = data.createTime;
+            industryObj2.creator = data.creator;
+            industryObj2.industryId = data.industryId;
+            industryObj2.industryName = data.industryName;
+            industryObj2.updater = data.updater;
+            industryObj2.updateTime = data.updateTime;
+            industryObj2.userId = data.userId;
+            industryObj2.userName = data.userName;
+            industryObj2.id = data.id2;
+            industryObj2.allWarningFrequency = data.allWarningFrequency2;
+            industryObj2.warningLevel = data.warningLevel2;
+            industryObj2.warningFrequency = data.warningFrequency2;
+            industryObj2.warningComment = data.warningComment2;
+            if(data.warningComment2 != ""){
+                industryObj2.warningData = data.warningData2;
+            }
+            //对象4
+            industryObj3.createTime = data.createTime;
+            industryObj3.creator = data.creator;
+            industryObj3.industryId = data.industryId;
+            industryObj3.industryName = data.industryName;
+            industryObj3.updater = data.updater;
+            industryObj3.updateTime = data.updateTime;
+            industryObj3.userId = data.userId;
+            industryObj3.userName = data.userName;
+            industryObj3.id = data.id3;
+            industryObj3.allWarningFrequency = data.allWarningFrequency3;
+            industryObj3.warningLevel = data.warningLevel3;
+            industryObj3.warningFrequency = data.warningFrequency3;
+            industryObj3.warningComment = data.warningComment3;
+            if(data.warningComment3 != ""){
+                industryObj3.warningData = data.warningData3;
+            }
+            impIndustryWarningInfos.push(industryObj0,industryObj1,industryObj2,industryObj3);
+            data.impIndustryWarningInfos = impIndustryWarningInfos;
+            delete data.allWarningFrequency0;
+            delete data.allWarningFrequency1;
+            delete data.allWarningFrequency2;
+            delete data.allWarningFrequency3;
+            delete data.creator;
+            delete data.createTime;
+            delete data.updater;
+            delete data.updateTime;
+            delete data.userId;
+            delete data.userName;
+            delete data.id0;
+            delete data.id1;
+            delete data.id2;
+            delete data.id3;
+            delete data.industryId;
+            delete data.industryName;
+            delete data.warningComment0;
+            delete data.warningComment1;
+            delete data.warningComment2;
+            delete data.warningComment3;
+            delete data.warningData0;
+            delete data.warningData1;
+            delete data.warningData2;
+            delete data.warningData3;
+            delete data.warningFrequency0;
+            delete data.warningFrequency1;
+            delete data.warningFrequency2;
+            delete data.warningFrequency3;
+            delete data.warningLevel0;
+            delete data.warningLevel1;
+            delete data.warningLevel2;
+            delete data.warningLevel3;
+            console.log("编辑信息："+JSON.stringify(data));
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/industry/impIndustryWarningInfo/updateList',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+
+            })
+            return false;
+        });
+        $('#chancelBtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>违规等级</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+</head>
+<body>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 20px;padding-right: 20px">
+    <form class="layui-form" id="formid" lay-filter="form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">字段名称</label>
+            <div class="layui-input-block">
+                <input name="fieldName" id="fieldName" disabled autocomplete="off" style='color: black !important;'
+                       class="layui-input layui-disabled"/>
+                <input type="hidden" name="industryFieldsId" id="industryFieldsId"/>
+            </div>
+        </div>
+        <div id="propertyDiv">
+
+        </div>
+        <div class="layui-form-item" style="text-align: right;">
+            <div class="layui-input-block" style="text-align: right;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add" id="addBtn" type="button"><i class="layui-icon">&#xe61f;</i>保存
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="edit" id="editBtn" type="button"><i class="layui-icon">&#xe61f;</i>保存
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script>
+
+    var fid = getParam("fid");
+    var propertyTemplates = new Array();
+    propertyTemplates[0] = "<div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled value=\"严重违规\"/>\n" +
+        "                        <input id='textId0' type='hidden'/>\n" +
+        "                        <input id='textId0createTime' type='hidden'/>\n" +
+        "                        <input id='textId0creator' type='hidden'/>\n" +
+        "                        <input id='textId0updateTime' type='hidden'/>\n" +
+        "                        <input id='textId0updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">文本内容</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input name=\"gradeComment1\" id=\"gradeComment1\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled value=\"一般违规\"/>\n" +
+        "                        <input id='textId1' type='hidden'/>\n" +
+        "                        <input id='textId1createTime' type='hidden'/>\n" +
+        "                        <input id='textId1creator' type='hidden'/>\n" +
+        "                        <input id='textId1updateTime' type='hidden'/>\n" +
+        "                        <input id='textId1updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">文本内容</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input name=\"gradeComment2\" id=\"gradeComment2\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled value=\"违规\"/>\n" +
+        "                        <input id='textId2' type='hidden'/>\n" +
+        "                        <input id='textId2createTime' type='hidden'/>\n" +
+        "                        <input id='textId2creator' type='hidden'/>\n" +
+        "                        <input id='textId2updateTime' type='hidden'/>\n" +
+        "                        <input id='textId2updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">文本内容</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input name=\"gradeComment3\" id=\"gradeComment3\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>";
+    propertyTemplates[1] = "<div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input  autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled\n" +
+        "                               value=\"严重违规\"/>\n" +
+        "                        <input id='rangeId0' type='hidden'/>\n" +
+        "                        <input id='rangeId0createTime' type='hidden'/>\n" +
+        "                        <input id='rangeId0creator' type='hidden'/>\n" +
+        "                        <input id='rangeId0updateTime' type='hidden'/>\n" +
+        "                        <input id='rangeId0updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">范围</label>\n" +
+        "                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n" +
+        "                        <input type=\"text\" name=\"rangeLeft1\" id=\"rangeLeft1\" placeholder=\"请输入\" autocomplete=\"off\"\n" +
+        "                               class=\"layui-input\">\n" +
+        "                    </div>\n" +
+        "                    <div class=\"layui-form-mid\">-</div>\n" +
+        "                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n" +
+        "                        <input type=\"text\" name=\"rangeRight1\" id=\"rangeRight1\" placeholder=\"请输入\" autocomplete=\"off\"\n" +
+        "                               class=\"layui-input\">\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input  autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled\n" +
+        "                               value=\"一般违规\"/>\n" +
+        "                        <input id='rangeId1' type='hidden'/>\n" +
+        "                        <input id='rangeId1createTime' type='hidden'/>\n" +
+        "                        <input id='rangeId1creator' type='hidden'/>\n" +
+        "                        <input id='rangeId1updateTime' type='hidden'/>\n" +
+        "                        <input id='rangeId1updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">范围</label>\n" +
+        "                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n" +
+        "                        <input type=\"text\" name=\"rangeLeft2\" id=\"rangeLeft2\" placeholder=\"请输入\" autocomplete=\"off\"\n" +
+        "                               class=\"layui-input\">\n" +
+        "                    </div>\n" +
+        "                    <div class=\"layui-form-mid\">-</div>\n" +
+        "                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n" +
+        "                        <input type=\"text\" name=\"rangeRight2\" id=\"rangeRight2\" placeholder=\"请输入\" autocomplete=\"off\"\n" +
+        "                               class=\"layui-input\">\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled value=\"违规\"/>\n" +
+        "                        <input id='rangeId2' type='hidden'/>\n" +
+        "                        <input id='rangeId2createTime' type='hidden'/>\n" +
+        "                        <input id='rangeId2creator' type='hidden'/>\n" +
+        "                        <input id='rangeId2updateTime' type='hidden'/>\n" +
+        "                        <input id='rangeId2updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">范围</label>\n" +
+        "                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n" +
+        "                        <input type=\"text\" name=\"rangeLeft3\" id=\"rangeLeft3\" placeholder=\"请输入\" autocomplete=\"off\"\n" +
+        "                               class=\"layui-input\">\n" +
+        "                    </div>\n" +
+        "                    <div class=\"layui-form-mid\">-</div>\n" +
+        "                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n" +
+        "                        <input type=\"text\" name=\"rangeRight3\" id=\"rangeRight3\" placeholder=\"请输入\" autocomplete=\"off\"\n" +
+        "                               class=\"layui-input\">\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>";
+    propertyTemplates[2] = "<div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled value=\"严重违规\"/>\n" +
+        "                        <input id='checkId0' type='hidden'/>\n" +
+        "                        <input id='checkId0createTime' type='hidden'/>\n" +
+        "                        <input id='checkId0creator' type='hidden'/>\n" +
+        "                        <input id='checkId0updateTime' type='hidden'/>\n" +
+        "                        <input id='checkId0updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">选项</label>\n" +
+        "                    <div class=\"layui-input-block\" style='width: 200%'>\n" +
+        "                        <div name=\"option1\" id=\"option1\">\n" +
+        "                        </div>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled\n" +
+        "                               value=\"一般违规\"/>\n" +
+        "                        <input id='checkId1' type='hidden'/>\n" +
+        "                        <input id='checkId1createTime' type='hidden'/>\n" +
+        "                        <input id='checkId1creator' type='hidden'/>\n" +
+        "                        <input id='checkId1updateTime' type='hidden'/>\n" +
+        "                        <input id='checkId1updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">选项</label>\n" +
+        "                    <div class=\"layui-input-block\" style='width: 200%'>\n" +
+        "                        <div name=\"option2\" id=\"option2\">\n" +
+        "                        </div>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">警示等级</label>\n" +
+        "                    <div class=\"layui-input-block\">\n" +
+        "                        <input autocomplete=\"off\" class=\"layui-input layui-disabled\" style='color: black !important;' disabled value=\"违规\"/>\n" +
+        "                        <input id='checkId2' type='hidden'/>\n" +
+        "                        <input id='checkId2createTime' type='hidden'/>\n" +
+        "                        <input id='checkId2creator' type='hidden'/>\n" +
+        "                        <input id='checkId2updateTime' type='hidden'/>\n" +
+        "                        <input id='checkId2updater' type='hidden'/>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "                <div class=\"layui-inline\">\n" +
+        "                    <label class=\"layui-form-label\">选项</label>\n" +
+        "                    <div class=\"layui-input-block\" style='width: 200%'>\n" +
+        "                        <div name=\"option3\" id=\"option3\">\n" +
+        "                        </div>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </div>";
+
+
+    var fieldId = getParam("fieldId");
+    $("#industryFieldsId").val(fieldId);
+    var fieldName = decodeURI(getParam("fieldName"));
+    $("#fieldName").val(fieldName);
+    var options = decodeURI(getParam("options"));
+    var fieldSecondProperties = getParam("fieldSecondProperties");
+    console.log("fieldSecondProperties----------->")
+    console.log("fieldSecondProperties----------->")
+    console.log("fieldSecondProperties----------->")
+    console.log(fieldSecondProperties)
+    var optionsArr;
+    if (fieldSecondProperties) {
+        var propertyStr;
+        var configData;
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: apiPath + "/industry/impIndustryFieldsLevel/getImpIndustryFieldList/" + fieldId,
+            async: false,
+            success: function (res) {
+                if (res.code == 0) {
+                    configData = res.data;
+                }
+            },
+            error: function () {
+
+            }
+        });
+        if (configData && configData.length > 0) {
+            $("#editBtn").show();
+            $("#addBtn").hide();
+        } else {
+            $("#addBtn").show();
+            $("#editBtn").hide();
+        }
+        if (fieldSecondProperties == "0" || fieldSecondProperties == "3") {
+            propertyStr = propertyTemplates[0];
+            $("#propertyDiv").empty();
+            $("#propertyDiv").append($(propertyStr));
+            if (configData && configData.length > 0) {
+                for (var index in configData) {
+                    console.log("111100----------->")
+                    console.log("#gradeComment" + (index + 1))
+                    $("#gradeComment" + (parseInt(index) + 1)).val(configData[index].gradeComment);
+                    $("#textId" + index).val(configData[index].id)
+                    $("#textId" + index + "createTime").val(configData[index].createTime)
+                    $("#textId" + index + "creator").val(configData[index].creator)
+                    $("#textId" + index + "updateTime").val(configData[index].updateTime)
+                    $("#textId" + index + "updater").val(configData[index].updater)
+                }
+            }
+        } else if (fieldSecondProperties == "2" || fieldSecondProperties == "14") {
+            propertyStr = propertyTemplates[1];
+            $("#propertyDiv").empty();
+            $("#propertyDiv").append($(propertyStr));
+            if (configData && configData.length > 0) {
+                for (var index in configData) {
+                    console.log("111100----------->")
+                    console.log("#rangeRight" + (index + 1))
+                    $("#rangeRight" + (parseInt(index) + 1)).val(configData[index].rangeRight);
+                    $("#rangeLeft" + (parseInt(index) + 1)).val(configData[index].rangeLeft);
+                    $("#rangeId" + index).val(configData[index].id)
+                    $("#rangeId" + index + "createTime").val(configData[index].createTime)
+                    $("#rangeId" + index + "creator").val(configData[index].creator)
+                    $("#rangeId" + index + "updateTime").val(configData[index].updateTime)
+                    $("#rangeId" + index + "updater").val(configData[index].updater)
+                }
+            }
+        } else {
+            propertyStr = propertyTemplates[2];
+            $("#propertyDiv").empty();
+            $("#propertyDiv").append($(propertyStr));
+            var opArr = options.split(",");
+            var datas = new Array();
+            for (var index in opArr) {
+                datas.push({name: opArr[index], value: opArr[index]})
+            }
+            optionsArr = new Array();
+            optionsArr.push(xmSelect.render({
+                el: '#option1',
+                data: datas
+            }));
+            optionsArr.push(xmSelect.render({
+                el: '#option2',
+                data: datas
+            }));
+            optionsArr.push(xmSelect.render({
+                el: '#option3',
+                data: datas
+            }));
+            console.log("------------id-")
+            console.log("------------id-")
+            console.log("------------id-")
+            console.log(configData)
+            if (configData && configData.length > 0) {
+                for (var index in configData) {
+                    console.log("index----->" + index)
+                    if (optionsArr[index]) {
+                        console.log()
+                        optionsArr[index].setValue(configData[index].option.split(","));
+                        $("#checkId" + index).val(configData[index].id);
+                        $("#checkId" + index + "createTime").val(configData[index].createTime)
+                        $("#checkId" + index + "creator").val(configData[index].creator)
+                        $("#checkId" + index + "updateTime").val(configData[index].updateTime)
+                        $("#checkId" + index + "updater").val(configData[index].updater)
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    layui.use(['form'], function () {
+        var form = layui.form;
+        form.on('submit(add)', function (data) {
+            var param = new Array();
+            if (fieldSecondProperties == "0" || fieldSecondProperties == "3") {
+                var args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "0";
+                args1.gradeComment = $("#gradeComment1").val();
+                param.push(args1);
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "1";
+                args1.gradeComment = $("#gradeComment2").val();
+                param.push(args1);
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "2";
+                args1.gradeComment = $("#gradeComment3").val();
+                param.push(args1);
+
+            } else if (fieldSecondProperties == "2" || fieldSecondProperties == "14") {
+                var args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "0";
+                args1.rangeRight = $("#rangeRight1").val();
+                args1.rangeLeft = $("#rangeLeft1").val();
+                param.push(args1);
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "1";
+                args1.rangeRight = $("#rangeRight2").val();
+                args1.rangeLeft = $("#rangeLeft2").val();
+                param.push(args1);
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "2";
+                args1.rangeRight = $("#rangeRight3").val();
+                args1.rangeLeft = $("#rangeLeft3").val();
+                param.push(args1);
+            } else {
+                var args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "0";
+                var valStr = "";
+                var optionChecked = optionsArr[0].getValue();
+                for (var index in optionChecked) {
+                    valStr += optionChecked[index].value + ",";
+                }
+                args1.option = valStr.substring(0, valStr.lastIndexOf(","));
+                param.push(args1);
+
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "1";
+                valStr = "";
+                optionChecked = optionsArr[1].getValue();
+                for (var index in optionChecked) {
+                    valStr += optionChecked[index].value + ",";
+                }
+                args1.option = valStr.substring(0, valStr.lastIndexOf(","));
+                param.push(args1);
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "2";
+                valStr = "";
+                optionChecked = optionsArr[2].getValue();
+                for (var index in optionChecked) {
+                    valStr += optionChecked[index].value + ",";
+                }
+                args1.option = valStr.substring(0, valStr.lastIndexOf(","));
+                param.push(args1);
+
+            }
+            var requestParam = {"impIndustryFieldsLevels": param};
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/industry/impIndustryFieldsLevel/insertImpIndustryFieldList',
+                data: JSON.stringify(requestParam),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('添加成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('添加失败')
+                    }
+                }
+            })
+            return false;
+        });
+        form.on('submit(edit)', function (data) {
+            var param = new Array();
+            if (fieldSecondProperties == "0" || fieldSecondProperties == "3") {
+                var args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "0";
+                args1.gradeComment = $("#gradeComment1").val();
+                args1.id = $("#textId0").val();
+                args1.createTime = $("#textId0createTime").val();
+                args1.creator = $("#textId0creator").val();
+                args1.updateTime = $("#textId0updateTime").val();
+                args1.updater = $("#textId0updater").val();
+                param.push(args1);
+
+
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "1";
+                args1.gradeComment = $("#gradeComment2").val();
+                args1.id = $("#textId1").val();
+                args1.createTime = $("#textId1createTime").val();
+                args1.creator = $("#textId1creator").val();
+                args1.updateTime = $("#textId1updateTime").val();
+                args1.updater = $("#textId1updater").val();
+                param.push(args1);
+
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "2";
+                args1.gradeComment = $("#gradeComment3").val();
+                args1.id = $("#textId2").val();
+                args1.createTime = $("#textId2createTime").val();
+                args1.creator = $("#textId2creator").val();
+                args1.updateTime = $("#textId2updateTime").val();
+                args1.updater = $("#textId2updater").val();
+                param.push(args1);
+
+
+            } else if (fieldSecondProperties == "2" || fieldSecondProperties == "14") {
+                var args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "0";
+                args1.rangeRight = $("#rangeRight1").val();
+                args1.rangeLeft = $("#rangeLeft1").val();
+                args1.id = $("#rangeId0").val();
+                args1.createTime = $("#rangeId0createTime").val();
+                args1.creator = $("#rangeId0creator").val();
+                args1.updateTime = $("#rangeId0updateTime").val();
+                args1.updater = $("#rangeId0updater").val();
+                param.push(args1);
+
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "1";
+                args1.rangeRight = $("#rangeRight2").val();
+                args1.rangeLeft = $("#rangeLeft2").val();
+                args1.id = $("#rangeId1").val();
+                args1.createTime = $("#rangeId1createTime").val();
+                args1.creator = $("#rangeId1creator").val();
+                args1.updateTime = $("#rangeId1updateTime").val();
+                args1.updater = $("#rangeId1updater").val();
+                param.push(args1);
+
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "2";
+                args1.rangeRight = $("#rangeRight3").val();
+                args1.rangeLeft = $("#rangeLeft3").val();
+                args1.id = $("#rangeId2").val();
+                args1.createTime = $("#rangeId2createTime").val();
+                args1.creator = $("#rangeId2creator").val();
+                args1.updateTime = $("#rangeId2updateTime").val();
+                args1.updater = $("#rangeId2updater").val();
+                param.push(args1);
+            } else {
+                var args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "0";
+                var valStr = "";
+                var optionChecked = optionsArr[0].getValue();
+                for (var index in optionChecked) {
+                    valStr += optionChecked[index].value + ",";
+                }
+                args1.option = valStr.substring(0, valStr.lastIndexOf(","));
+                args1.id = $("#checkId0").val();
+                args1.createTime = $("#checkId0createTime").val();
+                args1.creator = $("#checkId0creator").val();
+                args1.updateTime = $("#checkId0updateTime").val();
+                args1.updater = $("#checkId0updater").val();
+                param.push(args1);
+
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "1";
+                valStr = "";
+                optionChecked = optionsArr[1].getValue();
+                for (var index in optionChecked) {
+                    valStr += optionChecked[index].value + ",";
+                }
+                args1.option = valStr.substring(0, valStr.lastIndexOf(","));
+                args1.id = $("#checkId1").val();
+                args1.createTime = $("#checkId1createTime").val();
+                args1.creator = $("#checkId1creator").val();
+                args1.updateTime = $("#checkId1updateTime").val();
+                args1.updater = $("#checkId1updater").val();
+                param.push(args1);
+                args1 = {};
+                args1.industryFieldsId = fieldId;
+                args1.gradeWarning = "2";
+                valStr = "";
+                optionChecked = optionsArr[2].getValue();
+                for (var index in optionChecked) {
+                    valStr += optionChecked[index].value + ",";
+                }
+                args1.option = valStr.substring(0, valStr.lastIndexOf(","));
+                args1.id = $("#checkId2").val();
+                args1.createTime = $("#checkId2createTime").val();
+                args1.creator = $("#checkId2creator").val();
+                args1.updateTime = $("#checkId2updateTime").val();
+                args1.updater = $("#checkId2updater").val();
+                param.push(args1);
+
+            }
+            var requestParam = {"impIndustryFieldsLevels": param};
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/industry/impIndustryFieldsLevel/getImpIndustryFieldList/update',
+                data: JSON.stringify(requestParam),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('编辑成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('添加失败')
+                    }
+                }
+            })
+            return false;
+        });
+        $('#cancelbtn').on('click', function () {
+            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+            // 切换到对应到选项卡下
+            top.element.tabChange('xbs_tab', fid);
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+</body>
+</html>

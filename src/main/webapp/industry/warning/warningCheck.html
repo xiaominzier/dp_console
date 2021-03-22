@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看行业预警信息</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    
+</head>
+<body style="background-color: #fff;height: 100%;padding: 10px;">
+<style>
+    .layui-form-label {
+        width: 130px;
+    }
+
+    .layui-form-item .layui-input-inline {
+
+        width: 520px;
+    }
+
+    .layui-form-item {
+        margin-bottom: 25px;
+    }
+    .tpl{
+        display: none;
+    }
+
+</style>
+
+<form class="layui-form layui-col-space5">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="text-align: right;">
+                        <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i
+                                class="layui-icon">&#x1006;</i>返回
+                        </button>
+                    </div>
+                    <div class="layui-card-body ">
+                        <table class="layui-table" >
+                            <thead>
+                                <th>管理员</th>
+                                <th>角色</th>
+                                <th>预警内容</th>
+                                <th>生效时间段</th>
+                                <th>更新时间</th>
+                            </thead>
+                            <tbody id="tasks">
+                                <tr class="tpl">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+
+<script>
+    var id = getParam("id");
+    var userName;
+    var updateTime;
+    var allWarningFrequency = "";
+    $(function () {
+        if (id && id != null) {
+            $.ajax({
+                type: "GET",
+                url: apiPath+'/industry/impIndustryWarningInfo/getList/' + id,
+                success: function (res) {
+                    console.log("查看"+JSON.stringify(res.data));
+                    var data = res.data;
+                    if (res.code == 0) {
+                        if (data) {
+                            $(data).each(function(index,ele){
+                                if(ele.warningLevel == "0"){
+                                    allWarningFrequency += "默认";
+                                    if(ele.warningFrequency == "0"){
+                                        allWarningFrequency += "(无)";
+                                    }else if(ele.warningFrequency == "1"){
+                                        allWarningFrequency += "(每月提醒一次)";
+                                    }else if(ele.warningFrequency == "2"){
+                                        allWarningFrequency += "(每年提醒一次)";
+                                    }else if(ele.warningFrequency == "5"){
+                                        if(ele.warningComment){
+                                            if(ele.warningData == "3"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"天提醒一次)";
+                                            }else if(ele.warningData == "4"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"周提醒一次)";
+                                            }else if(ele.warningData == "1"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"月提醒一次)";
+                                            }else if(ele.warningData == "2"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"年提醒一次)";
+                                            }
+                                        }
+                                    }
+                                }else if(ele.warningLevel == "1"){
+                                    allWarningFrequency += "低";
+                                    if(ele.warningFrequency == "0"){
+                                        allWarningFrequency += "(无)";
+                                    }else if(ele.warningFrequency == "1"){
+                                        allWarningFrequency += "(每月提醒一次)";
+                                    }else if(ele.warningFrequency == "2"){
+                                        allWarningFrequency += "(每年提醒一次)";
+                                    }else if(ele.warningFrequency == "5"){
+                                        if(ele.warningComment){
+                                            if(ele.warningData == "3"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"天提醒一次)";
+                                            }else if(ele.warningData == "4"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"周提醒一次)";
+                                            }else if(ele.warningData == "1"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"月提醒一次)";
+                                            }else if(ele.warningData == "2"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"年提醒一次)";
+                                            }
+                                        }
+                                    }
+                                }else if(ele.warningLevel == "2"){
+                                    allWarningFrequency += "中";
+                                    if(ele.warningFrequency == "0"){
+                                        allWarningFrequency += "(无)";
+                                    }else if(ele.warningFrequency == "1"){
+                                        allWarningFrequency += "(每月提醒一次)";
+                                    }else if(ele.warningFrequency == "2"){
+                                        allWarningFrequency += "(每年提醒一次)";
+                                    }else if(ele.warningFrequency == "5"){
+                                        if(ele.warningComment){
+                                            if(ele.warningData == "3"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"天提醒一次)";
+                                            }else if(ele.warningData == "4"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"周提醒一次)";
+                                            }else if(ele.warningData == "1"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"月提醒一次)";
+                                            }else if(ele.warningData == "2"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"年提醒一次)";
+                                            }
+                                        }
+                                    }
+                                }else if(ele.warningLevel == "3"){
+                                    allWarningFrequency += "高";
+                                    if(ele.warningFrequency == "0"){
+                                        allWarningFrequency += "(无)";
+                                    }else if(ele.warningFrequency == "1"){
+                                        allWarningFrequency += "(每月提醒一次)";
+                                    }else if(ele.warningFrequency == "2"){
+                                        allWarningFrequency += "(每年提醒一次)";
+                                    }else if(ele.warningFrequency == "5"){
+                                        if(ele.warningComment){
+                                            if(ele.warningData == "3"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"天提醒一次)";
+                                            }else if(ele.warningData == "4"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"周提醒一次)";
+                                            }else if(ele.warningData == "1"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"月提醒一次)";
+                                            }else if(ele.warningData == "2"){
+                                                allWarningFrequency += "(每"+ele.warningComment+"年提醒一次)";
+                                            }
+                                        }
+                                    }
+                                }
+                                userName = ele.userName;
+                                updateTime = new Date(ele.updateTime).format("yyyy-MM-dd hh:mm:ss");
+                            })   
+                            var oCloneDom = $('.tpl').clone().removeClass('tpl');
+                            oCloneDom.find('td')
+                                .eq(0).text(userName)
+                                    .next().text('-')
+                                        .next().text(allWarningFrequency)
+                                            .next().text('-')
+                                                .next().text(updateTime)
+                            $('#tasks').append(oCloneDom);
+                        } else {
+                            parent.layer.msg("获取数据失败");
+                        }
+                        
+                    }
+                },
+                error: function () {
+                    return parent.layer.msg("获取数据失败");
+                }
+            });
+        }
+
+        $("#cancelbtn").click(function () {
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+
+
+</body>
+</html>

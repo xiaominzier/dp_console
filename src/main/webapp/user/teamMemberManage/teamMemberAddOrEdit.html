@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加/编辑组成员</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    
+</head>
+<body>
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form" id="formid" lay-filter="teamSubInfoForm">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: right;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>确认保存</button>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-card-header">基本信息</div>
+            <div class="layui-card-body">
+                <div class="layui-form-item">
+                    <label class="layui-form-label layui-required">小组</label>
+                    <div class="layui-input-block">
+                        <select name="teamId" lay-search="" lay-filter="teamId"
+                                id="teamName">
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">成员姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="realName" placeholder="请输入" autocomplete="off" class="layui-input">
+                        <input type="hidden" name="userId">
+                        <input type="hidden" name="impUserId">
+                        <input type="hidden" name="createTime">
+                        <input type="hidden" name="updateTime">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">联系方式</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="tel" lay-verify="checkMobile|required" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-card-header">登录信息</div>
+            <div class="layui-card-body">
+                
+                <div class="layui-form-item">
+                    <label class="layui-form-label layui-required">登录账号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="userName" onchange="checkUserName()" lay-verify="checkUserName|required" placeholder="请输入名称" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">登录密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="pass" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label layui-required">账号状态</label>
+                    <div class="layui-input-block">
+                        <select name="status" lay-verify="required" lay-search="" lay-filter="status" id="status">
+                            <option value="1">启用</option>
+                            <option value="0">禁用</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </form>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+    let data = "";
+    function checkMobile(str) { //写一个判断函数
+        var  re = /^1\d{10}$/    //正则表达式
+        if (!re.test(str)) {      //判断字符是否是11位数字
+            parent.layer.msg('请输入11位数字手机号');
+            return false;
+        }
+    }
+    function checkUserName(){
+        var userName = $("input[name='userName']").val();
+        var oldVal = $("input[name='userName']").attr('oldVal');
+        if(userName != "" && userName != oldVal){
+            $.ajax({
+                url: apiPath+'/user/impUserInfo/checkUserName/'+userName,
+                type: "GET",
+                // async: false,
+                success: function (res) {
+                    console.log(res);
+                    if (res.code == 0) {
+                        if (res.data == true) {
+                            parent.layer.msg("该登录账号已被占用，请换一个");
+                            return false;
+                        }
+                    }
+                }
+            })
+        }
+    }
+    layui.use(['form', 'jquery','laydate'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        
+        $("input[name='tel']").blur(function(){
+            var tel = $(this).val(); //取值
+            checkMobile(tel);
+        }) 
+        // 小组下拉框选项初始化
+        $.ajax({
+            type: 'GET',
+            dataType: 'json',
+            // contentType: 'application/json',
+            url: apiPath+'/user/impTeamInfo/query_list',
+            success: function (data) {
+                var json = getAjaxData(data);
+                console.log("小组下拉框选项初始化"+JSON.stringify(json));
+                $.each(json, function (index, value) {
+                    $('#teamName').append(new Option(value.teamName, value.id));
+                });
+                form.render('select');
+            }
+        });
+        if(id!=""){
+            form.verify({
+                checkUserName: function(value,item){
+                    var oldVal = $("input[name='userName']").attr('oldVal');
+                    if(value != "" && value != oldVal){
+                        $.ajax({
+                            url: apiPath+'/user/impUserInfo/checkUserName/'+value,
+                            type: "GET",
+                            async: false,  //同步请求
+                            success: function (res) {
+                                if (res.code == 0) {
+                                    data = res.data;
+                                }
+                            }
+                        })
+                    }
+                    if(data != ""){   //这个判断不能写在回调函数里，不然会不生效
+                        if (data == true) {
+                            return '该登录账号已被占用，请换一个';
+                        }
+                    }
+                },
+                checkMobile: function(value,item) { //写一个判断函数
+                    var  re = /^1\d{10}$/    //正则表达式
+                    if (!re.test(value)) {      //判断字符是否是11位数字
+                        return '请输入11位数字手机号';
+                    }
+                }
+            });
+            $.ajax({
+                type: 'GET',
+                url: apiPath+'/user/impTeamSubInfo/get/'+id,
+                // async: false,
+                success: function (data) {
+                    var json = getAjaxData(data);
+                    // console.log(json);
+                    form.val("teamSubInfoForm", json);
+                    $('[name="userName"]').val(json.impUserInfo.userName);
+                    $('[name="tel"]').val(json.impUserInfo.tel);
+                    $('[name="realName"]').val(json.impUserInfo.realName);
+                    $('[name="password"]').val(json.impUserInfo.password);
+                    $('[name="userId"]').val(json.userId);
+                    $('[name="impUserId"]').val(json.impUserInfo.id);
+                    $('[name="createTime"]').val(json.impUserInfo.createTime);
+                    $('[name="updateTime"]').val(json.impUserInfo.updateTime);
+                    if(json.impUserInfo.status=='1'){
+                        $('[name="status"]').find("option[value='1']").attr("selected",true);
+                    }else if(json.impUserInfo.status=='0'){
+                        $('[name="status"]').find("option[value='0']").attr("selected",true);
+                    }
+                    $("input[name='userName']").attr('oldVal',json.impUserInfo.userName);
+                    form.render();
+                }
+
+            })
+            form.on('submit(add)', function (data) {
+                data = data.field;
+                var impUserInfo = {};
+                impUserInfo.tel = data.tel;
+                impUserInfo.realName = data.realName;
+                var passwordShow = $("#pass").val();
+                if(passwordShow!=""){
+                    impUserInfo.password = passwordShow;
+                }
+                impUserInfo.status = data.status;
+                impUserInfo.userName = data.userName;
+                impUserInfo.createTime = data.createTime;
+                impUserInfo.updateTime = data.updateTime;
+                impUserInfo.id = data.impUserId;
+                delete data.tel;
+                delete data.realName;
+                delete data.password;
+                delete data.status;
+                delete data.userName;
+                delete data.createTime;
+                delete data.updateTime;
+                delete data.impUserId;
+                data.impUserInfo = impUserInfo;
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: apiPath+'/user/impTeamSubInfo/update/'+id,
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        console.log("组成员信息修改成功"+res);
+                        if (res && res.code == 0) {
+                            top.layer.msg('保存成功');
+                            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                            // 切换到对应到选项卡下
+                            top.element.tabChange('xbs_tab', fid);
+                            // 关闭顶层框架tab
+                            var id = self.frameElement.getAttribute("tab-id");
+                            top.element.tabDelete('xbs_tab', id);
+                        } else {
+                            top.layer.msg('保存失败');
+                        }
+                    }
+
+                })
+                return false;
+            });
+        }
+        else{
+            form.verify({
+                checkUserName: function(value,item){
+                    var oldVal = $("input[name='userName']").attr('oldVal');
+                    if(value != "" && value != oldVal){
+                        $.ajax({
+                            url: apiPath+'/user/impUserInfo/checkUserName/'+value,
+                            type: "GET",
+                            async: false,  //同步请求
+                            success: function (res) {
+                                if (res.code == 0) {
+                                    data = res.data;
+                                }
+                            }
+                        })
+                    }
+                    if(data != ""){   //这个判断不能写在回调函数里，不然会不生效
+                        if (data == true) {
+                            return '该登录账号已被占用，请换一个';
+                        }
+                    }
+                },
+                checkMobile: function(value,item) { //写一个判断函数
+                    var  re = /^1\d{10}$/    //正则表达式
+                    if (!re.test(value)) {      //判断字符是否是11位数字
+                        return '请输入11位数字手机号';
+                    }
+                }
+            });
+            form.on('submit(add)', function (data) {
+                //获取当前下拉多选选中的值
+                var selectArr = $('#teamName option:selected').val();//选中的值
+                console.log(selectArr);
+                if(selectArr==""){
+                    alert("小组必填，请选择");
+                    return false;
+                }
+                data = data.field;
+                var impUserInfo = {};
+                impUserInfo.tel = data.tel;
+                impUserInfo.realName = data.realName;
+                var passwordShow = $("#pass").val();
+                if(passwordShow==""){
+                    alert("请设置密码");
+                    return false;
+                }
+                if(passwordShow!=""){
+                    impUserInfo.password = passwordShow;
+                }
+                impUserInfo.status = data.status;
+                impUserInfo.userName = data.userName;
+                delete data.tel;
+                delete data.realName;
+                delete data.password;
+                delete data.status;
+                delete data.userName;
+                delete data.userId;
+                delete data.createTime;
+                delete data.updateTime;
+                delete data.impUserId;
+                data.impUserInfo = impUserInfo;
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: apiPath+'/user/impTeamSubInfo/save',
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        console.log(res);
+                        if (res && res.code == 0) {
+                            top.layer.msg('保存成功');
+                            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                            // 切换到对应到选项卡下
+                            top.element.tabChange('xbs_tab', fid);
+                            // 关闭顶层框架tab
+                            var id = self.frameElement.getAttribute("tab-id");
+                            top.element.tabDelete('xbs_tab', id);
+                        } else {
+                            top.layer.msg('保存失败');
+                        }
+                    }
+    
+                })
+                return false;
+            });
+        }
+
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+
+    });
+</script>
+
+
+</body>
+</html>

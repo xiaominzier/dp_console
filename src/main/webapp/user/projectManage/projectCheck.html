@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看项目信息</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+</head>
+<body style="background-color: #fff;height: 100%;padding: 10px;">
+<style>
+    .layui-form-label {
+        width: 130px;
+    }
+
+    .layui-form-item .layui-input-inline {
+
+        width: 520px;
+    }
+
+    .layui-form-item {
+        margin-bottom: 25px;
+    }
+
+</style>
+
+<form class="layui-form layui-col-space5">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="text-align: right;">
+                        <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i
+                                class="layui-icon">&#x1006;</i>返回
+                        </button>
+                    </div>
+
+                    <div class="layui-card-body ">
+                        <table class="layui-table" lay-skin="nob">
+                            <!-- <colgroup>
+                                <col>
+                                <col>
+                                <col>
+                                <col>
+                            </colgroup> -->
+                            <tbody>
+                            <tr>
+                                <td width="15%">项目名称</td>
+                                <td width="85%">
+                                    <div id="projectName"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>地点</td>
+                                <td>
+                                    <div id="place"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>时间</td>
+                                <td>
+                                    <div id="time"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>技术员</td>
+                                <td>
+                                    <div id="technicianIds"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>小组</td>
+                                <td>
+                                    <div id="teamIds"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>添加时间</td>
+                                <td>
+                                    <div id="createTime"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>修改时间</td>
+                                <td>
+                                    <div id="updateTime"></div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+
+<script>
+    var id = getParam("id");
+
+    $(function () {
+        if (id && id != null) {
+            $.ajax({
+                type: "GET",
+                url: apiPath+"/user/impProjectManage/get/"+id,
+                success: function (res) {
+                    console.log("查看"+JSON.stringify(res.data));
+                    if (res.code == 0) {
+                        var finalData = getAjaxData(res);
+                        if (finalData) {
+                            var technicianStr = '';
+                            $.each(finalData.technicianInfos,function(i,o){
+                                technicianStr += o.realName+",";
+                            })
+                            technicianStr = technicianStr.substring(0,technicianStr.length-1);
+                            var teamStr = '';
+                            $.each(finalData.teamInfos,function(i,o){
+                                teamStr += o.teamName+",";
+                            })
+                            teamStr = teamStr.substring(0,teamStr.length-1);
+                            $("#projectName").text(finalData.projectName);
+                            $("#place").text(finalData.place);
+                            $("#time").text(finalData.time);
+                            $("#technicianIds").text(technicianStr);
+                            $("#teamIds").text(teamStr);
+                            $("#createTime").text(new Date(finalData.createTime).format("yyyy-MM-dd hh:mm:ss"));
+                            $("#updateTime").text(new Date(finalData.updateTime).format("yyyy-MM-dd hh:mm:ss"));
+
+
+                        } else {
+                            parent.layer.msg("获取数据失败");
+                        }
+                    }
+                },
+                error: function () {
+                    return parent.layer.msg("获取数据失败");
+                }
+            });
+        }
+
+        $("#cancelbtn").click(function () {
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+
+
+</body>
+</html>

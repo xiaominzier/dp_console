@@ -1,0 +1,97 @@
+.flexbox_one {
+    margin: auto;
+    margin-top: 10px;
+    width: calc(50vw);
+    height: calc(50vh);
+    background: white;
+}
+
+.flexbox_parent_top {
+    height: 10%;
+    border-bottom: 1px solid #d7d7d7;
+}
+
+.flexbox_parent_top_title {
+    width: 100px;
+    height: 60%;
+    float: left;
+    margin: 5px 20px 5px 0px;
+    line-height: 30px;
+    color: black;
+    text-align: center;
+    padding: 3px 0px 3px 0px;
+}
+
+.flexbox_parent_top .preview {
+    cursor: pointer;
+    width: 100px;
+    height: 60%;
+    background: #009688;
+    float: right;
+    margin: 5px 20px 5px 0px;
+    line-height: 30px;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    padding: 3px 0px 3px 0px;
+}
+
+.flexbox_parent {
+    height: 90%;
+}
+
+.flexbox_child_1 {
+    float: left;
+    width: 40%;
+    height: 100%;
+    border-right: 1px solid #c3c3c3;
+}
+
+.flexbox_child_2 {
+    float: left;
+    width: 59%;
+    height: 100%;
+}
+
+.flexbox_child_top {
+    height: 82%;
+}
+
+.flexbox_child_bottom {
+    height: 18%;
+}
+
+#flexbox_child_top_tree {
+    margin: 20px 20px 0px 0px;
+    width: 100%;
+    height: 100%;
+    border-bottom: 1px solid #c3c3c3;
+}
+
+.flexbox_child_bottom_news {
+    height: 100%;
+    line-height: 50px;
+    margin-left: 20px;
+}
+
+.flexbox_child_2 table {
+    width: 100%;
+    height: 90%;
+    border-color: #999;
+}
+
+.flexbox_child_2 table .text_input {
+    padding-left: 10px;
+    width: 92%;
+    height: 50%;
+    border: 1px solid #999;
+    border-radius: 5px;
+}
+
+.flexbox_child_2 table textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: 1px solid #999999;
+    border-radius: 5px;
+}

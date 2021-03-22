@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>操作日志</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <link rel="stylesheet" href="/staticResource/lib/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a>
+          <cite>操作日志</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form" action="">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <input type="text" name="roleName" id="roleName"
+                                           autocomplete="on" placeholder="角色"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <input type="text" name="userName" id="userName"
+                                           autocomplete="on" placeholder="账户"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <!--<div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <select name="userLevel" id="userLevel">
+                                    </select>
+                                </div>
+                            </div>-->
+                            <div class="layui-inline">
+
+                                <div class="layui-input-inline">
+                                    <input type="text" name="elt_createTime" placeholder="创建时间开始" id="createBeginTime"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid" style="padding:  5px 0!important;">-</div>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="egt_createTime" id="createEndTime" placeholder="创建时间结束"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <button type="button" class="layui-btn" lay-event="search" id="search">搜索
+                                    </button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <table id="demo" lay-filter="demo" style="margin-left: 50px">
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--<script type="text/html" id="barDemo">
+    {{#
+    var genBtn = function(){
+    var loginUser = JSON.parse(localStorage.getItem("loginUser"));
+    var btnStr="";
+    btnStr+='<a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>';
+    return btnStr;
+    }
+    }}
+    {{genBtn()}}
+</script>-->
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+<script>
+    var tableIns;
+    layui.use(['element', 'table', 'form', 'laydate'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#pushBeginTime'
+            , type: 'datetime'
+            , theme: 'molv'
+            , calendar: true
+            , format: 'yyyy-MM-dd HH:mm:ss'
+            , done(value, date, endDate) {
+                $("#pushBeginTime").val(new Date(value).getTime());
+            }
+        });
+        laydate.render({
+            elem: '#pushEndTime'
+            , type: 'datetime'
+            , theme: 'molv'
+            , calendar: true
+            , format: 'yyyy-MM-dd HH:mm:ss'
+            , done(value, date, endDate) {
+                $("#pushEndTime").val(new Date(value).getTime());
+            }
+        });
+        //赋予完成 重新渲染select
+        form.render('select');
+
+        tableIns = table.render({
+            elem: '#demo',
+            url: apiPath + '/common/impLogInfo/query_page',
+            method: 'get',
+            cols: [[
+                {field: 'id', title: 'ID', width: '10%', fixed: 'left', align: 'center', unresize: true}
+                , {field: 'roleName', title: '角色', width: '15%', fixed: 'left', align: 'center', unresize: true}
+                , {field: 'userName', title: '账户', width: '15%', align: 'center', unresize: true}
+                , {field: 'model', title: '模块', width: '10%', align: 'center', unresize: true}
+                , {
+                    field: 'operating', title: '操作类型', width: '10%', align: 'center', unresize: true
+                }
+                , {field: 'content', title: '描述', width: '25%', align: 'center', unresize: true}
+                , {
+                    field: 'createTime', title: '时间', width: '15%', align: 'center', templet: function (item) {
+                        if (item.createTime == undefined || item.createTime == null) {
+                            return "";
+                        }
+                        return new Date(item.createTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                }
+            ]],
+            id: "opTable",
+            parseData: function (res) { //res 即为原始返回的数据
+                var config = getAjaxData(res);
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": config.total,
+                    "data": config.records  //解析数据列表
+                };
+            }
+            , request: {
+                pageName: 'page' //页码的参数名称，默认：page
+                , limitName: 'size' //每页数据量的参数名，默认：limit
+            },
+            even: true,
+            limits: [10, 15, 30],
+            limit: 10,
+            page: true,
+
+        });
+        //防止表格工具按钮隐藏失效
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+
+        $('#search').on('click', function (data) {
+            reloadTable();
+        });
+    });
+
+    function getQueryParam() {
+        var param = {};
+        var roleName = $("#roleName").val();
+        if (roleName != "") {
+            param.like_roleName = roleName;
+        }
+        var userName = $("#userName").val();
+        if (userName != "") {
+            param.like_userName = userName;
+        }
+        var createBeginTime = $("#createBeginTime").val();
+        if (createBeginTime != "") {
+            param.gt_createTime = createBeginTime;
+        }
+        var createEndTime = $("#createEndTime").val();
+        if (createEndTime != "") {
+            param.lt_createTime = createEndTime;
+        }
+        return param;
+    }
+
+    function reloadTable() {
+        var param = getQueryParam();
+        if (tableIns != null) {
+            tableIns.where = {};  //置空where
+            tableIns.page = {};
+        }
+        layui.use(['table'], function () {
+            var table = layui.table;
+            //执行重载
+            table.reload('opTable', {
+                page: {
+                    page: 1 //重新从第 1 页开始
+                },
+                where: param,
+                done: function () {
+                    tableIns = this;
+                }
+            }, 'data');
+            table.render();
+        });
+
+    }
+
+    var fid = self.frameElement.getAttribute("tab-id");
+
+</script>
+</body>
+</html>

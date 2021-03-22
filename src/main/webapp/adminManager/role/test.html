@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="utf-8">
+    <title>树组件</title>
+
+    <link rel="stylesheet" href="/staticResource/lib/layui/css/layui.css">
+    <link rel="stylesheet" href="/staticResource/lib/layui/css/modules/eleTree/eleTree.css">
+    <script src="/staticResource/lib/layui/lay/modules/eleTree.js"></script>
+</head>
+<body>
+<div id="test1"></div>
+<script src="/staticResource/lib/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: "/staticResource/lib/layui/lay/modules/"
+    }).use('eleTree', function () {
+        var eleTree = layui.eleTree;
+
+        //渲染
+        /*var inst1 = tree.tree({
+            elem: '#test1'  //绑定元素
+            ,data: [{
+                title: '江西' //一级菜单
+                ,children: [{
+                    title: '南昌' //二级菜单
+                    ,children: [{
+                        title: '高新区' //三级菜单
+                        //…… //以此类推，可无限层级
+                    }]
+                }]
+            },{
+                title: '陕西' //一级菜单
+                ,children: [{
+                    title: '西安' //二级菜单
+                }]
+            }]
+        });*/
+        var data = [{
+            "href": "",
+            "id": 5,
+            "isDel": 0,
+            "menuCode": "sys",
+            "menuName": "系统管理",
+            "orderIndex": 100,
+            "permissionCode": "sys:user",
+            "permissionName": "系统管理",
+            "pid": 0,
+            "pids": "0",
+            "requiredPermission": 1,
+            "subResourceList": [{
+                "href": "sysConfig/list.html",
+                "id": 22,
+                "isDel": 0,
+                "menuCode": "sys:config:page",
+                "menuName": "系统参数配置",
+                "orderIndex": 4,
+                "permissionCode": "sys:config:page",
+                "permissionName": "系统参数配置",
+                "pid": 5,
+                "pids": "5",
+                "requiredPermission": 1,
+                "subResourceList": [{
+                    "href": "/sysConfig/save",
+                    "id": 7,
+                    "isDel": 0,
+                    "menuCode": "sys:config:save",
+                    "menuName": "保存参数",
+                    "orderIndex": 3,
+                    "permissionCode": "sys:config:save",
+                    "permissionName": "保存参数",
+                    "pid": 22,
+                    "pids": "5/22",
+                    "requiredPermission": 1,
+                    "type": 3
+                }, {
+                    "href": "/sysConfig/list",
+                    "id": 6,
+                    "isDel": 0,
+                    "menuCode": "sys:config:list",
+                    "menuName": "系统参数列表数据",
+                    "orderIndex": 2,
+                    "permissionCode": "sys:config:list",
+                    "permissionName": "系统参数列表数据",
+                    "pid": 22,
+                    "pids": "5/22",
+                    "requiredPermission": 1,
+                    "type": 3
+                }],
+                "type": 2
+            }, {
+                "href": "adminManager/user/admin-list.html",
+                "id": 24,
+                "isDel": 0,
+                "menuCode": "sys:user:page",
+                "menuName": "管理员管理",
+                "orderIndex": 4,
+                "permissionCode": "sys:user:page",
+                "permissionName": "管理员管理",
+                "pid": 5,
+                "pids": "5",
+                "requiredPermission": 1,
+                "type": 2
+            }, {
+                "href": "adminManager/role/list.html",
+                "id": 25,
+                "isDel": 0,
+                "menuCode": "sys:role:page",
+                "menuName": "角色管理",
+                "orderIndex": 4,
+                "permissionCode": "sys:role:page",
+                "permissionName": "角色管理",
+                "pid": 5,
+                "pids": "5",
+                "requiredPermission": 1,
+                "type": 2
+            }],
+            "type": 1
+        }, {
+            "href": "/sysConfig/findByCode",
+            "id": 8,
+            "isDel": 0,
+            "menuCode": "sys:config:findByCode",
+            "menuName": "保存参数",
+            "orderIndex": 4,
+            "permissionCode": "sys:config:findByCode",
+            "permissionName": "查询参数详情",
+            "pid": 22,
+            "pids": "5/22",
+            "requiredPermission": 1,
+            "type": 3
+        }, {
+            "href": "/sysConfig/delete",
+            "id": 9,
+            "isDel": 0,
+            "menuCode": "sys:config:delete",
+            "menuName": "删除参数",
+            "orderIndex": 4,
+            "permissionCode": "sys:config:delete",
+            "permissionName": "删除参数",
+            "pid": 22,
+            "pids": "5/22",
+            "requiredPermission": 1,
+            "type": 3
+        }, {
+            "href": "/sysConfig/getSystemConfigData",
+            "id": 10,
+            "isDel": 0,
+            "menuCode": "sys:config:getSystemConfigData",
+            "menuName": "获取已配置系统参数",
+            "orderIndex": 4,
+            "permissionCode": "sys:config:getSystemConfigData",
+            "permissionName": "获取已配置系统参数",
+            "pid": 22,
+            "pids": "5/22",
+            "requiredPermission": 1,
+            "type": 3
+        }, {
+            "href": "/sysConfig/saveParamData",
+            "id": 11,
+            "isDel": 0,
+            "menuCode": "sys:config:saveParamData",
+            "menuName": "保存配置系统参数",
+            "orderIndex": 4,
+            "permissionCode": "sys:config:saveParamData",
+            "permissionName": "保存配置系统参数",
+            "pid": 22,
+            "pids": "5/22",
+            "requiredPermission": 1,
+            "type": 3
+        }, {
+            "href": "/uploadFile",
+            "id": 12,
+            "isDel": 0,
+            "menuCode": "common:uploadFile",
+            "menuName": "文件上传",
+            "orderIndex": 4,
+            "permissionCode": "common:uploadFile",
+            "permissionName": "文件上传",
+            "requiredPermission": 1,
+            "type": 3
+        }, {
+            "href": "/role/selall",
+            "id": 13,
+            "isDel": 0,
+            "menuCode": "role:selall",
+            "menuName": "查询所有角色",
+            "orderIndex": 4,
+            "permissionCode": "role:selall",
+            "permissionName": "查询所有角色",
+            "pid": 4,
+            "requiredPermission": 1,
+            "type": 2
+        }, {
+            "href": "/role/add",
+            "id": 14,
+            "isDel": 0,
+            "menuCode": "role:add",
+            "menuName": "添加角色",
+            "orderIndex": 4,
+            "permissionCode": "role:add",
+            "permissionName": "添加角色",
+            "pid": 4,
+            "requiredPermission": 1,
+            "type": 2
+        }, {
+            "href": "/user/add",
+            "id": 15,
+            "isDel": 0,
+            "menuCode": "user:add",
+            "menuName": "添加管理员",
+            "orderIndex": 4,
+            "permissionCode": "user:add",
+            "permissionName": "添加管理员",
+            "requiredPermission": 1
+        }, {
+            "href": "/user/query",
+            "id": 16,
+            "isDel": 0,
+            "menuCode": "user:query",
+            "menuName": "查询管理员",
+            "orderIndex": 4,
+            "permissionCode": "user:query",
+            "permissionName": "查询管理员",
+            "requiredPermission": 1
+        }, {
+            "href": "/user/delete",
+            "id": 17,
+            "isDel": 0,
+            "menuCode": "user:delete",
+            "menuName": "删除管理员",
+            "orderIndex": 4,
+            "permissionCode": "user:delete",
+            "permissionName": "删除管理员",
+            "requiredPermission": 1
+        }, {
+            "href": "/user/update",
+            "id": 18,
+            "isDel": 0,
+            "menuCode": "user:update",
+            "menuName": "编辑管理员",
+            "orderIndex": 4,
+            "permissionCode": "user:update",
+            "permissionName": "编辑管理员",
+            "requiredPermission": 1
+        }, {
+            "href": "/user/updateStatus",
+            "id": 19,
+            "isDel": 0,
+            "menuCode": "user:updateStatus",
+            "menuName": "更改用户状态码（开启或禁用）",
+            "orderIndex": 4,
+            "permissionCode": "user:updateStatus",
+            "permissionName": "更改用户状态码",
+            "requiredPermission": 1
+        }, {
+            "href": "/menu/getAllAuthedMenu",
+            "id": 20,
+            "isDel": 0,
+            "menuCode": "sys:menu:getAllAuthedMenu",
+            "menuName": "获取已授权菜单",
+            "orderIndex": 4,
+            "permissionCode": "sys:menu:getAllAuthedMenu",
+            "permissionName": "获取已授权菜单",
+            "pid": 6,
+            "pids": "6",
+            "requiredPermission": 1,
+            "type": 3
+        }, {
+            "id": 4,
+            "isDel": 0,
+            "menuCode": "role",
+            "menuName": "角色管理",
+            "permissionCode": "role",
+            "permissionName": "角色管理",
+            "pid": 0,
+            "pids": "0",
+            "requiredPermission": 1,
+            "type": 1
+        }];
+        //var eleTree = layui.eleTree;
+        var el5 = eleTree.render({
+            elem: '#test1',
+            data: data,
+            defaultExpandAll: true,
+            expandOnClickNode: true,
+            highlightCurrent: true,
+            showCheckbox: true,
+
+            request: {
+                name: "menuName",
+                key: "id",
+                children: "subResourceList",
+            },
+        });
+
+    });
+
+
+</script>
+</body>
+</html>

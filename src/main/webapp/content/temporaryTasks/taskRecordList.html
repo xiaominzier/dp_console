@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>临时任务提报记录</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <link rel="stylesheet" href="/staticResource/lib/layui/css/layui.css" media="all">
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>临时任务提报记录</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                        <div class="layui-form-item">
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">任务名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="taskName" autocomplete="off" id="taskName"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">审核状态</label>
+                                <div class="layui-input-inline">
+                                    <div id="status"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">提报人</label>
+                                <div class="layui-input-inline">
+                                    <!-- <div id="creator"></div> -->
+                                    <input type="text" name="creator" autocomplete="off" id="creator"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">项目名称</label>
+                                <div class="layui-input-inline">
+                                    <!-- <div id="projectIds"></div> -->
+                                    <input type="text" name="projectName" autocomplete="off" id="projectName"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">小组名称</label>
+                                <div class="layui-input-inline">
+                                    <!-- <div id="teamIds"></div> -->
+                                    <input type="text" name="teamName" autocomplete="off" id="teamName"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">任务ID</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="taskId" autocomplete="off" id="taskId"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label" style="width: 120px;">首次提报时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="firstTime" placeholder="开始 到 结束">
+                                    <input type="text" style="display:none;" class="layui-input" nanme="beginFirstTime" id="beginFirstTime" autocomplete="off" >
+                                    <input type="text" style="display:none;" class="layui-input" name="endFirstTime" id="endFirstTime" autocomplete="off" >
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label" style="width: 120px;">本次提报时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="thisTime" placeholder="开始 到 结束">
+                                    <input type="text" style="display:none;" class="layui-input" name="beginThisTime" id="beginThisTime" autocomplete="off" >
+                                    <input type="text" style="display:none;" class="layui-input" name="endThisTime" id="endThisTime" autocomplete="off" >
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <button class="layui-btn" type="button" data-type="reload">搜索</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+
+
+                        </div>
+                    </form>
+                     <div class="layui-btn-group demoTable" style="padding-top:10px" >
+                         <button style="display: none" class="layui-btn" id="addBtn" type="button" per-code='sys:cooperator:add'><i
+                                 class="layui-icon"></i>添加
+                         </button>
+                     </div>
+                    <table id="table" lay-filter="table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+<!--btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">历史记录</a>';-->
+<script type="text/html" id="bar">
+    {{#
+    var genBtn = function(data){
+    var btnStr="";
+    btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="view">查看</a>';
+
+        if(data.status==""||data.status=="0"){
+            btnStr+=' <a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="audit">审核</a>';
+        }
+        if(data.status!="2"){
+            btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+        }
+
+        return btnStr;
+    }
+    }}
+    {{genBtn(d)}}
+</script>
+
+<script>
+    var fid = self.frameElement.getAttribute("tab-id");
+    var id = getParam("id");  //临时任务id
+    console.log("临时任务id："+id);
+    // var  creator ,projectIds ,teamIds;
+    layui.config({
+        base: "/staticResource/lib/layui/lay/modules/"
+    }).extend({
+        xmSelect: 'xm-select'
+    }).use(['table', 'jquery', 'form','laydate','xmSelect'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var pageSize =10;
+        laydate.render({
+            elem: '#firstTime'
+            , type: 'datetime'
+            , range: '到'
+            , format: 'yyyy-M-d H:m:s'
+            , done: function (value, date, endDate) {
+                var start_date,
+                    end_date,
+                    start_date_timestamp,
+                    end_date_timestamp;
+                // 初始化时间日期对象
+                start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                end_date = new Date(endDate.year, endDate.month - 1, endDate.date, endDate.hours, endDate.minutes, endDate.seconds);
+                // 获取时间戳 -- 13 位
+                console.log(start_date.toLocaleDateString())
+                // beginFirstTime = start_date.getTime();
+                // endFirstTime = end_date.getTime();
+                $("#beginFirstTime").val(start_date.getTime());
+                $("#endFirstTime").val(end_date.getTime());
+            }
+        });
+
+        laydate.render({
+            elem: '#thisTime'
+            , type: 'datetime'
+            , range: '到'
+            , format: 'yyyy-M-d H:m:s'
+            , done: function (value, date, endDate) {
+                var start_date,
+                    end_date,
+                    start_date_timestamp,
+                    end_date_timestamp;
+                // 初始化时间日期对象
+                console.log(date.month)
+                start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                end_date = new Date(endDate.year, endDate.month - 1, endDate.date, endDate.hours, endDate.minutes, endDate.seconds);
+                // 获取时间戳 -- 13 位
+                console.log(start_date.toLocaleDateString())
+                // beginThisTime = start_date.getTime();
+                // endThisTime = end_date.getTime();
+                $("#beginThisTime").val(start_date.getTime());
+                $("#endThisTime").val(end_date.getTime());
+            }
+        });
+
+        var status = xmSelect.render({
+            el: '#status',
+            tips: '全部（可多选）',	// 选项提示文字
+            data: [
+                {name: '待审核', value: 0},
+                {name: '审核成功', value: 1},
+                {name: '已驳回', value: 2},
+                // {name: '待更新', value: 3},
+                // {name: '已更新', value: 4},
+                // {name: '待完善', value: 5},
+            ]
+        })
+
+
+        //提报人下拉框
+        // creator = xmSelect.render({
+        //     el: '#creator',
+        //     name: 'creator',
+        //     radio: true,
+        //     prop: {
+        //         name: 'userName',
+        //         value: 'id',
+        //     },
+        //     style: {
+
+        //     },
+        //     data: [// 数据（JSON数组）
+
+        //     ],
+        //     tips: '请选择',	// 选项提示文字
+        //     // size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+        //     paging: true, // 是否分页，可选值：true、false
+        //     pageSize: 5, // 页大小，表示一页可显示多少数据
+        //     direction: 'down',	// 下拉方向，可选值为：auto、top、down
+        //     // filterable: true, // 是否启用搜索，可选值：true、false
+        //     empty: '呀, 没有用户呢', // 无数据时提示
+        //     toolbar: { // 工具条配置
+        //         show: true, // 是否显示
+        //         showIcon: false, // 显示图标
+        //     },
+        // })
+        // $.ajax({
+        //     type: 'GET',
+        //     url: apiPath+'/user/impUserInfo/technician/query_list',
+        //     // async: false,
+        //     success: function (data) {
+        //         creator.update({
+        //             data: data.data,
+        //             autoRow: true,
+        //         })
+        //     }
+        // })
+
+        //项目组下拉框
+        //  projectIds = xmSelect.render({
+        //     el: '#projectIds',
+        //     name: 'projectId',
+        //     prop: {
+        //         name: 'projectName',
+        //         value: 'id',
+        //     },
+        //     style: {
+
+        //     },
+        //     data: [// 数据（JSON数组）
+
+        //     ],
+        //      radio: true,
+        //     tips: '请选择',	// 选项提示文字
+        //     // size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+        //     paging: true, // 是否分页，可选值：true、false
+        //     pageSize: 5, // 页大小，表示一页可显示多少数据
+        //     direction: 'down',	// 下拉方向，可选值为：auto、top、down
+        //     // filterable: true, // 是否启用搜索，可选值：true、false
+        //     empty: '呀, 没有用户呢', // 无数据时提示
+        //     toolbar: { // 工具条配置
+        //         show: true, // 是否显示
+        //         showIcon: false, // 显示图标
+        //     },
+        // })
+        // $.ajax({
+        //     type: 'GET',
+        //     url: apiPath+'/user/impProjectManage/query_list',
+        //     // async: false,
+        //     success: function (data) {
+        //         projectIds.update({
+        //             data: data.data,
+        //             autoRow: true,
+        //         })
+        //     }
+        // })
+
+        //小组下拉框
+        //  teamIds = xmSelect.render({
+        //     el: '#teamIds',
+        //     name: 'teamId',
+        //     prop: {
+        //         name: 'teamName',
+        //         value: 'id',
+        //     },
+        //     style: {
+
+        //     },
+        //     data: [// 数据（JSON数组）
+
+        //     ],
+        //      radio: true,
+        //     tips: '请选择',	// 选项提示文字
+        //     // size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+        //     paging: true, // 是否分页，可选值：true、false
+        //     pageSize: 5, // 页大小，表示一页可显示多少数据
+        //     direction: 'down',	// 下拉方向，可选值为：auto、top、down
+        //     // filterable: true, // 是否启用搜索，可选值：true、false
+        //     empty: '呀, 没有用户呢', // 无数据时提示
+        //     toolbar: { // 工具条配置
+        //         show: true, // 是否显示
+        //         showIcon: false, // 显示图标
+        //     },
+        // })
+        // $.ajax({
+        //     type: 'GET',
+        //     url: apiPath+'/user/impTeamInfo/query_list',
+        //     // async: false,
+        //     success: function (data) {
+        //         teamIds.update({
+        //             data: data.data,
+        //             autoRow: true,
+        //         })
+        //     }
+        // })
+
+
+        var param = getQueryParam();
+        if(id!=""){
+            var tableIns = table.render({
+                elem: '#table',
+                url: apiPath+'/content/impTemporaryTasksRecord/query_page?taskId='+id,
+                method: "get",
+                even: true,
+                page: true,
+                defaultToolbar: false,
+                where: param,
+    
+                cols: [[
+                    {
+                        field: 'taskId', title: '任务ID', width: '10%', align: 'center'
+                    },
+                    {
+                        field: 'taskName', title: '任务名称', width: '8%', align: 'center'
+                    },
+                    {
+                        field: 'creatorTeamName', title: '提报人', width: '8%', align: 'center'
+                    },
+                    {
+                        field: 'identity', title: '提报人身份', width: '16%', align: 'center'
+                    },
+                    {
+                        field: '', title: '首次提报时间', width: '12%', align: 'center', templet: function (item) {
+                            if (item.firstTime == undefined || item.firstTime == null||item.firstTime == "") {
+                                return "-";
+                            }
+                            return new Date(item.firstTime).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    },
+                    {
+                        field: '', title: '本次提报时间', width: '12%', align: 'center', templet: function (item) {
+                            if (item.thisTime == undefined || item.thisTime == null||item.thisTime == "") {
+                                return "-";
+                            }
+                            return new Date(item.thisTime).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    },
+                    {
+                        field: '', title: '审核时间', width: '12%', align: 'center', templet: function (item) {
+                            if (item.auditTime	 == undefined || item.auditTime	 == null || item.auditTime == "" || item.status=="0") {
+                                return "-";
+                            }
+                            return new Date(item.auditTime).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    },
+                    {
+                        field: 'status', title: '审核状态', width: '12%', align: 'center', templet: function (item) {
+                            var auditStatus = "-"
+                                if (item.status == "0") {
+                                    auditStatus = "待审核";
+                                } else if (item.status == "1") {
+                                    auditStatus = "审核成功";
+                                } else if (item.status == "2") {
+                                    auditStatus = "已驳回";
+                                } else if (item.status == "3") {
+                                    auditStatus = "待更新";
+                                } else if (item.status == "4") {
+                                    auditStatus = "已更新";
+                                }else if (item.status == "5") {
+                                    auditStatus = "待完善";
+                                }
+    
+                            return auditStatus;
+                        }
+                    },
+                    {
+                        title: '操作', toolbar: '#bar', width: '10%', align: 'center',fixed: 'right'
+                    }
+    
+                ]],
+                id: 'testReload',
+    
+                parseData: function (res) {
+    
+                    var json = getAjaxData(res);
+                    return {
+                        "code": res.code,
+                        "data": json.records,
+                        "count": json.total,
+                        "msg": res.message
+                    };
+    
+                },
+    
+                request: {
+                    pageName: 'page',
+                    limitName: 'size'
+                }
+    
+            });
+        }else{
+
+            var tableIns = table.render({
+                elem: '#table',
+                url: apiPath+'/content/impTemporaryTasksRecord/query_page',
+                method: "get",
+                even: true,
+                page: true,
+                defaultToolbar: false,
+                where: param,
+    
+                cols: [[
+                    {
+                        field: 'taskId', title: '任务ID', width: '10%', align: 'center'
+                    },
+                    {
+                        field: 'taskName', title: '任务名称', width: '8%', align: 'center'
+                    },
+                    {
+                        field: 'creatorTeamName', title: '提报人', width: '8%', align: 'center'
+                    },
+                    {
+                        field: 'identity', title: '提报人身份', width: '16%', align: 'center'
+                    },
+                    {
+                        field: '', title: '首次提报时间', width: '12%', align: 'center', templet: function (item) {
+                            if (item.firstTime == undefined || item.firstTime == null||item.firstTime == "") {
+                                return "-";
+                            }
+                            return new Date(item.firstTime).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    },
+                    {
+                        field: '', title: '本次提报时间', width: '12%', align: 'center', templet: function (item) {
+                            if (item.thisTime == undefined || item.thisTime == null||item.thisTime == "") {
+                                return "-";
+                            }
+                            return new Date(item.thisTime).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    },
+                    {
+                        field: '', title: '审核时间', width: '12%', align: 'center', templet: function (item) {
+                            if (item.auditTime	 == undefined || item.auditTime	 == null||item.auditTime == "" || item.status=="0") {
+                                return "-";
+                            }
+                            return new Date(item.auditTime	).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    },
+                    {
+                        field: 'status', title: '审核状态', width: '12%', align: 'center', templet: function (item) {
+                            var auditStatus = "-"
+                                if (item.status == "0") {
+                                    auditStatus = "待审核";
+                                } else if (item.status == "1") {
+                                    auditStatus = "审核成功";
+                                } else if (item.status == "2") {
+                                    auditStatus = "已驳回";
+                                } else if (item.status == "3") {
+                                    auditStatus = "待更新";
+                                } else if (item.status == "4") {
+                                    auditStatus = "已更新";
+                                }else if (item.status == "5") {
+                                    auditStatus = "待完善";
+                                }
+    
+                            return auditStatus;
+                        }
+                    },
+                    {
+                        title: '操作', toolbar: '#bar', width: '10%', align: 'center',fixed: 'right'
+                    }
+    
+                ]],
+                id: 'testReload',
+    
+                parseData: function (res) {
+    
+                    var json = getAjaxData(res);
+                    return {
+                        "code": res.code,
+                        "data": json.records,
+                        "count": json.total,
+                        "msg": res.message
+                    };
+    
+                },
+    
+                request: {
+                    pageName: 'page',
+                    limitName: 'size'
+                }
+    
+            });
+        }
+
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+        laydate.render({
+            elem: '#timeStartShow'
+             , type: 'date'
+             , format: 'yyyy/MM/dd'
+            , done(value, date, endDate) {
+                $("#timeStart").val(new Date(value).getTime());
+            }
+        });
+
+        laydate.render({
+            elem: '#timeEndShow'
+            , type: 'date'
+            , format: 'yyyy/MM/dd'
+            , done(value, date, endDate) {
+                $("#timeEnd").val(new Date(value).getTime());
+            }
+        });
+
+        laydate.render({
+            elem: '#updateTime'
+            , type: 'date'
+            , format: 'yyyy/MM/dd'
+            , done(value, date, endDate) {
+                $("#updateTime").val(new Date(value).getTime());
+            }
+        });
+
+        var $ = layui.$, active = {
+
+            reload: function () {
+                var param = getQueryParam();
+                if (tableIns != null) {
+                    tableIns.where = {};  //置空where
+                    tableIns.page = {};
+                }
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        currPage: 1 //重新从第 1 页开始
+                    }
+                    , where: param,
+                    done: function () {
+                        tableIns = this;
+                    }
+                    // sysOperatorId: $("#sysOperatorId").val(),
+                });
+
+            }
+        };
+
+        function reload() {
+            var param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+                // sysOperatorId: $("#sysOperatorId").val(),
+            });
+
+        }
+        $('.layui-fluid .layui-form .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+         $("#addBtn").click(function () {
+             top.xadmin.add_tab("添加临时任务", "/content/temporaryTasks/temporaryTasks-add.html?fid=" + fid);
+         })
+
+        table.on('tool(table)', function (obj) {
+
+            var data = obj.data;
+            if (obj.event == 'del') {
+                $.ajax({
+                    type: "POST",
+                    url: apiPath+"/content/impTemporaryTasks/delete/"+data.id,
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('删除成功');
+                            reload();
+                        } else {
+                            parent.layer.msg('删除失败');
+                        }
+                    }
+                })
+            } else if (obj.event == 'edit') {
+                top.xadmin.add_tab("编辑临时任务", "/content/temporaryTasks/taskRecord-edit.html?fid=" + fid + "&id=" + data.id);
+            }else if (obj.event == 'view') {
+                top.xadmin.add_tab("查看", "content/temporaryTasks/taskRecord-check.html?fid=" + fid + "&id=" + data.id);
+            }else if (obj.event == 'audit') {
+                top.xadmin.add_tab("审核", "content/temporaryTasks/taskRecord-audit.html?fid=" + fid + "&id=" + data.id);
+            }
+
+        })
+
+        function getQueryParam() {
+            var param = {};
+
+            var taskName = $("#taskName").val();
+            var creator = $("#creator").val();
+            var projectName = $("#projectName").val();
+            var teamName = $("#teamName").val();
+            if (taskName != "") {
+                param.LK_taskName = taskName;
+            }
+
+            if (status && status.getValue().length > 0) {
+                param.IN_status = status.getValue("valueStr");
+            }
+
+            if (creator != "") {
+                param.LK_creator = creator;
+            }
+
+            var taskId = $("#taskId").val();
+            if (taskId != "") {
+                param.taskId = taskId;
+            }
+
+            if (projectName != "") {
+                param.LK_projectName = projectName;
+            }
+            if (teamName != "") {
+                param.LK_teamName = teamName;
+            }
+            // if (projectIds && projectIds.getValue().length > 0) {
+            //     param.projectIds = projectIds.getValue("valueStr");
+            // }
+
+            // if (teamIds && teamIds.getValue().length > 0) {
+            //     param.teamIds = teamIds.getValue("valueStr");
+            // }
+
+            var beginFirstTime = $("#beginFirstTime").val();
+            if (beginFirstTime !="") {
+                param.gt_firstTime = beginFirstTime;
+            }
+            var endFirstTime = $("#endFirstTime").val();
+            if (endFirstTime !="") {
+                param.lt_firstTime = endFirstTime;
+            }
+
+            var beginThisTime = $("#beginThisTime").val();
+            if (beginThisTime !="") {
+                param.gt_thisTime = beginThisTime;
+            }
+            var endThisTime = $("#endThisTime").val();
+            if (endThisTime !="") {
+                param.lt_thisTime = endThisTime;
+            }
+
+            return param;
+        }
+
+
+        $('#search').on('click', function (data) {
+            reload();
+        });
+    })
+
+</script>
+</body>
+
+
+</html>

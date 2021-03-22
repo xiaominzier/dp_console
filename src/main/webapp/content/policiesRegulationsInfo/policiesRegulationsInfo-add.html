@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加政策法规条例</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form layui-form-pane" id="formid">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+        <fieldset class="layui-elem-field" style="background-color: #fff;">
+            <legend>政策法规信息</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item">
+                    <label class="layui-form-label ">政策法规</label>
+                    <div class="layui-input-block">
+                        <div id="policiesRegulationsNameSelect" name="policiesRegulationsNameSelect"
+                             class="xm-select-demo"></div>
+
+                        <input type="hidden" name="policiesRegulationsName" id="policiesRegulationsName" autocomplete="off"
+                               class="layui-input">
+                        <input type="hidden" name="policiesId" id="policiesId" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label ">章</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="chapter" lay-verify="required" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">条例内容</label>
+                    <div class="layui-input-block">
+                        <textarea name="measures" lay-verify="required" placeholder="请输入" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label ">关键词</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="keywords" lay-verify="required" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+
+        <fieldset class="layui-elem-field" style="background-color: #fff;">
+            <legend>行业&字段</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item">
+                    <button class="layui-btn" type="button" id="addbtn" lay-filter="addbtn"><i class="layui-icon">&#xe61f;</i>添加
+                    </button>
+                    <table id="table-hy-zd" class="layui-table"></table>
+
+                    <input type="hidden" name="industryAssociatedFields" id="industryAssociatedFields" autocomplete="off"
+                           class="layui-input">
+
+                </div>
+            </div>
+        </fieldset>
+
+
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin: 0 auto;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script>
+
+    var fid = getParam("fid");
+    var industryId, industryFieldsId, policiesRegulationsNameSelect;
+    var arr = new Array();//先声明一维
+    var i = 0;//下拉框的id后缀
+    var k = 0;//一维数组下标
+    var table = $("#table-hy-zd");
+    var pageSize = 10;
+    layui.config({
+        base: "/staticResource/lib/layui/lay/modules/"
+    }).extend({
+        xmSelect: 'xm-select'
+    }).use(['form', 'jquery', 'laydate','xmSelect'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        var xmSelect = layui.xmSelect;
+        var url = apiPath + '/content/impPoliciesInfo/query_page?size=10000';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (data) {
+                if (data.code == 0) {
+                    policiesRegulationsNameSelect = xmSelect.render({
+                        el: '#policiesRegulationsNameSelect',
+                        radio: true,
+                        filterable: true,
+                        clickClose: true,
+                        paging: true,
+                        pageSize: pageSize,
+                        prop: {
+                            name: 'policiesName',
+                            value: 'id',
+                        },
+                        on: function (data) {
+                            //arr:  当前多选已选中的数据
+                            var arr = data.arr;
+                            //change, 此次选择变化的数据,数组
+                            var change = data.change;
+                            //isAdd, 此次操作是新增还是删除
+                            var isAdd = data.isAdd;
+                            console.log("---xialk--on--------");
+                            console.log(change);
+                            if (change && change.length > 0) {
+                                console.log("---change--on--------");
+                                var policiesId = change[0].id;
+                                var policiesName = change[0].policiesName;
+                                $('#policiesId').val(policiesId);
+                                $('#policiesRegulationsName').val(policiesName)
+                                form.render();
+                            }
+                        },
+                        // toolbar: { // 工具条配置
+                        //     show: true, // 是否显示
+                        //     showIcon: false, // 显示图标
+                        // },
+                        data: data.data.records,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+
+
+        //动态添加行
+        $("#addbtn").click(function () {
+            addTr();
+            i++;
+            k++;
+        });
+
+        form.on('submit(add)', function (data) {
+            //获取当前下拉多选选中的值
+            var policiesRegulationsNameSelectArr = policiesRegulationsNameSelect.getValue();
+            if(policiesRegulationsNameSelectArr==""){
+                alert("政策法规必填，请选择");
+                return false;
+            }
+            data = data.field;
+            var tableData = getTableContent('table-hy-zd');
+            data.impPoliciesFieldsRelations = tableData;
+            data.industryAssociatedFields = $("#industryAssociatedFields").val();
+            delete data.select;
+            console.log(JSON.stringify(data));
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/content/impPoliciesRegulationsInfo/save',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+
+            })
+            return false;
+        });
+
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+
+
+        function getTableContent(id) {
+            var policiesId = $("#policiesId").val();
+            var data = [];
+            var json;
+            var industryAssociatedFields = '';
+            for (var i = 0; i < arr.length; i++) {
+                json = {};
+                for (var j = 0; j < arr[i].length; j++) {
+                    var value = arr[i][j].getValue('valueStr');
+                    var name = arr[i][j].getValue('nameStr');
+                    if (j == 0) {
+                        json.industryId = value;
+                        industryAssociatedFields += name;
+                    } else if (j == 1) {
+                        json.industryFieldsId = value;
+                        industryAssociatedFields += "(" + name + ")";
+                    }
+                    json.regulationsId = policiesId;
+                    json.createTime = new Date().getTime();
+                }
+                data.push(json);
+            }
+            $("#industryAssociatedFields").val(industryAssociatedFields);
+            return data;
+        }
+
+        $(function () {
+            addTr();
+            i++;
+            k++;
+        })
+    
+        function addTr() {
+            arr[k] = new Array();
+            var m = "industryId" + i;
+            var n = "industryFieldsId" + i;
+            var tr = "<tr >\n" +
+                "<td>行业</td>" +
+                "<td>" +
+                "<div id=" + m + " name=\"industryId\" class=\"xm-select-demo\">\n" +
+                "</div>" +
+                "</td>\n" +
+                "<td>字段</td>" +
+                "<td>" +
+                "<div id=" + n + " name=\"industryFieldsId\" class=\"xm-select-demo\">\n" +
+                "</div>" +
+                "</td>\n" +
+                "<td>" +
+                "<button type=\"button\" onclick='del(this)'  class=\"layui-btn layui-btn-danger del\">删除</button> " +
+                "</td>\n" +
+                "</tr>";
+            table.append(tr);
+    
+            var h = i;
+            var url = apiPath + '/industry/impIndustryInfo/query_page?size=60';
+            $.ajax({
+                type: 'get',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: url,
+                async: false,
+                success: function (data) {
+                    if (data.code == 0) {
+                        industryId = xmSelect.render({
+                            el: '#industryId' + h,
+                            radio: true,
+                            filterable: true,
+                            clickClose: true,
+                            paging: true,
+                            pageSize: pageSize,
+                            prop: {
+                                name: 'name',
+                                value: 'id',
+                            },
+                            on: function (data) {
+                                //arr:  当前多选已选中的数据
+                                var arr = data.arr;
+                                //change, 此次选择变化的数据,数组
+                                var change = data.change;
+                                //isAdd, 此次操作是新增还是删除
+                                var isAdd = data.isAdd;
+                                console.log(change);
+    
+                                if (change && change.length > 0) {
+                                    var industryId = change[0].id;
+                                    var url = apiPath + '/industry/impIndustryFieldsRelease/getIndustryFieldsTree/' + industryId;
+                                    $.ajax({
+                                        type: 'get',
+                                        dataType: 'json',
+                                        contentType: 'application/json',
+                                        url: url,
+                                        success: function (data) {
+                                            //回调需要两个参数, 第一个: 数据数组, 第二个: 总页码
+                                            industryFieldsId = xmSelect.render({
+                                                el: '#industryFieldsId' + h,
+                                                radio: true,
+                                                clickClose: true,
+                                                prop: {
+                                                    name: 'fieldName',
+                                                    value: 'id',
+                                                    children: 'childs'
+    
+                                                },
+                                                tree: {
+                                                    show: true,
+                                                    strict: false,
+                                                    expandedKeys: [-1],
+                                                },
+                                                data: data.data
+                                            })
+                                        },
+                                        error: function () {
+                                        }
+                                    });
+    
+                                    // form.render();
+                                }
+                            },
+                            // toolbar: { // 工具条配置
+                            //     show: true, // 是否显示
+                            //     showIcon: false, // 显示图标
+                            // },
+                            data: data.data.records,
+                        })
+                    }
+                },
+                error: function () {
+                    console.log(e.status);
+                    console.log(e.responseText);
+                }
+            });
+    
+            industryFieldsId = xmSelect.render({
+                el: '#industryFieldsId' + h,
+                radio: true,
+                clickClose: true,
+                prop: {
+                    name: 'fieldName',
+                    value: 'id',
+                    children: 'childs'
+    
+                },
+                tree: {
+                    show: true,
+                    strict: false,
+                    expandedKeys: [-1],
+                },
+            });
+    
+            arr[k][0] = industryId;
+            arr[k][1] = industryFieldsId;
+    
+        }
+    
+        function del(e) {
+            var a = e.parentNode.parentNode.rowIndex
+            arr.splice(a, 1);
+            $(e).closest('tr').remove();
+            k--;
+        }
+    });
+
+</script>
+
+
+</body>
+</html>

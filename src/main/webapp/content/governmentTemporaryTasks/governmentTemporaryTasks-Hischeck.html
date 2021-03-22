@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看政府临时任务</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+</head>
+<body>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form layui-form-pane" id="formid" lay-filter="cooperForm">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+
+
+        <div class="layui-row ">
+            <div class=" layui-col-md6">
+                <label class="layui-form-label  ">点位名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="governmentName" disabled lay-verify="required" placeholder="请输入"
+                           autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class=" layui-col-md6">
+                <label class="layui-form-label ">类型</label>
+                <div class="layui-input-block">
+                    <input type="text" name="type" id="type" disabled lay-verify="required" placeholder="请输入"
+                           autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="layui-row ">
+            <div class=" layui-col-md6">
+                <label class="layui-form-label ">联系人</label>
+                <div class="layui-input-block">
+                    <input type="text" name="linkman" disabled lay-verify="required" placeholder="请输入"
+                           autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class=" layui-col-md6">
+                <label class="layui-form-label ">联系电话</label>
+                <div class="layui-input-block">
+                    <input type="text" name="linkmanTel" disabled lay-verify="required" placeholder="请输入"
+                           autocomplete="off"
+                           class="layui-input">
+
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-row ">
+            <div class=" layui-col-md6">
+                <label class="layui-form-label ">污染物类型</label>
+                <div class="layui-input-block">
+                    <input type="text" name="contaminantsType" disabled id="contaminantsType" lay-verify="required"
+                           autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <!--<div class="layui-col-md3">-->
+                <label class="layui-form-label ">所属大院/商场楼体/村落/园区</label>
+                <!--</div>-->
+                <div class="layui-input-block ">
+                    <input type="text" name="belongsToArea" disabled lay-verify="required" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-row ">
+            <div class=" layui-col-md6">
+                <label class="layui-form-label ">小组</label>
+                <div class="layui-input-block">
+                    <input type="text" name="teamId" disabled id="teamId" lay-verify="required" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class=" layui-col-md6">
+                <label class="layui-form-label ">核实人</label>
+                <div class="layui-input-block">
+                    <input type="text" name="verifier" disabled lay-verify="required" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-row ">
+            <div class=" layui-col-md6">
+                <label class="layui-form-label ">实际地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="physicalAddress" disabled lay-verify="required" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+            <!--<div class=" layui-col-md6">
+                <label class="layui-form-label ">经纬度</label>
+                <div class="layui-input-block">
+                    <input type="text" name="" lay-verify="required"  autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>-->
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">现场情况描述</label>
+            <div class="layui-input-block">
+                <textarea name="sceneDescription" required lay-verify="required" disabled
+                          class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">现场情况处置结果</label>
+            <div class="layui-input-block">
+                <textarea name="sceneResult" required lay-verify="required" disabled class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="remark" required lay-verify="required" disabled class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">现场问题照片</label>
+            <div id="fileIds" class="layui-input-inline layui-photos-demo"
+                 style="padding: 7px;">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: left;">
+                <button class="layui-btn layui-btn-success" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>返回
+                </button>
+            </div>
+        </div>
+
+    </form>
+
+
+</div>
+
+<script>
+    var fid = getParam("fid");
+    var detailJson = decodeURI(getParam("detailJson"));
+
+
+    layui.use(['table', 'form', 'jquery', 'laydate', 'upload'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+        var table = layui.table;
+
+
+
+        var json =  JSON.parse(detailJson);
+        form.val("cooperForm", json);
+        if (json) {
+            if (json.type) {
+                var type = '-';
+                if (json.type == 0) {
+                    type = "督察核实单"
+                } else if (json.type == 1) {
+                    type = "举报件核实单"
+                } else if (json.type == 2) {
+                    type = "联合执法单"
+                } else if (json.type == 3) {
+                    type = "道路扬尘检查单"
+                } else if (json.type == 4) {
+                    type = "疫情防控单"
+                } else if (json.type == 5) {
+                    type = "施工工地检查单"
+                } else if (json.type == 6) {
+                    type = "其他"
+                }
+                $("#type").val(type);
+            }
+            if (json.contaminantsType) {
+                var c = json.contaminantsType.split(",");
+                var ct = [];
+                for (var i = 0; i < c.length; i++) {
+                    if (c[i] == 1) {
+                        ct.push('废气');
+                    } else if (c[i] == 2) {
+                        ct.push('废水');
+                    } else if (c[i] == 3) {
+                        ct.push('噪声');
+                    } else if (c[i] == 4) {
+                        console.log(c[i]);
+                        ct.push('危废');
+                    } else if (c[i] == 5) {
+                        ct.push('扬尘');
+                    } else if (c[i] == 6) {
+                        ct.push('其他');
+                    }
+                }
+                $("#contaminantsType").val(ct.toString());
+            }
+
+            if (json.teamId) {
+                var url = apiPath + '/user/impTeamInfo/get/' + json.teamId;
+                $.ajax({
+                    type: 'get',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: url,
+                    success: function (data) {
+                        var json = getAjaxData(data);
+                        console.log(json);
+                        $("#teamId").val(json.teamName);
+                    }
+
+                });
+            }
+            if (json.fileId) {
+                var fdiv = document.getElementById("fileIds");
+                var f = json.fileId.split(",");
+                for (var i = 0; i < f.length; i++) {
+                    var url = apiPath + '/attached/show/' + f[i];
+                    var img = document.createElement("img");
+                    img.setAttribute("width", "90px");
+                    img.setAttribute("height", "90px");
+                    img.src = url;
+                    fdiv.appendChild(img);
+                }
+            }
+            var tableIns = table.render({
+                elem: '#table',
+                method: "get",
+                even: true,
+                page: true,
+                defaultToolbar: false,
+                data: json.historyList,
+                cols: [[
+                    {
+                        field: 'userName', title: '用户', width: '30%', align: 'center'
+                    },
+                    {
+                        field: 'createTime',
+                        title: '编辑时间',
+                        width: '40%',
+                        align: 'center',
+                        templet: function (item) {
+                            if (item.createTime == undefined || item.createTime == null) {
+                                return "";
+                            }
+                            return new Date(item.createTime).format("yyyy-MM-dd hh:mm:ss");
+                        }
+                    },
+                    {
+                        title: '操作', toolbar: '#bar', width: '30%', align: 'center', fixed: 'right',
+                    }
+
+                ]],
+                id: 'testReload',
+
+                parseData: function (res) {
+
+                    var json = getAjaxData(res);
+                    return {
+                        "code": res.code,
+                        "data": json.records,
+                        "count": json.total,
+                        "msg": res.message
+                    };
+
+                },
+
+                request: {
+                    pageName: 'page',
+                    limitName: 'size'
+                }
+
+            });
+
+        }
+        form.render();
+
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+        $("body").on("click", "#fileIds img", function (e) {
+            layer.photos({photos: {"data": [{"src": e.target.src}]}});
+        });
+
+    });
+
+</script>
+
+
+</body>
+</html>

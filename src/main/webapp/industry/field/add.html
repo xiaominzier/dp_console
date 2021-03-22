@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加行业字段</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+</head>
+<body>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 20px;padding-right: 20px">
+    <form class="layui-form" id="formid" lay-filter="form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">行业</label>
+            <div class="layui-input-block">
+                <input type="hidden" name="type" value="1">
+                <input type="hidden" name="id" id="id">
+                <input type="hidden" name="createTime" id="createTime">
+                <input type="hidden" name="id" id="updateStatus">
+                <input type="hidden" name="id" id="updateTime">
+                <input type="hidden" name="id" id="version">
+                <div id="industryId" name="industryId" class="xm-select-demo"></div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">父级</label>
+            <div class="layui-input-block">
+                <div id="parentId" name="parentId" class="xm-select-demo"></div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">调用其他字段</label>
+            <div class="layui-input-block">
+                <input type="radio" lay-filter="other" name="other" value="1" title="是">
+                <input type="radio" lay-filter="other" name="other" value="0" title="否" checked>
+            </div>
+        </div>
+
+        <div id="publicFieldIdDiv" style="display: none;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">其他字段名</label>
+                <div class="layui-input-block">
+                    <div id="otherIndustryId" name="otherIndustryId"></div>
+                    <div name="publicFieldId" id="publicFieldId" style="margin-top: 5px;" class="xm-select-demo"></div>
+
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">排序</label>
+                <div class="layui-input-block">
+                    <input name="sort" id="sort" autocomplete="off" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="radio" lay-filter="status" name="status" value="1" title="启用">
+                    <input type="radio" lay-filter="status" name="status" value="0" title="禁用" checked>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">导出excel模版</label>
+                <div class="layui-input-block">
+                    <input type="radio" lay-filter="addTemplate" name="addTemplate" value="1" title="是">
+                    <input type="radio" lay-filter="addTemplate" name="addTemplate" value="0" title="否" checked>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">前置字段</label>
+                <div class="layui-input-block">
+                    <input name="frontFiled" id="frontFiled" autocomplete="off" class="layui-input"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item" id="fieldFirstPropertiesDiv">
+            <label class="layui-form-label">字段属性</label>
+            <div class="layui-input-block">
+                <div name="fieldFirstProperties" id="fieldFirstProperties">
+                </div>
+                <div name="fieldSecondProperties" id="fieldSecondProperties" style="margin-top: 5px;">
+                </div>
+            </div>
+        </div>
+        <div id="fieldDiv">
+
+        </div>
+
+
+        <div class="layui-form-item" style="text-align: right;">
+            <div class="layui-input-block" style="text-align: right;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add" id="addBtn" type="button"><i class="layui-icon">&#xe61f;</i>保存
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="edit" id="editBtn" type="button"><i class="layui-icon">&#xe61f;</i>保存
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script>
+
+    var fid = getParam("fid");
+    var secondFields = new Array();
+    secondFields[0] = [{
+        "value": 0,
+        "name": "短文本输入"
+    }, {
+        "value": 1,
+        "name": "11位手机号输入"
+    }, {
+        "value": 2,
+        "name": "数字输入"
+    }, {
+        "value": 3,
+        "name": "长文本输入"
+    }];
+    secondFields[1] = [{
+        "value": 4,
+        "name": "日期选择（年月日）"
+    }, {
+        "value": 5,
+        "name": "时间选择（年月日时分秒）"
+    }];
+    secondFields[2] = [{
+        "value": 6,
+        "name": "单选"
+    }, {
+        "value": 7,
+        "name": "单选（含其他）"
+    }, {
+        "value": 8,
+        "name": "多选"
+    }, {
+        "value": 9,
+        "name": "多选（含其他）"
+    }];
+    secondFields[3] = [{
+        "value": 10,
+        "name": "上传单图"
+    }, {
+        "value": 11,
+        "name": "上传多图（数量不限）"
+    }];
+    secondFields[4] = [{
+        "value": 12,
+        "name": "栏目标题"
+    }, {
+        "value": 13,
+        "name": "栏目标题（组）"
+    }];
+    secondFields[5] = [{
+        "value": 14,
+        "name": "系统计算"
+    }];
+
+    var secondFieldTemplates = new Array();
+    secondFieldTemplates[0] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否查重</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"duplicateCheck\" name=\"duplicateCheck\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"duplicateCheck\" name=\"duplicateCheck\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[1] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否查重</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"duplicateCheck\" name=\"duplicateCheck\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"duplicateCheck\" name=\"duplicateCheck\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+
+    secondFieldTemplates[2] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">数字要求</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"digitalRequirements\" name=\"digitalRequirements\" value=\"0\" title=\"自然数\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"digitalRequirements\" name=\"digitalRequirements\" value=\"1\" title=\"正数（保留两位小数）\" checked>\n" +
+        "                    <input type=\"radio\" lay-filter=\"digitalRequirements\" name=\"digitalRequirements\" value=\"2\" title=\"正数\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[3] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否查重</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"duplicateCheck\" name=\"duplicateCheck\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"duplicateCheck\" name=\"duplicateCheck\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[4] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入，支持特殊符号\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段要求</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <select name=\"dateRequirement\" id=\"dateRequirement\" >" +
+        "                       <option value='1'>任意日期</option>" +
+        "                       <option value='2'>不可大于提报日期</option>" +
+        "                       <option value='3'>不可小于提报日期</option>" +
+        "                    </select>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[5] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入，支持特殊符号\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段要求</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <select name=\"dateRequirement\" id=\"dateRequirement\" >" +
+        "                       <option value='1'>任意日期</option>" +
+        "                       <option value='2'>不可大于提报日期</option>" +
+        "                       <option value='3'>不可小于提报日期</option>" +
+        "                    </select>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[6] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入，支持特殊符号\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段要求</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"options\" id=\"options\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入选项，英文逗号分隔\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[7] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入，支持特殊符号\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段要求</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"options\" id=\"options\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入选项，英文逗号分隔\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[8] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入，支持特殊符号\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段要求</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"options\" id=\"options\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入选项，英文逗号分隔\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[9] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">单位</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入，支持特殊符号\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段要求</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"options\" id=\"options\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"请输入选项，英文逗号分隔\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[10] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[11] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"groupColumn\" name=\"groupColumn\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[12] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\"\n" +
+        "                           placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[13] = "<div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">字段名称</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\" placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">提示文字</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\"\n" +
+        "                           placeholder=\"20个文字以内\">\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">是否必填</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">排序</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">状态</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "                </div>\n" +
+        "            </div>\n" +
+        "            <div class=\"layui-form-item\">\n" +
+        "                <label class=\"layui-form-label\">前置字段</label>\n" +
+        "                <div class=\"layui-input-block\">\n" +
+        "                    <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "                </div>\n" +
+        "            </div>";
+    secondFieldTemplates[14] = "<div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">字段名称</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input name=\"fieldName\" id=\"fieldName\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">单位</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input name=\"unit\" id=\"unit\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">提示文字</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input name=\"promptText\" id=\"promptText\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "     <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">公式</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input name=\"formula\" id=\"formula\" autocomplete=\"off\" class=\"layui-input\">\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">作为检索条件</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"1\" title=\"是\">\n" +
+        "            <input type=\"radio\" lay-filter=\"retrieval\" name=\"retrieval\" value=\"0\" title=\"否\" checked>\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">是否必填</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"1\" title=\"是\">\n" +
+        "            <input type=\"radio\" lay-filter=\"required\" name=\"required\" value=\"0\" title=\"否\" checked>\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">是否组列表展示</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input type=\"radio\" lay-filter=\"groupColumn \" name=\"groupColumn \" value=\"1\" title=\"是\">\n" +
+        "            <input type=\"radio\" lay-filter=\"groupColumn \" name=\"groupColumn \" value=\"0\" title=\"否\" checked>\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">排序</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input name=\"sort\" id=\"sort\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">状态</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"1\" title=\"启用\">\n" +
+        "                    <input type=\"radio\" lay-filter=\"status\" name=\"status\" value=\"0\" title=\"禁用\" checked>\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">导出excel模版</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"1\" title=\"是\">\n" +
+        "            <input type=\"radio\" lay-filter=\"addTemplate\" name=\"addTemplate\" value=\"0\" title=\"否\" checked>\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "    <div class=\"layui-form-item\">\n" +
+        "        <label class=\"layui-form-label\">前置字段</label>\n" +
+        "        <div class=\"layui-input-block\">\n" +
+        "            <input name=\"frontFiled\" id=\"frontFiled\" autocomplete=\"off\" class=\"layui-input\"/>\n" +
+        "        </div>\n" +
+        "    </div>";
+    var parentId, otherIndustryId, publicFieldId, industryId, fieldFirstProperties, fieldSecondProperties;
+
+    function getParentField(id) {
+        var url = apiPath + '/industry/impIndustryFieldsConfig/getImpIndustryConfigFieldList/' + id + "/1";
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (data) {
+                //回调需要两个参数, 第一个: 数据数组, 第二个: 总页码
+                parentId = xmSelect.render({
+                    el: '#parentId',
+                    radio: true,
+                    clickClose: true,
+                    prop: {
+                        name: 'fieldName',
+                        value: 'id',
+                        children: 'childs'
+
+                    },
+                    tree: {
+                        show: true,
+                        strict: false,
+                        expandedKeys: [-1],
+                    },
+                    data: data.data
+                })
+            },
+            error: function () {
+
+            }
+        });
+    }
+
+
+    function fieldSecondPropertiesSel(index) {
+        return xmSelect.render({
+            el: '#fieldSecondProperties',
+            radio: true,
+            clickClose: true,
+            data: secondFields[index],
+            on: function (data1) {
+                //change, 此次选择变化的数据,数组
+                var change1 = data1.change;
+                if (change1 && change1.length > 0) {
+                    //渲染数据项
+                    $("#fieldDiv").empty();
+                    $("#fieldDiv").append($(secondFieldTemplates[change1[0].value]));
+                }
+
+                layui.use(['form'], function () {
+                    var form = layui.form;
+                    form.render();
+                });
+            }
+        });
+    }
+
+    function getfirstPropertiesSel() {
+        fieldFirstProperties = xmSelect.render({
+            el: '#fieldFirstProperties',
+            radio: true,
+            clickClose: true,
+            data: [
+                {name: '输入', value: 0},
+                {name: '时间', value: 1},
+                {name: '选择', value: 2},
+                {name: '上传', value: 3},
+                {name: '栏目', value: 4},
+                {name: '计算', value: 5},
+            ],
+            on: function (data) {
+                $("#fieldDiv").empty();
+                //arr:  当前多选已选中的数据
+                var arr = data.arr;
+                //change, 此次选择变化的数据,数组
+                var change = data.change;
+                //isAdd, 此次操作是新增还是删除
+                var isAdd = data.isAdd;
+                if (change && change.length > 0) {
+                    fieldSecondProperties = fieldSecondPropertiesSel(change[0].value);
+                }
+            }
+        });
+    }
+
+    function publicFieldIdSel(id) {
+        var url = apiPath + '/industry/impIndustryFieldsConfig/getPublicConfigFieldList/' + id;
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (data) {
+                publicFieldId = xmSelect.render({
+                    el: '#publicFieldId',
+                    radio: true,
+                    clickClose: true,
+                    prop: {
+                        name: 'fieldName',
+                        value: 'id',
+                        children: 'childs'
+
+                    },
+                    tree: {
+                        show: true,
+                        strict: false,
+                        expandedKeys: [-1],
+                    },
+                    data: data.data
+                })
+            }
+        });
+    }
+
+    function changePublicField(val) {
+        if (val == 0) {
+            $("#publicFieldIdDiv").hide();
+            $("#fieldFirstPropertiesDiv").show();
+            publicFieldId = null;
+            getfirstPropertiesSel();
+        } else {
+            fieldFirstProperties = null;
+            $("#publicFieldIdDiv").show();
+            $("#fieldFirstPropertiesDiv").hide();
+            /* var id = otherIndustryId.getValue();
+             console.log(id)
+             if (id == undefined || id[0] == undefined || id[0].id == undefined) {
+                 top.layer.msg("请选择行业");
+                 return false;
+             }*/
+            // publicFieldIdSel(id[0].id);
+
+        }
+    }
+
+    layui.use(['form'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        var pageSize = 10;
+        //无数据初始化下拉框
+        xmSelect.render({
+            el: '#parentId',
+            radio: true,
+            clickClose: true,
+            prop: {
+                name: 'fieldName',
+                value: 'id',
+                children: 'childs'
+
+            },
+            tree: {
+                show: true,
+                strict: false,
+                expandedKeys: [-1],
+            },
+        });
+
+        //初始化父级下拉框
+        getfirstPropertiesSel();
+        var url = apiPath + '/industry/impIndustryInfo/query_page?size=60';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (data) {
+                if (data.code == 0) {
+                    industryId = xmSelect.render({
+                        el: '#industryId',
+                        paging: true,
+                        radio: true,
+                        filterable: true,
+                        clickClose: true,
+                        prop: {
+                            name: 'name',
+                            value: 'id',
+                        },
+                        data: data.data.records,
+                        on: function (data) {
+                            //change, 此次选择变化的数据,数组
+                            var change = data.change;
+                            if (change && change.length > 0) {
+                                var id = change[0].id;
+                                getParentField(id);
+                                form.render();
+                            }
+                        }
+                    })
+                    otherIndustryId = xmSelect.render({
+                        el: '#otherIndustryId',
+                        paging: true,
+                        radio: true,
+                        filterable: true,
+                        clickClose: true,
+                        tips: '选择行业',
+                        prop: {
+                            name: 'name',
+                            value: 'id',
+                        },
+                        data: data.data.records,
+                        on: function (data) {
+                            //change, 此次选择变化的数据,数组
+                            var change = data.change;
+                            if (change && change.length > 0) {
+                                var id = change[0].id;
+                                publicFieldIdSel(id);
+                                form.render();
+                            }
+                        }
+                    })
+                    xmSelect.render({
+                        el: '#publicFieldId',
+                        radio: true,
+                        clickClose: true,
+                        prop: {
+                            name: 'fieldName',
+                            value: 'id',
+                            children: 'childs'
+
+                        },
+                        tree: {
+                            show: true,
+                            strict: false,
+                            expandedKeys: [-1],
+                        }
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+
+
+        form.on('radio(other)', function (data) {
+            return changePublicField(data.value);
+        });
+        form.on('submit(add)', function (data) {
+            data = data.field;
+            if (industryId && industryId.getValue().length > 0) {
+                data.industryId = industryId.getValue()[0].id;
+            }
+            if (parentId && parentId.getValue().length > 0) {
+                data.parentId = parentId.getValue()[0].id;
+            }
+            if (publicFieldId && publicFieldId.getValue().length > 0) {
+                data.publicFieldId = publicFieldId.getValue()[0].id;
+            }
+            if (fieldFirstProperties && fieldFirstProperties.getValue().length > 0) {
+                data.fieldFirstProperties = fieldFirstProperties.getValue()[0].value;
+            }
+            if (fieldSecondProperties && fieldSecondProperties.getValue().length > 0) {
+                data.fieldSecondProperties = fieldSecondProperties.getValue()[0].value;
+            }
+            if (data.parentId == null || data.parentId == undefined) {
+                data.parentId = 0;
+            }
+            delete data.select;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/industry/impIndustryFieldsConfig/save',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('添加成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('添加失败')
+                    }
+                }
+            })
+            return false;
+        });
+        form.on('submit(edit)', function (data) {
+            data = data.field;
+            if (industryId && industryId.getValue().length > 0) {
+                data.industryId = industryId.getValue()[0].id;
+            }
+            if (parentId && parentId.getValue().length > 0) {
+                data.parentId = parentId.getValue()[0].id;
+            }
+            if (publicFieldId && publicFieldId.getValue().length > 0) {
+                data.publicFieldId = publicFieldId.getValue()[0].id;
+            }
+            if (fieldFirstProperties && fieldFirstProperties.getValue().length > 0) {
+                data.fieldFirstProperties = fieldFirstProperties.getValue()[0].value;
+            }
+            if (fieldSecondProperties && fieldSecondProperties.getValue().length > 0) {
+                data.fieldSecondProperties = fieldSecondProperties.getValue()[0].value;
+            }
+            if (data.parentId == null || data.parentId == undefined) {
+                data.parentId = 0;
+            }
+            delete data.select;
+            var id = data.id;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/industry/impIndustryFieldsConfig/update/' + id,
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('编辑成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('添加失败')
+                    }
+                }
+            })
+            return false;
+        });
+        var id = getParam("id");
+        if (id) {
+            $("#editBtn").show();
+            $("#addBtn").hide();
+            $.ajax({
+                type: 'get',
+                url: apiPath + '/industry/impIndustryFieldsConfig/get/' + id,
+                success: function (res) {
+                    if (res.code == 0) {
+                        var data = res.data;
+                        if (data.industryId) {
+                            var arr = new Array();
+                            arr.push(data.industryId)
+                            industryId.setValue(arr);
+                            getParentField(data.industryId)
+                            if (data.parentId && data.parentId != 0) {
+                                parentId.setValue([data.parentId]);
+                            }
+                        }
+                        if (data.other == "0") {
+                            $("[name='other']").find("[value='0']").first().click();
+                            changePublicField(0);
+                            fieldFirstProperties.setValue([data.fieldFirstProperties]);
+                            fieldSecondProperties = fieldSecondPropertiesSel(data.fieldFirstProperties);
+                            fieldSecondProperties.setValue([data.fieldSecondProperties]);
+                            $("#fieldDiv").empty();
+                            $("#fieldDiv").append($(secondFieldTemplates[data.fieldSecondProperties]));
+                        } else {
+                            $("[name='other']").find("[value='1']").click();
+                            changePublicField(1);
+                            $.ajax({
+                                type: 'get',
+                                dataType: 'json',
+                                contentType: 'application/json',
+                                url: apiPath + '/industry/impIndustryFieldsRelease/query_list?configId=' + data.publicFieldId,
+                                async: false,
+                                success: function (resData) {
+                                    if (resData.code == 0 && resData.data.length > 0) {
+                                        var arr = new Array();
+                                        arr.push(resData.data[0].industryId);
+                                        otherIndustryId.setValue(arr);
+
+                                        publicFieldIdSel(resData.data[0].industryId);
+                                        arr = new Array();
+                                        arr.push(resData.data[0].id);
+                                        publicFieldId.setValue(arr)
+                                    }
+                                }
+                            });
+
+                            // publicFieldId = publicFieldIdSel(data.industryId)
+                            // publicFieldId.setValue([data.publicFieldId]);
+
+                        }
+                        form.val("form", res.data);
+                        form.render();
+                    }
+
+                }
+
+            })
+        } else {
+            $("#addBtn").show();
+            $("#editBtn").hide();
+        }
+        $('#cancelbtn').on('click', function () {
+            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+            // 切换到对应到选项卡下
+            top.element.tabChange('xbs_tab', fid);
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+</body>
+</html>

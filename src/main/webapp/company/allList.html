@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>全部历史记录</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>全部历史记录</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">行业</label>
+                                <div class="layui-input-inline">
+                                    <div id="industryId" name="industryId" class="xm-select-demo"></div>
+                                    <input type="hidden" id="companyId" name="companyId"/>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">更新时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="test16" placeholder="开始 到 结束">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">状态</label>
+                                <div class="layui-input-inline">
+                                    <div id="auditStatus" name="auditStatus" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">负责小组</label>
+                                <div class="layui-input-inline">
+                                    <div id="teamId" name="teamId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">填报人</label>
+                                <div class="layui-input-inline">
+                                    <div id="userId" name="userId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">区域</label>
+                                <div class="layui-input-inline">
+                                    <div id="areaId" name="areaId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">档案编号</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="fileNumber" id="fileNumber" autocomplete="off"
+                                           placeholder="档案编号"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="companyName" id="companyName" autocomplete="off"
+                                           placeholder="名称"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">企业执照</label>
+                                <div class="layui-input-inline">
+                                    <div id="licenseType" name="licenseType" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">运行状态</label>
+                                <div class="layui-input-inline">
+                                    <div id="runStatus" name="runStatus" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">经纬度</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="jingweidu" id="jingweidu" autocomplete="off"
+                                           placeholder="经纬度"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <button class="layui-btn" type="button" id="searchBtn">搜索</button>
+
+                                <button type="reset" class="layui-btn layui-btn-primary" id="resetBtn1"
+                                        style="display: none;">重置
+                                </button>
+                                <button type="button" class="layui-btn layui-btn-primary" id="resetBtn">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                    <!--<div class="layui-btn-group demoTable" style="padding-top:10px">
+                        <button class="layui-btn" id="addBtn" type="button" per-code='app:user:grade:saveOrUpdate'><i
+                                class="layui-icon"></i>添加
+                        </button>
+                    </div>
+                    <div class="layui-btn-group demoTable" style="padding-top:10px">
+                        <button class="layui-btn layui-btn-warm" id="updateBtn" type="button"
+                                per-code='app:user:grade:publishUserGrade'><i
+                                class="layui-icon"></i>更新
+                        </button>
+                    </div>-->
+                    <table id="table" lay-filter="table"></table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="bar">
+    {{#
+    var statusBtn = function(data){
+    var btnStr="";
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="detail">查看</a>';
+    return btnStr;
+    }
+    }}
+    {{statusBtn(d)}}
+
+
+</script>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<script>
+    var companyId=getParam("companyId");
+    if(companyId){
+        $("#companyId").val(companyId);
+    }
+    var fid = self.frameElement.getAttribute("tab-id");
+    var industryId, auditStatus, teamId, userId, areaId, licenseType, runStatus;
+    var beginTime, endTime;
+
+    function getParentField(id) {
+        var url = apiPath + '/industry/impIndustryFieldsRelease/getIndustryFieldsTree/' + id;
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (data) {
+                //回调需要两个参数, 第一个: 数据数组, 第二个: 总页码
+                parentId = xmSelect.render({
+                    el: '#parentId',
+                    radio: true,
+                    clickClose: true,
+                    prop: {
+                        name: 'fieldName',
+                        value: 'id',
+                        children: 'childs'
+
+                    },
+                    tree: {
+                        show: true,
+                        strict: false,
+                        expandedKeys: [-1],
+                    },
+                    data: data.data
+                })
+            },
+            error: function () {
+
+            }
+        });
+    }
+
+    layui.use(['table', 'form', 'element', 'laydate'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+        var laydate = layui.laydate;
+        laydate.render({
+            elem: '#test16'
+            , type: 'datetime'
+            , range: '到'
+            , format: 'yyyy-M-d H:m:s'
+            , done: function (value, date, endDate) {
+                var start_date,
+                    end_date,
+                    start_date_timestamp,
+                    end_date_timestamp;
+                // 初始化时间日期对象
+                console.log(date.month)
+                start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                end_date = new Date(endDate.year, endDate.month - 1, endDate.date, endDate.hours, endDate.minutes, endDate.seconds);
+                // 获取时间戳 -- 13 位
+                console.log(start_date.toLocaleDateString())
+                beginTime = start_date.getTime();
+                endTime = end_date.getTime();
+            }
+        });
+        auditStatus = xmSelect.render({
+            el: '#auditStatus',
+            radio: true,
+            clickClose: true,
+            filterable: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            data: [{id: 0, name: "待审核"}, {id: 1, name: "审核成功"}, {id: 2, name: "已驳回"}, {id: 3, name: "待更新"}, {
+                id: 4,
+                name: "已更新"
+            }, {id: 5, name: "待完善"}]
+        });
+        licenseType = xmSelect.render({
+            el: '#licenseType',
+            radio: true,
+            clickClose: true,
+            filterable: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            data: [{id: 1, name: "营业执照"}, {id: 2, name: "排污许可证"}, {id: 3, name: "应急预案"}, {
+                id: 4,
+                name: "食品经营许可证"
+            }, {id: 5, name: "维修经营许可证"}, {id: 6, name: "医疗机构执业许可证"}]
+        });
+        runStatus = xmSelect.render({
+            el: '#runStatus',
+            radio: true,
+            clickClose: true,
+            filterable: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            data: [{id: 0, name: "已关门"}, {id: 1, name: "暂停营业"}, {id: 2, name: "运行中"}]
+        });
+
+        var url = apiPath + '/industry/impIndustryInfo/query_page?size=60';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (data) {
+                if (data.code == 0) {
+                    industryId = xmSelect.render({
+                        el: '#industryId',
+                        radio: true,
+                        filterable: true,
+                        clickClose: true,
+                        prop: {
+                            name: 'name',
+                            value: 'id',
+                        },
+                        data: data.data.records,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+
+        // industryId, auditStatus, teamId, userId, areaId, licenseType, runStatus
+        url = apiPath + '/user/impTeamInfo/query_list';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (res) {
+                if (res.code == 0) {
+                    teamId = xmSelect.render({
+                        el: '#teamId',
+                        radio: true,
+                        filterable: true,
+                        clickClose: true,
+                        prop: {
+                            name: 'teamName',
+                            value: 'id',
+                        },
+                        data: res.data,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+        url = apiPath + '/user/impAreaInfo/query_list';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (res) {
+                if (res.code == 0) {
+                    areaId = xmSelect.render({
+                        el: '#areaId',
+                        radio: true,
+                        filterable: true,
+                        clickClose: true,
+                        prop: {
+                            name: 'areaName',
+                            value: 'id',
+                        },
+                        data: res.data,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+        url = apiPath + '/user/impUserInfo/query_list';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (res) {
+                if (res.code == 0) {
+                    userId = xmSelect.render({
+                        el: '#userId',
+                        radio: true,
+                        filterable: true,
+                        clickClose: true,
+                        prop: {
+                            name: 'userName',
+                            value: 'id',
+                        },
+                        data: res.data,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath + '/company/impCompanyHistoryRecord/query_page',
+            method: "get",
+            even: true,
+            page: true,
+            defaultToolbar: false,
+            where: getQueryParam(),
+            // toolbar: "#toolbar",
+            cols: [[
+                {
+                    field: 'fileNumber', title: '档案编号', width: '10%', align: 'center', fixed: 'true'
+                },
+                {
+                    field: 'companyName', title: '公司名称', width: '15%', align: 'center'
+                },
+                {
+                    field: 'runStatus',
+                    title: '运行状态',
+                    width: '10%',
+                    align: 'center',
+                    templet: function (item) {
+                        let runStatus = "-";
+                        if (item.runStatus == 0) {
+                            runStatus = "关门";
+                        } else if (item.runStatus == 1) {
+                            runStatus = "暂停运行";
+                        } else if (item.runStatus == 2) {
+                            runStatus = "运行";
+                        }
+                        return runStatus;
+                    }
+                },
+                {
+                    field: 'mainIndustryName', title: '主行业', width: '10%', align: 'center'
+                },
+                {
+                    field: 'subIndustryName', title: '辅行业', width: '10%', align: 'center'
+                },
+                {
+                    field: 'teamUserName', title: '负责小组&填报人', width: '10%', align: 'center'
+                },
+                {
+                    field: 'areaName', title: '区域', width: '10%', align: 'center'
+                },
+                {
+                    field: 'type', title: '提报类型', width: '10%', align: 'center', templet: function (item) {
+                        var typeStr = "-"
+                        if (item.type == 1) {
+                            return "勘察";
+                        } else if (item.type == 2) {
+                            return "巡查";
+                        }
+                        return typeStr;
+                    }
+                },
+                {
+                    field: 'belongTime', title: '归属预警时间', width: '15%', align: 'center', templet: function (item) {
+                        if (item.belongTime == undefined || item.belongTime == null) {
+                            return "";
+                        }
+                        return new Date(item.belongTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    field: 'firstSubmitTime', title: '首次提报时间', width: '15%', align: 'center', templet: function (item) {
+                        if (item.firstSubmitTime == undefined || item.firstSubmitTime == null) {
+                            return "";
+                        }
+                        return new Date(item.firstSubmitTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    field: 'thisSubmitTime', title: '本次提报时间', width: '15%', align: 'center', templet: function (item) {
+                        if (item.thisSubmitTime == undefined || item.thisSubmitTime == null) {
+                            return "";
+                        }
+                        return new Date(item.thisSubmitTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    field: 'thisAuditTime', title: '本次审核时间', width: '15%', align: 'center', templet: function (item) {
+                        if (item.thisAuditTime == undefined || item.thisAuditTime == null) {
+                            return "";
+                        }
+                        return new Date(item.thisAuditTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    field: 'warningTime', title: '预警时间', width: '15%', align: 'center', templet: function (item) {
+                        if (item.warningTime == undefined || item.warningTime == null) {
+                            return "";
+                        }
+                        return new Date(item.warningTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    field: 'auditStatus', title: '审核状态', width: '10%', align: 'center', templet: function (item) {
+                        var auditStatus = "-"
+                        if (item.auditStatus) {
+                            if (item.auditStatus == "0") {
+                                auditStatus = "待审核";
+                            } else if (item.auditStatus == "1") {
+                                auditStatus = "审核成功";
+                            } else if (item.auditStatus == "2") {
+                                auditStatus = "已驳回";
+                            } else if (item.auditStatus == "3") {
+                                auditStatus = "待更新";
+                            } else if (item.auditStatus == "4") {
+                                auditStatus = "已更新";
+                            }
+                        }
+                        return auditStatus;
+                    }
+                },
+                {
+                    title: '操作', toolbar: '#bar', width: '10%', align: 'center', fixed: 'right'
+                }
+
+            ]],
+            id: 'testReload',
+
+            parseData: function (res) {
+                return {
+                    "code": res.code,
+                    "data": res.data.records,
+                    "count": res.data.total,
+                    "msg": res.message
+                };
+
+            },
+
+            request: {
+                pageName: 'page',
+                limitName: 'size'
+            }
+
+        });
+
+        function reload() {
+            var param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+                // sysOperatorId: $("#sysOperatorId").val(),
+            });
+
+        }
+
+        function getQueryParam() {
+            var param = {};
+
+            // industryId, auditStatus, teamId, userId, areaId, licenseType, runStatus
+            var companyId = $("#companyId").val();
+            if (companyId != "") {
+                param.companyId = companyId;
+            }
+            var fileNumber = $("#fileNumber").val();
+            if (fileNumber != "") {
+                param.lk_fileNumber = fileNumber;
+            }
+            var companyName = $("#companyName").val();
+            if (companyName != "") {
+                param.lk_companyName = companyName;
+            }
+            if (industryId && industryId.getValue().length > 0) {
+                param.industryId = industryId.getValue()[0].id;
+            }
+            if (auditStatus && auditStatus.getValue().length > 0) {
+                param.auditStatus = auditStatus.getValue()[0].id;
+            }
+            if (teamId && teamId.getValue().length > 0) {
+                param.teamId = teamId.getValue()[0].id;
+            }
+            if (userId && userId.getValue().length > 0) {
+                param.userId = userId.getValue()[0].id;
+            }
+            if (areaId && areaId.getValue().length > 0) {
+                param.areaId = areaId.getValue()[0].id;
+            }
+            if (licenseType && licenseType.getValue().length > 0) {
+                param.licenseType = licenseType.getValue()[0].id;
+            }
+            if (runStatus && runStatus.getValue().length > 0) {
+                param.runStatus = runStatus.getValue()[0].id;
+            }
+            if (beginTime) {
+                param.gt_updateTime = beginTime;
+            }
+            if (endTime) {
+                param.lt_updateTime = endTime;
+            }
+            return param;
+        }
+
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+
+
+        $("#searchBtn").click(function () {
+            reload();
+        })
+        $("#resetBtn").click(function () {
+            $("#resetBtn1").click();
+            beginTime = undefined;
+            endTime = undefined;
+        })
+        $("#addBtn").click(function () {
+            top.xadmin.add_tab("添加行业字段", "/industry/field/add.html?fid=" + fid);
+        })
+        $("#updateBtn").click(function () {
+            $.ajax({
+                url: apiPath + '/industry/impIndustryFieldsConfig/upStatus',
+                type: 'POST',
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('更新成功');
+                        reload();
+                    } else {
+                        top.layer.msg('更新失败,' + res.message);
+                    }
+                }
+            });
+        })
+
+
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            if (obj.event == 'detail') {
+                top.xadmin.add_tab("查看公司信息", "/company/detail.html?his=1&id=" + data.id);
+            } else if (obj.event == 'edit') {
+                top.xadmin.add_tab("编辑行业字段", "/industry/field/add.html?id=" + data.id);
+            } else if (obj.event == 'level') {
+                top.xadmin.add_tab("违规等级", "/industry/field/levelConfig.html?fieldId=" + data.id + "&fieldName=" + encodeURI(data.fieldName) + "&options=" + encodeURI(data.options) + "&fieldSecondProperties=" + data.fieldSecondProperties);
+            } else if (obj.event == 'delete') {
+                layer.confirm('确认删除吗？', function (index) {
+                    $.ajax({
+                        url: apiPath + '/company/impCompanyInfo/delete/' + data.id,
+                        type: "POST",
+                        success: function (res) {
+                            if (res.code == 0) {
+                                parent.layer.msg('删除成功');
+                                reload();
+                            } else {
+                                parent.layer.msg('删除失败');
+                            }
+                        }
+                    });
+                    layer.close(index);
+                });
+            } else if (obj.event == 'enable') {
+                $.ajax({
+                    url: apiPath + '/industry/impIndustryFieldsConfig/disable/' + data.id + "/1",
+                    type: "get",
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('启用成功');
+                            reload();
+                        } else {
+                            parent.layer.msg('启用失败');
+                        }
+                    }
+                });
+            } else if (obj.event == 'dis') {
+                $.ajax({
+                    url: apiPath + '/industry/impIndustryFieldsConfig/disable/' + data.id + "/0",
+                    type: "get",
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('禁用成功');
+                            reload();
+                        } else {
+                            parent.layer.msg('禁用失败');
+                        }
+                    }
+                });
+            }
+
+        })
+    })
+
+</script>
+</body>
+
+
+</html>

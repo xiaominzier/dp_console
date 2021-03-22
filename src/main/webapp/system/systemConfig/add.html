@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加系统配置</title>
+    <!--
+        <link href="layui/css/layui.css" rel="stylesheet" />-->
+
+    <!-- <script src="layui/layui.js" type="text/javascript"></script>
+     <script src="js/jquery.min.js" type="text/javascript"></script>-->
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <link rel="stylesheet" href="/staticResource/lib/layui/css/layui.css">
+    <style>
+        .layui-form-label.layui-required:after {
+            content: "*";
+            color: red;
+            position: absolute;
+        }
+
+    </style>
+</head>
+</head>
+
+<body>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card" style="padding: 15px;">
+                <form class="layui-form" lay-filter="userForm">
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">安卓启动页</label>
+                        <div class="layui-input-block">
+                            <div class="layui-upload">
+                                <button type="button" class="layui-btn" id="businessLicenseUploadBtn"><i
+                                        class="layui-icon">&#xe681;</i>上传启动页图片
+                                </button>
+                                <div class="layui-upload-list">
+                                    <img class="layui-upload-img" style='width: 80px;height: 80px;'
+                                         id="businessLicenseUploadImg">
+                                    <p id="businessLicenseUploadMsg"></p>
+                                </div>
+                                <input class="layui-input" type="hidden" name="fileId" id="fileId">
+                            </div>
+
+                        </div>
+
+                        <div class="layui-input-block">
+                            <input type="text" name="link" id="link" lay-verify="required" autocomplete="off"
+                                   placeholder="输入网址" class="layui-input">
+                        </div>
+
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">首页标题</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="title" id="title" lay-verify="required" autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-row ">
+                        <div class=" layui-col-md5">
+                            <label class="layui-form-label layui-required">巡查时间范围</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="timeRange" id="timeRange" lay-verify="required"
+                                       autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <label class="layui-form-label layui-col-md1">天</label>
+                        <div class=" layui-col-md5">
+                            <label class="layui-form-label layui-required">巡查半径范围</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="radiusRange" id="radiusRange" lay-verify="required"
+                                       autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <label class="layui-form-label layui-col-md1">米</label>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block" style="text-align: left;">
+                            <button class="layui-btn layui-btn-danger" type="button" id="chancelBtn">取消</button>
+                            <button class="layui-btn" lay-submit lay-filter="saveData">确认保存</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+<script type="text/javascript">
+    var fid = getParam("fid");
+    var id = getParam("id");
+
+    var laydate;
+    layui.config({
+        base: "/staticResource/lib/layui/lay/modules/"
+    }).use(['form', 'laydate', 'jquery', 'tree', 'eleTree', 'layer', 'laydate', 'upload'], function () {
+        var form = layui.form,
+            $ = layui.jquery,
+            eleTree = layui.eleTree;
+
+        var layer = layui.layer;
+        laydate = layui.laydate;
+        var upload = layui.upload;
+
+
+        var uploadInst = upload.render({
+            elem: '#businessLicenseUploadBtn'
+            , url: apiPath + '/attached/file_upload' //改成您自己的上传接口
+            // ,field: "sss"
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#businessLicenseUploadImg').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return top.layer.msg('上传失败');
+                }
+                //上传成功
+                if (res && res.code == 0) {
+                    top.layer.msg('上传成功')
+                    // var resPath = getAjaxData(res);
+
+                    $("#fileId").val(res.data);
+                    $('#businessLicenseUploadMsg').html("");
+                }
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#businessLicenseUploadMsg');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload-blic">重试</a>');
+                demoText.find('.demo-reload-blic').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+
+        /* form.verify({
+             checkEmail: function (value, item) { //value：表单的值、item：表单的DOM对象
+                 if (value != "") {
+                     var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$");
+                     if (!reg.test(value)) { //正则验证不通过，格式不对
+                         return '邮箱格式不正确';
+                     }
+                 }
+             }
+         });*/
+        //监听提交
+        form.on('submit(saveData)', function (data) {
+            var a = data.field;
+            delete a.file;
+            $.ajax({
+                url: apiPath + '/user/impSystemConfig/save',
+                data: JSON.stringify(a),
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                success: function (res) {
+                    if (res.code == 0) {
+                        parent.layer.msg('添加成功');
+                        // var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                        // parent.layer.close(index);
+                        //刷新个人稿库tab
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+
+                    } else {
+                        parent.layer.msg('添加失败');
+                    }
+                }
+            })
+            return false;
+        });
+        $("#chancelBtn").click(function () {
+            // var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            // parent.layer.close(index)
+            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+            // 切换到对应到选项卡下
+            top.element.tabChange('xbs_tab', fid);
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+
+
+    });
+
+
+</script>
+
+</body>
+</html>

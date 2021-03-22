@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>公司信息详情</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <style>
+        .base-info-title {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .clear {
+            clear: both
+        }
+    </style>
+</head>
+<body style="background-color: #fff;height: 100%;padding: 10px;">
+<form class="layui-form layui-col-space5">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="text-align: right;">
+                        <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i
+                                class="layui-icon">&#x1006;</i>关闭
+                        </button>
+                    </div>
+                    <div class="layui-card-body ">
+                        <h1>公司详情</h1>
+                        <!--公司信息开始-->
+                        <table class="layui-table" lay-skin="nob">
+                            <tbody id="companyInfo">
+
+                            </tbody>
+                        </table>
+                        <!--公司信息结束-->
+                        <!--公司固定字段开始-->
+                        <fieldset class="layui-elem-field">
+                            <legend>基本信息</legend>
+                            <div class="layui-field-box">
+                                <table class="layui-table" lay-skin="nob">
+                                    <tbody id="baseFieldInfo">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                        <!--公司固定字段结束-->
+                        <!--公司动态字段开始-->
+                        <div class="layui-tab layui-tab-card" lay-filter="dynFieldInfo" id="dynFieldInfo"
+                             style="margin-top: 0px;">
+                            <ul class="layui-tab-title" id="tabTitle">
+                            </ul>
+                            <div class="layui-tab-content" style="min-height: 800px;" id="tabContent">
+                            </div>
+                        </div>
+                        <!--公司动态字段结束-->
+                        <!--公司其他信息开始-->
+                        <fieldset class="layui-elem-field">
+                            <legend>其他</legend>
+                            <div class="layui-field-box" id="otherInfos">
+                            </div>
+                        </fieldset>
+                        <!--公司其他信息结束-->
+                        <div class="layui-card-header" style="text-align: right;">
+                            <button class="layui-btn layui-btn-danger" type="button" id="cancelbtn1"
+                                    lay-filter="cancel"><i
+                                    class="layui-icon">&#x1006;</i>关闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+    var historyTpye = getParam("his");
+    var companyDtoInfo;
+    //违规等级信息
+    var levelOptions = [{name: "不违规", value: 3}, {name: "违规", value: 2}, {name: "一般违规", value: 1}, {
+        name: "严重违规",
+        value: 0
+    }];
+
+    function delWorkImg(obj) {
+        var delBtn = $(obj);
+        var fileuploadId = delBtn.data("fileuploadId");
+        if (companyDtoInfo) {
+            var impCompanyPictures = companyDtoInfo.impCompanyPictures;
+            if (impCompanyPictures) {
+                let delIndex;
+                for (var index in impCompanyPictures) {
+                    if (impCompanyPictures[index].fileuploadId == fileuploadId) {
+                        delIndex = index;
+                        break;
+                    }
+                }
+                if (delIndex) {
+                    impCompanyPictures.splice(delIndex, 1);
+                }
+            }
+            delBtn.parent().remove();
+        }
+
+    }
+
+    $(function () {
+        if (id && id != null) {
+            var url = apiPath + "/company/impCompanyInfo/getCompanyDto/" + id;
+            if (historyTpye == "1") {
+                url = apiPath + "/company/impCompanyHistoryRecord/getCompanyHistory/" + id;
+            }
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (res) {
+                    if (res.code == 0) {
+
+                        layui.config({
+                            base: "/staticResource/lib/layui/lay/modules/"
+                        }).use(['layer', 'element', 'form', 'laydate', 'upload'], function () {
+                            layer = layui.layer;
+                            element = layui.element;
+                            form = layui.form;
+                            laydate = layui.laydate;
+                            upload = layui.upload;
+                            form.on('radio(auditResult)', function (data) {
+                                if (data.value == '1') { //通过，不能进行编辑原因
+                                    $("#auditReason").val("");
+                                    $("#auditReason").attr("disabled", true);
+                                } else {
+                                    $("#auditReason").attr("disabled", false);
+                                }
+                            });
+                            companyDtoInfo = res.data;
+                            var data = res.data;
+                            disComanyInfo(data);
+                            showBaseField(data);
+                            showDynField(data);
+                            // 公司照片
+                            var companyImags = new Array();
+                            //现场照片
+                            var siteImags = new Array();
+                            //工作照片
+                            var workImags = new Array();
+                            var impCompanyPictures = data.impCompanyPictures;
+                            if (impCompanyPictures) {
+                                var impCompanyPicture;
+                                for (var index in impCompanyPictures) {
+                                    impCompanyPicture = impCompanyPictures[index];
+                                    // 公司图片类型   1：工作照 2：现场图片3：企业执照
+                                    if (impCompanyPicture.type == "1") {
+                                        workImags.push(apiPath + "/attached/show/" + impCompanyPicture.fileuploadId);
+                                    } else if (impCompanyPicture.type == "2") {
+                                        siteImags.push(apiPath + "/attached/show/" + impCompanyPicture.fileuploadId);
+                                    } else if (impCompanyPicture.type == "3") {
+                                        var licenseType = impCompanyPicture.licenseType;
+                                        var licenseTypeStr = "";
+                                        // 营业执照:1 排污许可证:2 应急预案:3 食品经营许可证:4  维修经营许可证:5  医疗机构执业许可证:6
+                                        if (licenseType == 0) {
+                                            licenseTypeStr = "自定义";
+                                        } else if (licenseType == 1) {
+                                            licenseTypeStr = "营业执照";
+                                        } else if (licenseType == 2) {
+                                            licenseTypeStr = "排污许可证";
+                                        } else if (licenseType == 3) {
+                                            licenseTypeStr = "应急预案";
+                                        } else if (licenseType == 4) {
+                                            licenseTypeStr = "食品经营许可证";
+                                        } else if (licenseType == 5) {
+                                            licenseTypeStr = "维修经营许可证";
+                                        } else if (licenseType == 6) {
+                                            licenseTypeStr = "医疗机构执业许可证";
+                                        }
+                                        companyImags.push({
+                                            type: licenseType,
+                                            name: licenseTypeStr,
+                                            src: apiPath + "/attached/show/" + impCompanyPicture.fileuploadId
+                                        })
+                                    }
+                                }
+                            }
+                            var otherInfos = $("#otherInfos");
+                            //显示企业执照信息。
+                            var companyLicenseIds = "companyLicenseImgs";
+                            var companyLicenseStr = "<fieldset class=\"layui-elem-field\">\n" +
+                                "                            <legend>企业执照</legend>\n" +
+                                "                            <div class=\"layui-field-box\">\n" +
+                                "<div class=\" layui-photos-demo\" id=\"" + companyLicenseIds + "\" style=\"padding: 7px;\">\n";
+                            var licenseTypeArr = [{name: "自定义", value: "0"}, {name: "营业执照", value: "1"}, {
+                                name: "排污许可证",
+                                value: "2"
+                            }, {name: "应急预案", value: "3"}, {name: "食品经营许可证", value: "4"}, {
+                                name: "维修经营许可证",
+                                value: "5"
+                            }, {name: "医疗机构执业许可证", value: "6"}];
+                            for (var imgIndex in companyImags) {
+                                companyLicenseStr += "<div class=\"layui-upload\">\n" +
+                                    "  <div class=\"layui-upload-list\">\n" +
+                                    "    <img style='width: 90px;' class=\"layui-upload-img\" id=\"licenseType_img_" + companyImags[imgIndex].name + "\" layer-src = \"" + companyImags[imgIndex].src + "\" layer-pid src=\"" + companyImags[imgIndex].src + "\" alt=\"" + companyImags[imgIndex].name + "\" layer-index = \"" + index + "\">\n" +
+                                    "    <p id=\"demoText\"></p>\n" +
+                                    "  </div>\n" +
+                                    "  <button type=\"button\" class=\"layui-btn\ lic_upload\" id=\"licenseType_upload_" + companyImags[imgIndex].name + "\">" + companyImags[imgIndex].name + "</button>\n" +
+                                    "</div>  ";
+                            }
+                            companyLicenseStr += "</div>\n" +
+                                "</div>\n" +
+                                "</fieldset>\n";
+                            otherInfos.append($(companyLicenseStr));
+                            photoIds.push(companyLicenseIds);
+                            // 显示处罚记录
+                            var publishStr = "<fieldset class=\"layui-elem-field\">\n" +
+                                "                            <legend>处罚记录</legend>\n" +
+                                "                            <div class=\"layui-field-box\">\n";
+                            var impCompanyPunishRecords = data.impCompanyPunishRecords;
+                            if (impCompanyPunishRecords) {
+                                for (var index in impCompanyPunishRecords) {
+                                    var impCompanyPunishRecord = impCompanyPunishRecords[index];
+                                    var punishTimeStr = "-";
+                                    if (impCompanyPunishRecord.punishTime != null && impCompanyPunishRecord.punishTime != undefined && impCompanyPunishRecord.punishTime > 0) {
+                                        punishTimeStr = new Date(impCompanyPunishRecord.punishTime).format("yyyy-MM-dd hh:mm:ss");
+                                    }
+                                    var solveStr = "否";
+                                    if (impCompanyPunishRecord.solve != undefined) {
+                                        solveStr = impCompanyPunishRecord.solve == 0 ? "否" : "是";
+                                    }
+                                    publishStr += "<fieldset class=\"layui-elem-field\">\n" +
+                                        "                            <legend>处罚记录</legend>\n" +
+                                        "                            <div class=\"layui-field-box\">\n" +
+                                        "<table class=\"layui-table\" lay-skin=\"nob\" style='width: 48%;float: left;'>\n" +
+                                        "<tbody><tr>" +
+                                        "   <td width=\"15%\" class=\"base-info-title\">处罚项目</td>\n" +
+                                        "   <td width=\"35%\">" +
+                                        "   " + getDisStr2(impCompanyPunishRecord.punishProject) +
+                                        "</td></tr></tbody></table>\n" +
+                                        "<table class=\"layui-table\" lay-skin=\"nob\" style='width: 48%;float: left;'>\n" +
+                                        "<tbody><tr>" +
+                                        "   <td width=\"15%\" class=\"base-info-title\">处罚原因</td>\n" +
+                                        "   <td width=\"35%\">" +
+                                        "   " + getDisStr2(impCompanyPunishRecord.punishReason) +
+                                        "</td></tr></tbody></table>\n" +
+                                        "<table class=\"layui-table\" lay-skin=\"nob\" style='width: 48%;float: left;'>\n" +
+                                        "<tbody><tr>" +
+                                        "   <td width=\"15%\" class=\"base-info-title\">处罚机构</td>\n" +
+                                        "   <td width=\"35%\">" +
+                                        "   " + getDisStr2(impCompanyPunishRecord.punishMechanism) +
+                                        "</td></tr></tbody></table>\n" +
+                                        "<table class=\"layui-table\" lay-skin=\"nob\" style='width: 48%;float: left;'>\n" +
+                                        "<tbody><tr>" +
+                                        "   <td width=\"15%\" class=\"base-info-title\">处罚时间</td>\n" +
+                                        "   <td width=\"35%\">" +
+                                        "   " + punishTimeStr +
+                                        "</td></tr></tbody></table>\n" +
+                                        "<table class=\"layui-table\" lay-skin=\"nob\" style='width: 48%;float: left;'>\n" +
+                                        "<tbody><tr>" +
+                                        "   <td width=\"15%\" class=\"base-info-title\">是否解决</td>\n" +
+                                        "   <td width=\"35%\">" +
+                                        "   " + solveStr +
+                                        "</td></tr></tbody></table>\n" +
+                                        "<table class=\"layui-table\" lay-skin=\"nob\" style='width: 48%;float: left;'>\n" +
+                                        "<tbody><tr>" +
+                                        "   <td width=\"15%\" class=\"base-info-title\">解决方式</td>\n" +
+                                        "   <td width=\"35%\">";
+                                    var solveTypeStr = "";
+                                    if (solveStr == "是") {
+                                        if (impCompanyPunishRecord.solveType) {
+                                            // 缴纳罚款:1  触发撤销:2 其他:3
+                                            if (impCompanyPunishRecord.solveType == 1) {
+                                                solveTypeStr = "缴纳罚款";
+                                            } else if (impCompanyPunishRecord.solveType == 2) {
+                                                solveTypeStr = "处罚撤销";
+                                            } else if (impCompanyPunishRecord.solveType == 3) {
+                                                solveTypeStr = "其他";
+                                            }
+                                        }
+                                    }
+
+                                    publishStr += solveTypeStr + "</td></tr></tbody></table>\n" +
+                                        "      </div>\n" +
+                                        "  </fieldset>";
+                                }
+                            }
+                            publishStr += "      </div>\n" +
+                                "  </fieldset>"
+
+                            otherInfos.append($(publishStr));
+
+                            var siteConditions;
+                            if (data.impCompanyOtherInfo.siteConditions) {
+                                siteConditions = data.impCompanyOtherInfo.siteConditions;
+                            }
+                            var workContent;
+                            if (data.impCompanyOtherInfo.workContent) {
+                                workContent = data.impCompanyOtherInfo.workContent;
+                            }
+                            var remarks;
+                            if (data.impCompanyOtherInfo.remarks) {
+                                remarks = data.impCompanyOtherInfo.remarks;
+                            }
+                            var latitudeLongitude;
+                            if (data.latitudeLongitude) {
+                                latitudeLongitude = data.latitudeLongitude;
+                            }
+                            //现场图片
+                            var siteInfos = "<fieldset class=\"layui-elem-field\">\n" +
+                                "                            <legend>现场图片</legend>\n" +
+                                "                            <div class=\"layui-field-box\" id=\"otherInfos\">\n" +
+                                "<table class=\"layui-table\" lay-skin=\"nob\" style='float: left;'>\n" +
+                                "<tbody><tr>" +
+                                "   <td width=\"15%\" class=\"base-info-title\">现场情况</td>\n" +
+                                "   <td>" +
+                                "   <textarea id='siteConditions_textarea' class='layui-textarea'>" + getDisStr1(siteConditions) + "</textarea>" +
+                                "</td></tr></tbody></table>\n" +
+                                "<table class=\"layui-table\" lay-skin=\"nob\" style='float: left;'>\n" +
+                                "<tbody><tr>" +
+                                "   <td width=\"15%\" class=\"base-info-title\">现场图片</td>\n" +
+                                "   <td>" +
+                                "<div class=\"layui-upload\">\n" +
+                                "  <blockquote class=\"layui-elem-quote layui-quote-nm\" style=\"margin-top: 10px;\">\n";
+                            var xcimgId = "layui-photos-demo-" + Math.random();
+                            siteInfos += " <div class=\" layui-upload-list uploader-list\" id=\"" + xcimgId + "\"\" style=\"padding: 7px;\">\n";
+                            /* siteInfos += " <div class=\" layui-upload-list uploader-list\" id=\"uploader-list\"\" style=\"padding: 7px;\">\n";*/
+                            for (var imgIndex in siteImags) {
+                                siteInfos += " <span><img layer-src = \"" + siteImags[imgIndex] + "\" layer-pid src=\"" + siteImags[imgIndex] + "\" alt=\"\" layer-index = \"" + imgIndex + "\"></span>\n";
+                            }
+                            siteInfos += "</div>  " +
+                                " </blockquote>\n" +
+                                "</div>" +
+                                "</td></tr></tbody></table>\n" +
+                                "                            </div>\n" +
+                                "                        </fieldset>";
+                            otherInfos.append($(siteInfos));
+                            photoIds.push(xcimgId);
+                            /* photoIds.push("uploader-list");*/
+                            //工作照
+                            var workInfos = "<fieldset class=\"layui-elem-field\">\n" +
+                                "                            <legend>工作照</legend>\n" +
+                                "                            <div class=\"layui-field-box\" id=\"otherInfos\">\n" +
+                                "<table class=\"layui-table\" lay-skin=\"nob\" style='float: left;'>\n" +
+                                "<tbody><tr>" +
+                                "   <td width=\"15%\" class=\"base-info-title\">工作内容</td>\n" +
+                                "   <td>" +
+                                "   <textarea id='workContent_textarea' class='layui-textarea'>" + getDisStr1(workContent) + "</textarea>" +
+                                "</td></tr></tbody></table>\n" +
+                                "<table class=\"layui-table\" lay-skin=\"nob\" style='float: left;'>\n" +
+                                "<tbody><tr>" +
+                                "   <td width=\"15%\" class=\"base-info-title\">工作照</td>\n" +
+                                "   <td>" +
+                                "<div class=\"layui-upload\">\n" +
+                                "  <blockquote class=\"layui-elem-quote layui-quote-nm\" style=\"margin-top: 10px;\">\n";
+                            var imgId = "layui-photos-demo" + Math.random();
+                            workInfos += " <div class=\" layui-photos-demo\" id=\"" + imgId + "\" style=\"padding: 7px;\">\n";
+                            for (var imgIndex in workImags) {
+                                workInfos += " <img layer-src = \"" + workImags[imgIndex] + "\" layer-pid src=\"" + workImags[imgIndex] + "\" alt=\"\" layer-index = \"" + imgIndex + "\">\n";
+                            }
+                            workInfos += "</div>  " +
+                                " </blockquote>\n" +
+                                "</div>" +
+                                "</td></tr></tbody></table>\n" +
+                                "                            </div>\n" +
+                                "                        </fieldset>";
+                            otherInfos.append($(workInfos));
+                            photoIds.push(imgId);
+                            // 其他
+                            var otherChildInfos = "<fieldset class=\"layui-elem-field\">\n" +
+                                "                            <legend>其他</legend>\n" +
+                                "                            <div class=\"layui-field-box\" id=\"otherInfos\">\n" +
+                                "<table class=\"layui-table\" lay-skin=\"nob\" style='float: left;'>\n" +
+                                "<tbody><tr>" +
+                                "   <td width=\"15%\" class=\"base-info-title\">备注</td>\n" +
+                                "   <td>" +
+                                "   <textarea id='remarks_textarea' class='layui-textarea'>" + getDisStr1(remarks) + "</textarea>" +
+                                "</td></tr></tbody></table>\n" +
+                                "<table class=\"layui-table\" lay-skin=\"nob\" style='float: left;'>\n" +
+                                "<tbody><tr>" +
+                                "   <td width=\"15%\" class=\"base-info-title\">企业签字</td>\n" +
+                                "   <td>";
+                            var signImgPath = "";
+                            if (data.impCompanyOtherInfo && data.impCompanyOtherInfo.sign) {
+                                signImgPath = apiPath + "/attached/show/" + data.impCompanyOtherInfo.sign;
+                            }
+                            var imgId = "layui-photos-demo" + Math.random();
+                            otherChildInfos += "<div class=\"layui-upload\">\n" +
+                                "  <div class=\"layui-upload-list\" id=\"" + imgId + "\">\n" +
+                                "    <img class=\"layui-upload-img\" id='impCompanyOtherInfo_img'   layer-src = \"" + signImgPath + "\" layer-pid src=\"" + signImgPath + "\"   layer-index = \"" + index + "\">\n" +
+                                "    <p id=\"demoText\"></p>\n" +
+                                "  </div>\n" +
+                                "</div>  " +
+                                "</td>" +
+                                "   </tr><tr></tr><td width=\"15%\" class=\"base-info-title\">经纬度</td>\n" +
+                                "<td>" + getDisStr2(latitudeLongitude) +
+                                "</td>" +
+                                "</tr></tbody></table>\n" +
+                                "                            </div>\n" +
+                                "                        </fieldset>";
+                            otherInfos.append($(otherChildInfos));
+                            photoIds.push(imgId);
+                            // fileName、rectificationPlanId
+                            //方案信息
+                            var impCompanyPlanRelations = data.impCompanyPlanRelations;
+                            var fileStr = "";
+                            if (impCompanyPlanRelations) {
+                                for (var index in impCompanyPlanRelations) {
+                                    var impCompanyPlanRelation = impCompanyPlanRelations[index];
+                                    fileStr += "<a href='" + apiPath + '/attached​/file_download​/' + impCompanyPlanRelation.rectificationPlanId + "'>" + impCompanyPlanRelation.fileName + "</a><br/>";
+                                }
+                            }
+                            var rectificationPlanHtml = "<fieldset class=\"layui-elem-field\">\n" +
+                                "                            <legend>整改方案</legend>\n" +
+                                "                            <div class=\"layui-field-box\" id=\"otherInfos\">\n"
+                            "<table class=\"layui-table\" lay-skin=\"nob\" style='float: left;'>\n" +
+                            "<tbody><tr>" +
+                            "   <td width=\"15%\" class=\"base-info-title\">整改方案附件</td>\n" +
+                            "   <td>" + fileStr + "</td></tr></tbody></table>\n" +
+                            "</div>\n" +
+                            "</fieldset>";
+
+
+                            otherInfos.append($(rectificationPlanHtml));
+                            // for (var index in photoIds) {
+                            //     layer.photos({
+                            //         photos: "#" + photoIds[index],
+                            //         anim: 5,
+
+                            //     });
+                            // }
+                        });
+                    } else {
+                        parent.layer.msg("获取数据失败");
+                    }
+                },
+                error: function () {
+                    return parent.layer.msg("获取数据失败");
+                }
+            });
+        }
+
+        //点击图片放大
+        $(document).on("click", ".layui-upload img", function(e){
+            layer.photos({ photos: {"data": [{"src": e.target.src}]} });
+        });
+        //头部关闭按钮
+        $("#cancelbtn").click(function () {
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+        //底部关闭按钮
+        $("#cancelbtn1").click(function () {
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+        //保存按钮
+        $("#auditBtn").click(function () {
+            var param = {};
+            param.impCompanyDto = companyDtoInfo;
+            param.impAuditHistoryRecord = {
+                "companyId": id,
+                "auditReason": $('input[name="auditReason"]').val(),
+                "status": $('input[name="auditResult"]:checked').val()
+            }
+            //console.log(JSON.stringify(param));
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/company/impCompanyInfo/audit',
+                data: JSON.stringify(param),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('审核成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('审核失败')
+                    }
+                }
+            })
+        });
+    });
+
+    //展示企业动态字段信息。
+    function showDynField(companyInfo) {
+        var dynFieldInfoTab = $("#dynFieldInfo");
+        element.tabDelete("dynFieldInfo");
+        //主行业信息
+        var impIndustryFieldsReleaseTreeMainDto = companyInfo.impIndustryFieldsReleaseTreeMainDto;
+        if (impIndustryFieldsReleaseTreeMainDto) {
+            var tabTitle = impIndustryFieldsReleaseTreeMainDto.industryName;
+            var zgStatus = impIndustryFieldsReleaseTreeMainDto.zgStatus;
+            var violation = impIndustryFieldsReleaseTreeMainDto.violation;
+            var ybViolation = impIndustryFieldsReleaseTreeMainDto.ybViolation;
+            var yzViolation = impIndustryFieldsReleaseTreeMainDto.yzViolation;
+            var impIndustryFieldsReleaseArr = impIndustryFieldsReleaseTreeMainDto.impIndustryFieldsRelease;
+            var industryContainer = "<div class=\"layui-tab-item\"><span style='color:#0000FF;line-height:14px;display:inline-block;padding-left:10px;'>整改状态:</span><span style='color:#0000FF;'>" + zgStatus + "</span>" +
+                "<span style='text-align:center;line-height:20px;background-color:#D9001B;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-block;margin-left:10px;'>i</span><span style='color:#D9001B;line-height:14px;display:inline-block;padding-left:10px;'>严重违规</span><span style='color:#D9001B'>" + yzViolation + "项</span>" +
+                "<span style='text-align:center;line-height:20px;background-color:#F59A23;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-block;margin-left:10px;'>i</span><span style='color:#F59A23;line-height:14px;display:inline-block;padding-left:10px;'>一般违规</span><span style='color:#F59A23'>" + ybViolation + "项</span>" +
+                "<span style='text-align:center;line-height:20px;background-color:#00BFBF;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-block;margin-left:10px;'>i</span><span style='color:#00BFBF;line-height:14px;display:inline-block;padding-left:10px;'>违规</span><span style='color:#00BFBF'>" + violation + "项</span>" +
+                "</div>";
+            industryContainer = $(industryContainer);
+            $("#tabTitle").append("<li>" + tabTitle + "</li>");
+            $("#tabContent").append(industryContainer);
+
+            //存储配置了前置字段属性的字段信息
+            var fontFieldRefMap = new Map();
+            //存储前置字段信息
+            var fontFieldItemMap = new Map();
+            var sysCompMap = new Map();
+            for (var index in impIndustryFieldsReleaseArr) {
+                genSysCompFieldInfos(impIndustryFieldsReleaseTreeMainDto, impIndustryFieldsReleaseArr[index], sysCompMap);
+                genFontFieldInfos(impIndustryFieldsReleaseArr,impIndustryFieldsReleaseArr[index], fontFieldRefMap,fontFieldItemMap);
+            }
+            //console.log("---fontFieldRefMap----");
+            //console.log(fontFieldRefMap);
+            impIndustryFieldsReleaseTreeMainDto.fontFieldRefMap = fontFieldRefMap;
+            //console.log("---fontFieldItemMap----");
+            //console.log(fontFieldItemMap);
+            impIndustryFieldsReleaseTreeMainDto.fontFieldItemMap = fontFieldItemMap;
+
+            for (var index in impIndustryFieldsReleaseArr) {
+                genFormItem(impIndustryFieldsReleaseArr[index], industryContainer, impIndustryFieldsReleaseTreeMainDto);
+            }
+            // industryContainer.empty();
+            /* element.tabAdd('dynFieldInfo', {
+                 title: tabTitle
+                 , content: industryContainer.html() //支持传入html
+                 , id: 'mainIndustryHtml'
+             });
+             industryContainer.empty();*/
+
+        }
+        //子行业信息
+        var impIndustryFieldsReleaseTreeSubDto = companyInfo.impIndustryFieldsReleaseTreeSubDto;
+        if (impIndustryFieldsReleaseTreeSubDto) {
+            for (var index in  impIndustryFieldsReleaseTreeSubDto) {
+                var tabTitle = impIndustryFieldsReleaseTreeSubDto[index].industryName;
+                var stuDto = impIndustryFieldsReleaseTreeSubDto[index];
+                var impIndustryFieldsReleaseArr = stuDto.impIndustryFieldsRelease;
+                var zgStatus = stuDto.zgStatus;
+                var violation = stuDto.violation;
+                var ybViolation = stuDto.ybViolation;
+                var yzViolation = stuDto.yzViolation;
+                var impIndustryFieldsReleaseArr = stuDto.impIndustryFieldsRelease;
+                var industryContainer = "<div class=\"layui-tab-item\"><span style='color:#0000FF;line-height:14px;display:inline-block;padding-left:10px;'>整改状态:</span><span style='color:#0000FF;'>" + zgStatus + "</span>" +
+                    "<span style='text-align:center;line-height:20px;background-color:#D9001B;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-block;margin-left:10px;'>i</span><span style='color:#D9001B;line-height:14px;display:inline-block;padding-left:10px;'>严重违规</span><span style='color:#D9001B'>" + yzViolation + "项</span>" +
+                    "<span style='text-align:center;line-height:20px;background-color:#F59A23;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-block;margin-left:10px;'>i</span><span style='color:#F59A23;line-height:14px;display:inline-block;padding-left:10px;'>一般违规</span><span style='color:#F59A23'>" + ybViolation + "项</span>" +
+                    "<span style='text-align:center;line-height:20px;background-color:#00BFBF;color:#fff;width:20px;height:20px;border-radius:50%;display:inline-block;margin-left:10px;'>i</span><span style='color:#00BFBF;line-height:14px;display:inline-block;padding-left:10px;'>违规</span><span style='color:#00BFBF'>" + violation + "项</span>" +
+                    "</div>";
+                industryContainer = $(industryContainer);
+                $("#tabTitle").append("<li>" + tabTitle + "</li>");
+                $("#tabContent").append(industryContainer);
+                //存储配置了前置字段属性的字段信息
+                var fontFieldRefMap = new Map();
+                //存储前置字段信息
+                var fontFieldItemMap = new Map();
+                var sysCompMap = new Map();
+                for (var index in impIndustryFieldsReleaseArr) {
+                    genSysCompFieldInfos(stuDto, impIndustryFieldsReleaseArr[index], sysCompMap);
+                    genFontFieldInfos(impIndustryFieldsReleaseArr,impIndustryFieldsReleaseArr[index], fontFieldRefMap,fontFieldItemMap);
+                }
+                ////console.log("---fontFieldRefMap----");
+                ////console.log(fontFieldRefMap);
+                stuDto.fontFieldRefMap = fontFieldRefMap;
+                ////console.log("---fontFieldItemMap----");
+                ////console.log(fontFieldItemMap);
+                stuDto.fontFieldItemMap = fontFieldItemMap;
+                if (impIndustryFieldsReleaseArr) {
+                    for (var subIndex in impIndustryFieldsReleaseArr) {
+                        genFormItem(impIndustryFieldsReleaseArr[subIndex], industryContainer, stuDto);
+                    }
+                }
+            }
+        }
+        form.render();
+        $("#dynFieldInfo li:first").click();
+        element.render('tab')
+    }
+
+    var photoIds = new Array();
+
+
+    //展示企业固定字段信息。
+    function showBaseField(companyInfo) {
+        var baseFieldInfo = $("#baseFieldInfo");
+        baseFieldInfo.empty();
+        var basicIndustryFieldsReleaseDto = companyInfo.basicIndustryFieldsReleaseDto;
+        //存储配置了前置字段属性的字段信息
+        var fontFieldRefMap = new Map();
+        //存储前置字段信息
+        var fontFieldItemMap = new Map();
+        for (var index in basicIndustryFieldsReleaseDto) {
+            genFontFieldInfos(basicIndustryFieldsReleaseDto,basicIndustryFieldsReleaseDto[index], fontFieldRefMap,fontFieldItemMap);
+        }
+        ////console.log("---fontFieldRefMap----");
+        ////console.log(fontFieldRefMap);
+        basicIndustryFieldsReleaseDto.fontFieldRefMap = fontFieldRefMap;
+        ////console.log("---fontFieldItemMap----");
+        ////console.log(fontFieldItemMap);
+        basicIndustryFieldsReleaseDto.fontFieldItemMap = fontFieldItemMap;
+        if (basicIndustryFieldsReleaseDto) {
+            for (var index in basicIndustryFieldsReleaseDto) {
+                genFormItem(basicIndustryFieldsReleaseDto[index], baseFieldInfo, basicIndustryFieldsReleaseDto);
+            }
+        }
+    }
+
+
+
+    //获取配置了前置字段属性的字段信息
+    function genFontFieldInfos(impIndustryFieldsReleaseArr, fieldInfo, fontFieldRefMap, fontFieldItemMap) {
+        if (fieldInfo.webId == undefined) {
+            fieldInfo.webId = "id_" + parseInt(Math.random() * 100000) + new Date().getTime();
+        }
+        if (fieldInfo.columnNum && fieldInfo.columnNum == 1000000000000) {
+            return;
+        }
+        if (fieldInfo && fontFieldRefMap) {
+            ////console.log("---->")
+            ////console.log(fieldInfo.frontFiled)
+            if (fieldInfo.frontFiled && fieldInfo.frontFiled != "") {
+                var configArr = fieldInfo.frontFiled.split(":");
+                if (configArr && configArr.length > 0) {
+                    var configId = configArr[0] + "";
+                    var configVal = configArr[1];
+                    var fontdConfigMap;
+                    if (fieldInfo.columnNum) {
+                        configId = configId + "_" + fieldInfo.columnNum;
+                    }
+                    if (fontFieldRefMap.has(configId) == false) {
+                        fontdConfigMap = new Map();
+                        fontFieldRefMap.set(configId, fontdConfigMap);
+                    } else {
+                        fontdConfigMap = fontFieldRefMap.get(configId);
+                    }
+                    if (fontdConfigMap) {
+                        fontdConfigMap.set(fieldInfo.webId, {
+                            webId: fieldInfo.webId,
+                            val: configVal
+                        });
+                    }
+                    let fontFieldItem = getObjFromIndustry(impIndustryFieldsReleaseArr, configArr[0], fieldInfo.columnNum);
+                    if (fontFieldItem) {
+                        fontFieldItemMap.set(configId, fontFieldItem);
+                    }
+                }
+            }
+            if (fieldInfo.fieldSecondProperties == "12" || fieldInfo.fieldSecondProperties == "13") {
+                if (fieldInfo.childs && fieldInfo.childs.length > 0) {
+                    var childs = fieldInfo.childs;
+                    for (var index in childs) {
+                        genFontFieldInfos(impIndustryFieldsReleaseArr, childs[index], fontFieldRefMap, fontFieldItemMap);
+                    }
+                }
+            }
+        }
+    }
+
+    //获取类型为"系统计算"的字段信息
+    function genSysCompFieldInfos(industryObj, fieldInfo, sysCompMap) {
+        if (fieldInfo && sysCompMap) {
+            if (fieldInfo.webId == undefined) {
+                fieldInfo.webId = "id_" + parseInt(Math.random() * 100000) + new Date().getTime();
+            }
+            if (fieldInfo.fieldSecondProperties == "14") {
+                sysCompMap.set(fieldInfo.webId, fieldInfo);
+                let formula = fieldInfo.formula;
+                //通过正则表达式找出configId,规则是#55,那么55就是configid
+                //#55*0.8
+                let configReg = /[\#](\d)+/gi;
+
+                let result = formula.match(configReg);
+                var computeFieldSet = new Set();
+                let formula1 = fieldInfo.formula;
+                for (var i = 0; i < result.length; i++) {
+                    var item = result[i]
+                    if (item) {
+                        var impIndustryFieldsReleaseArr = industryObj.impIndustryFieldsRelease;
+                        for (let industryIndex in impIndustryFieldsReleaseArr) {
+                            let res = getObjByConfigId(impIndustryFieldsReleaseArr[industryIndex], item.substring(1), fieldInfo.columnNum);
+                            // //console.log("configid res---------")
+                            // //console.log(res)
+                            if (res) {
+                                computeFieldSet.add(res);
+                                let refCompFieldSet = res.refComputeFieldSet;
+                                if (!refCompFieldSet) {
+                                    refCompFieldSet = new Set();
+                                    res.refComputeFieldSet = refCompFieldSet;
+                                }
+                                refCompFieldSet.add(fieldInfo);
+                                formula1 = formula1.replace(item, res.webId);
+                            }
+                        }
+                    }
+                }
+                fieldInfo.computeFieldSet = computeFieldSet;
+                fieldInfo.formula1 = formula1;
+
+            }
+            if (fieldInfo.fieldSecondProperties == "12" || fieldInfo.fieldSecondProperties == "13") {
+                if (fieldInfo.childs && fieldInfo.childs.length > 0) {
+                    var childs = fieldInfo.childs;
+                    for (let childIndex in childs) {
+                        genSysCompFieldInfos(industryObj, childs[childIndex], sysCompMap);
+                    }
+                }
+            }
+        }
+    }
+
+    //获取系统计算公式中#xx对应的字段信息
+    function getObjFromIndustry(impIndustryFieldsReleaseArr, configId, columnNum) {
+        if (impIndustryFieldsReleaseArr && configId) {
+            // var impIndustryFieldsReleaseArr = industryObj.impIndustryFieldsRelease;
+            for (var index in impIndustryFieldsReleaseArr) {
+                let fieldInfo = impIndustryFieldsReleaseArr[index]
+                if (fieldInfo.configId == parseInt(configId) && (!fieldInfo.columnNum || (fieldInfo.columnNum != 1000000000000 && fieldInfo.columnNum == columnNum))) {
+                    return fieldInfo;
+                }
+                if (fieldInfo.fieldSecondProperties == "12" || fieldInfo.fieldSecondProperties == "13") {
+                    if (fieldInfo.childs && fieldInfo.childs.length > 0) {
+                        var childs = fieldInfo.childs;
+                        for (let childIndex in childs) {
+                            var res = getObjByConfigId(childs[childIndex], configId, columnNum);
+                            if (res) {
+                                return res;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //获取系统计算公式中#xx对应的字段信息
+    function getObjByConfigId(fieldInfo, configId, columnNum) {
+        if (fieldInfo && configId) {
+            if (fieldInfo.configId == parseInt(configId) && (!fieldInfo.columnNum || (fieldInfo.columnNum != 1000000000000 && fieldInfo.columnNum == columnNum))) {
+                return fieldInfo;
+            }
+            if (fieldInfo.fieldSecondProperties == "12" || fieldInfo.fieldSecondProperties == "13") {
+                if (fieldInfo.childs && fieldInfo.childs.length > 0) {
+                    var childs = fieldInfo.childs;
+                    for (let childIndex in childs) {
+                        var res = getObjByConfigId(childs[childIndex], configId, columnNum);
+                        if (res) {
+                            return res;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //计算系统计算
+    function compSystemVal(fieldInfo) {
+        let compVal = "";
+        var formula1 = fieldInfo.formula1;
+        if (fieldInfo.formula1) {
+            let computeFieldSet = fieldInfo.computeFieldSet;
+            for (let item of computeFieldSet.values()) {
+                let fieldVal = 0;
+                if (item.fieldData) {
+                    fieldVal = item.fieldData;
+                }
+                formula1 = formula1.replace(item.webId, fieldVal);
+            }
+        }
+        try {
+            compVal = eval(formula1);
+        } catch (e) {
+            return 0;
+        }
+        return compVal;
+    }
+    function genFormItem(fieldInfo, container, industryObj) {
+        if (fieldInfo && container) {
+            var dis = "";
+            if (fieldInfo.columnNum == 1000000000000 ||(fieldInfo.fieldSecondProperties == "13" && (fieldInfo.columnNum == undefined || fieldInfo.columnNum == null || fieldInfo.columnNum == ""))) {
+                dis = "display: none;";
+                // console.log("------1111111111------------->")
+                // console.log(fieldInfo.fieldName)
+                // console.log(configId)
+                // console.log(configVal)
+                // console.log(industryObj)
+            } else if (fieldInfo.frontFiled != undefined && fieldInfo.frontFiled.length > 0) {
+                var fontArray = fieldInfo.frontFiled.split(":");
+                let configId = fontArray[0];
+                var configVal = fontArray[1];
+                // console.log("------122222222222------------->")
+                // console.log(fieldInfo.fieldName)
+                // console.log(configId)
+                // console.log(configVal)
+                // console.log(industryObj)
+
+                if (fieldInfo.columnNum) {
+                    configId = configId + "_" + fieldInfo.columnNum;
+                }
+                var checkedVal = new Array();
+                if (configId && industryObj && industryObj.fontFieldItemMap) {
+                    //console.log("------22222------------->")
+                    var fontItem = industryObj.fontFieldItemMap.get(configId + "");
+                    //console.log(fontItem)
+                    var fontVal = "";
+                    // var fontFieldRefMap=industryObj.fontFieldRefMap;
+                    //console.log("fieldSecondProperties----------------")
+                    //console.log(fieldInfo.fieldSecondProperties)
+                    if (fontItem) {
+                        if (fontItem.fieldSecondProperties == "6" || fontItem.fieldSecondProperties == "7" || fontItem.fieldSecondProperties == "8" || fontItem.fieldSecondProperties == "9") {
+                            var fontCheckArr = new Array();
+                            if (fontItem.fieldData) {
+                                fontCheckArr = fontItem.fieldData.split(",");
+                            }
+                            //console.log("------333333------------->")
+                            //console.log(fontCheckArr)
+                            if (fontItem.options) {
+                                var dataArr = fontItem.options.split(",");
+                                //console.log(dataArr)
+                                for (var index in dataArr) {
+                                    //console.log(index)
+                                    if (isNaN(index) == false) {
+                                        //console.log(fontCheckArr.indexOf(index + ""))
+                                        if (fontCheckArr.indexOf(index + "") > -1) {
+                                            checkedVal.push(dataArr[index]);
+                                        }
+                                    }
+                                }
+                            }
+                            //console.log("---checkedVal--------")
+                            //console.log(checkedVal.join(","))
+                            //  fontVal = checkedVal.join(",");
+                        } else {
+                            // fontVal=fontItem.fieldData;
+                            checkedVal.push(fontItem.fieldData);
+                        }
+                        if (fontItem.fieldSecondProperties == "7" || fontItem.fieldSecondProperties == "9") {
+                            if (fontItem.otherData && fontItem.otherData.length > 0) {
+                                // fontVal+=","+fieldInfo.otherData;
+                                // fontVal += fieldInfo.otherData;
+                                // checkedVal.push(fieldInfo.otherData);
+                                checkedVal.push("其他");
+                            }
+                        }
+                    }
+                    if (checkedVal.indexOf(configVal) > -1) {
+                        dis = "";
+                    } else {
+                        dis = "display: none;";
+                    }
+                    // fieldSecondProperties
+                }
+            }
+            // console.log("dis--------" + dis)
+            let configId= fieldInfo.configId + "";
+            if(fieldInfo.columnNum){
+                configId=configId+"_"+fieldInfo.columnNum;
+            }
+            var fieldId = "f_" + fieldInfo.webId;
+            if (fieldInfo.fieldSecondProperties == "0") {
+                // DWBSR(0,"短文本输入")
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item\"> \n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                       <input id='" + fieldId + "'   autocomplete=\"off\" class=\"layui-input\" value='" + fieldInfo.fieldData + "'>\n" + getDisStr1(fieldInfo.unit)+"&nbsp;&nbsp;" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+
+            } else if (fieldInfo.fieldSecondProperties == "1") {
+                // SJHSR(1,"11号手机号输入")
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                       <input   data-id='' id='" + fieldId + "' lay-verify='phone'  autocomplete=\"off\" class=\"layui-input\" value='" + fieldInfo.fieldData + "'>\n" + getDisStr1(fieldInfo.unit)+"&nbsp;&nbsp;" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+            } else if (fieldInfo.fieldSecondProperties == "2") {
+                // SZSR(2,"数字输入")
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                       <input   data-id='' id='" + fieldId + "' lay-verify='number'  autocomplete=\"off\" class=\"layui-input\" value='" + fieldInfo.fieldData + "'>\n" + getDisStr1(fieldInfo.unit)+"&nbsp;&nbsp;" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+            } else if (fieldInfo.fieldSecondProperties == "3") {
+                // CWBSR(3,"长文本输入")
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                       <textarea   data-id='' id='" + fieldId + "'   autocomplete=\"off\" class=\"layui-textarea\">" + fieldInfo.fieldData + "</textarea>\n" + getDisStr1(fieldInfo.unit)+"&nbsp;&nbsp;" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+            } else if (fieldInfo.fieldSecondProperties == "4") {
+                //  RQXZ(4,"日期选择(年月日)")
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                        <input type=\"text\" class=\"layui-input\" id=\"" + fieldId + "\">\n" + getDisStr1(fieldInfo.unit)+"&nbsp;&nbsp;" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                var option = {
+                    elem: '#' + fieldId
+                    , done: function (value, date, endDate) {
+                        var start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                    }
+                };
+                if (fieldInfo.fieldData) {
+                    option.value = new Date(parseInt(fieldInfo.fieldData));
+                }
+                laydate.render(option);
+
+            } else if (fieldInfo.fieldSecondProperties == "5") {
+                // SJXZ(5,"时间选择(年月日时分秒)")
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                        <input type=\"text\" class=\"layui-input\" id=\"" + fieldId + "\">\n" + getDisStr1(fieldInfo.unit)+"&nbsp;&nbsp;" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+
+                var option = {
+                    elem: '#' + fieldId
+                    , type: 'datetime'
+                    , done: function (value, date, endDate) {
+                        var start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                    }
+                };
+                if (fieldInfo.fieldData) {
+                    option.value = new Date(parseInt(fieldInfo.fieldData));
+                }
+                laydate.render(option);
+
+
+            } else if (fieldInfo.fieldSecondProperties == "6") {
+                // DX(6,"单选")
+                var checkArr = new Array();
+                if (fieldInfo.fieldData) {
+                    checkArr = fieldInfo.fieldData.split(",");
+                }
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n";
+                var optionSelected = "";
+                if (fieldInfo.options) {
+                    var dataArr = fieldInfo.options.split(",");
+                    for (var index in dataArr) {
+                        if (checkArr.indexOf(index) > -1) {
+                            optionSelected = dataArr[index];
+                            itemHtml += "<input type=\"radio\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + index + "\" title=\"" + dataArr[index] + "\" checked>";
+                        } else {
+                            itemHtml += "<input type=\"radio\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + index + "\" title=\"" + dataArr[index] + "\" >";
+                        }
+                    }
+                }
+                itemHtml += "<a class=\"layui-form-label\" onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + optionSelected + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;width:90px;display:inline-block;float:right;'>查看整改方案</a><div class='clear'></div>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+            } else if (fieldInfo.fieldSecondProperties == "7") {
+                // DXQT(7,"单选(其他)")
+                var checkArr = new Array();
+                if (fieldInfo.fieldData) {
+                    checkArr = fieldInfo.fieldData.split(",");
+                }
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n";
+                if (fieldInfo.options) {
+                    var dataArr = fieldInfo.options.split(",");
+                    for (var index in dataArr) {
+                        if (checkArr.indexOf(index) > -1) {
+                            itemHtml += "<input type=\"radio\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + index + "\" title=\"" + dataArr[index] + "\" checked>";
+                        } else {
+                            itemHtml += "<input type=\"radio\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + index + "\" title=\"" + dataArr[index] + "\">";
+                        }
+                    }
+                }
+                if (fieldInfo.otherData) {
+                    itemHtml += "<input type=\"radio\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" checked value=\"其他\" title=\"其他\">";
+                    itemHtml += "<input type=\"input\" id=\"other_" + fieldId + "\" value='" + fieldInfo.otherData + "' >";
+                } else {
+                    itemHtml += "<input type=\"radio\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"其他\" title=\"其他\">";
+                    itemHtml += "<input type=\"input\" id=\"other_" + fieldId + "\" style='display: none;' >";
+                }
+
+                itemHtml += "<a class=\"layui-form-label\" onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.options + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;width:90px;display:inline-block;float:right;'>查看整改方案</a><div class='clear'></div>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                form.on('radio(' + fieldId + ')', function (data) {
+                    fieldInfo.bindData = data.value;
+                    if (data.value == "其他") {
+                        $("#other_" + fieldId).show();
+                    } else {
+                        $("#other_" + fieldId).hide();
+                    }
+                });
+
+            } else if (fieldInfo.fieldSecondProperties == "8") {
+                // DXX(8,"多选")
+                var checkArr = new Array();
+                if (fieldInfo.fieldData) {
+                    checkArr = fieldInfo.fieldData.split(",");
+                }
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n";
+                var optionSelected = "";
+                if (fieldInfo.options) {
+                    var dataArr = fieldInfo.options.split(",");
+                    for (var index in dataArr) {
+                        if (checkArr.indexOf(index) > -1) {
+                            itemHtml += "<input type=\"checkbox\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + index + "\" title=\"" + dataArr[index] + "\" checked>";
+                            optionSelected += dataArr[index] + ",";
+                        } else {
+                            itemHtml += "<input type=\"checkbox\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + index + "\" title=\"" + dataArr[index] + "\">";
+                        }
+                    }
+                }
+                itemHtml += "<a class=\"layui-form-label\" onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + optionSelected + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;width:90px;display:inline-block;float:right;'>查看整改方案</a><div class='clear'></div>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+            } else if (fieldInfo.fieldSecondProperties == "9") {
+                // DXXQT(9,"多选(其他)")
+                var checkArr = new Array();
+                if (fieldInfo.fieldData) {
+                    checkArr = fieldInfo.fieldData.split(",");
+                }
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n";
+                if (fieldInfo.options) {
+                    var dataArr = fieldInfo.options.split(",");
+                    for (var index in dataArr) {
+                        if (checkArr.indexOf(index) > -1) {
+                            itemHtml += "<input type=\"checkbox\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + index + "\" title=\"" + dataArr[index] + "\" checked>";
+                        } else {
+                            itemHtml += "<input type=\"checkbox\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + index + "\" title=\"" + dataArr[index] + "\">";
+                        }
+                    }
+                }
+                if (fieldInfo.otherData) {
+                    itemHtml += "<input type=\"checkbox\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"其他\" title=\"其他\" checked>";
+                    itemHtml += "<input type=\"input\" id=\"other_" + fieldId + "\" value='" + fieldInfo.otherData + "' >";
+                } else {
+                    itemHtml += "<input type=\"checkbox\" name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"其他\" title=\"其他\">";
+                    itemHtml += "<input type=\"input\" id=\"other_" + fieldId + "\" style='display: none;' >";
+                }
+                itemHtml += "<a class=\"layui-form-label\" onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.options + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;width:90px;display:inline-block;float:right;'>查看整改方案</a><div class='clear'></div>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+            } else if (fieldInfo.fieldSecondProperties == "10") {
+                var imagePath = "";
+                if (fieldInfo.fieldData) {
+                    imagePath = apiPath + "/attached/show/" + fieldInfo.fieldData;
+                }
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-upload layui-input-block\">\n" +
+                    "                       <div class=\"layui-upload-list\" style='text-align: center;'>\n" +
+                    "                           <img class=\"layui-upload-img\" style='width: 60px;height: 60px;' id=\"img_view_" + fieldId + "\"  layer-src = \"" + imagePath + "\" layer-pid src=\"" + imagePath + "\">\n" +
+                    "                           <p id=\"msgText_" + fieldId + "\"></p>\n" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                   </div>" +
+                    "               </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+            } else if (fieldInfo.fieldSecondProperties == "11") {
+                // SCTPBX(11,"上传图片（不限）")
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-upload layui-input-block\">\n" +
+                    "                       <div class=\"layui-upload-list\" id=\"img_view_" + fieldId + "\">\n" +
+                    "                       </div>" +
+                    "                   </div>" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                if (fieldInfo.fieldData) {
+                    var imageIds = fieldInfo.fieldData.split(",");
+                    for (var imageIndex in imageIds) {
+                        var aid = fieldId + parseInt(Math.random() * 100000);
+                        $('#img_view_' + fieldId).append(" <div style='text-align: center;'><img style='width: 60px;height: 60px;' layer-src = \"" + apiPath + "/attached/show/" + imageIds[imageIndex] + "\" layer-pid src=\"" + apiPath + "/attached/show/" + imageIds[imageIndex] + "\" alt=\"\"></div>\n");
+                    }
+                }
+            } else if (fieldInfo.fieldSecondProperties == "12") {
+                // LMBT(12,"栏目标题")
+                var itemHtml = "<fieldset class=\"layui-elem-field\" id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "                            <legend>" + fieldInfo.fieldName + "</legend>\n" +
+                    "                            <div class=\"layui-field-box\">\n" +
+                    "                            </div>\n" +
+                    "                        </fieldset>";
+                var itemHtmlObj = $(itemHtml)
+                container.append(itemHtmlObj);
+                if (fieldInfo.childs && fieldInfo.childs.length > 0) {
+                    var childs = fieldInfo.childs;
+                    for (var index in childs) {
+                        genFormItem(childs[index], itemHtmlObj.find(".layui-field-box").first(), industryObj);
+                    }
+                }
+                return itemHtmlObj;
+
+            } else if (fieldInfo.fieldSecondProperties == "13") {
+                // LMBTZ(13,"栏目标题组")
+                var itemHtml = "<fieldset class=\"layui-elem-field\" id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "                            <legend>" + fieldInfo.fieldName + "</legend>\n" +
+                    "                            <div class=\"layui-field-box\">\n" +
+                    "                            </div>\n" +
+                    "                        </fieldset>";
+                var itemHtmlObj = $(itemHtml)
+                container.append(itemHtmlObj);
+                if (fieldInfo.childs && fieldInfo.childs.length > 0) {
+                    var childs = fieldInfo.childs;
+                    for (var index in childs) {
+                        genFormItem(childs[index], itemHtmlObj.find(".layui-field-box").first(), industryObj);
+                    }
+                }
+                return itemHtmlObj;
+
+            } else if (fieldInfo.fieldSecondProperties == "14") {
+                // XTJS(14,"系统计算")
+                if (fieldInfo.columnNum && fieldInfo.columnNum == 1000000000000) {
+                    return;
+                }
+                let compVal = compSystemVal(fieldInfo);
+                var itemHtml = " <table width='100%' id='" + fieldInfo.webId + "' style='" + dis + "'>\n" +
+                    "        <tr>\n" +
+                    "            <td>" +
+                    "              <div class=\"layui-form-item\"> \n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                       <input   data-id='' id='" + fieldId + "'   autocomplete=\"off\" class=\"layui-input\" value='" + compVal + "'>\n" + getDisStr1(fieldInfo.unit)+"&nbsp;&nbsp;" +
+                    "<a onclick='openView(\"" + fieldInfo.fieldName + "\",\"" + fieldInfo.fieldData + "\",\"" + fieldInfo.policiesId + "\",\"" + fieldInfo.rectificationId + "\",\"" + fieldInfo.violationLevel + "\")' href='javascript:void(0)' style='font-weight: unset;color: blue;'>查看整改方案</a>\n"
+                if (fieldInfo.zgStatus) {
+                    var zgStatusStr = "";
+                    if (fieldInfo.zgStatus == 1) {
+                        zgStatusStr = "已整改";
+                    } else if (fieldInfo.zgStatus == 2) {
+                        zgStatusStr = "未整改";
+                    }
+                    itemHtml += "<span>" + zgStatusStr + "</span>";
+                }
+                itemHtml += "</div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+            }
+        }
+        return container;
+    }
+
+
+    //展示公司基本信息
+    function disComanyInfo(companyInfo) {
+        var tbody = $("#companyInfo");
+        var tblx = "-";
+        if (companyInfo.type) {
+            if (companyInfo.type == 1) {
+                tblx = "勘察";
+            } else if (companyInfo.type == 2) {
+                tblx = "巡查";
+            }
+        }
+        var auditStatusStr = "";
+        if (companyInfo.auditStatus) {
+            if (companyInfo.auditStatus == 0) {
+                auditStatusStr = "待审核";
+            } else if (companyInfo.auditStatus == 1) {
+                auditStatusStr = "审核成功";
+            } else if (companyInfo.auditStatus == 2) {
+                auditStatusStr = "已驳回";
+            } else if (companyInfo.auditStatus == 3) {
+                auditStatusStr = "待更新";
+            } else if (companyInfo.auditStatus == 4) {
+                auditStatusStr = "已更新";
+            } else if (companyInfo.auditStatus == 5) {
+                auditStatusStr = "待完善";
+            }
+        }
+        var firstSubmitTimeStr = "";
+        if (companyInfo.firstSubmitTime) {
+            firstSubmitTimeStr = new Date(companyInfo.firstSubmitTime).format("yyyy-MM-dd hh:mm:ss")
+        }
+        var trStr = "<tr>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">档案编号</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.fileNumber) +
+            "                                </td>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">行业</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.industry) +
+            "                                </td>\n" +
+            "                            </tr>" +
+            "<tr>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">提报类型</td>\n" +
+            "                                <td width=\"35%\">\n" + tblx +
+            "                                </td>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">归属预警</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.attributionWarning) +
+            "                                </td>\n" +
+            "                            </tr>" +
+            "<tr>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">小组</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.team) +
+            "                                </td>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">组员</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.teamSub) +
+            "                                </td>\n" +
+            "                            </tr>" +
+            "<tr>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">技术员</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.technician) +
+            "                                </td>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">提报时间</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(firstSubmitTimeStr) +
+            "                                </td>\n" +
+            "                            </tr>" +
+            "<tr>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">区域</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.area) +
+            "                                </td>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">整改状态</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.zgStatus) +
+            "                                </td>\n" +
+            "                            </tr>" +
+            "<tr>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">整改方案</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(companyInfo.zgPlanStatus) +
+            "                                </td>\n" +
+            "                                <td width=\"15%\" class=\"base-info-title\">状态</td>\n" +
+            "                                <td width=\"35%\">\n" + getDisStr(auditStatusStr) +
+            "                                </td>\n" +
+            "                            </tr>";
+        tbody.append($(trStr));
+    }
+
+    //查看配置的政策法规和整改方案
+    function openView(name, content, policiesId, rectificationId, violationLevel) {
+        var index = layer.open({
+            type: 2,
+            skin: 'layui-layer-demo', //样式类名
+            title: '查看整改方案',
+            area: ['800px', '1000px'],
+            closeBtn: 1,
+            anim: 2,
+            maxmin: true,
+            shadeClose: true, //开启
+            content: "viewRectificationPlan.html?fieldName=" + encodeURI(name) + "&fieldData=" + encodeURI(content) + "&policiesId=" + policiesId + "&rectificationId=" + rectificationId + "&violationLevel=" + violationLevel,
+        });
+        layer.full(index);
+    }
+
+</script>
+
+
+</body>
+</html>

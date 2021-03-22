@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>查看用户信息</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+    <script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+</head>
+<body style="background-color: #fff;height: 100%;padding: 10px;">
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+
+<style>
+    .layui-form-label {
+        width: 130px;
+    }
+
+    .layui-form-item .layui-input-inline {
+
+        width: 520px;
+    }
+
+    .layui-form-item {
+        margin-bottom: 25px;
+    }
+
+</style>
+
+<form class="layui-form layui-col-space5">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="text-align: right;">
+                        <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i
+                                class="layui-icon">&#x1006;</i>取消
+                        </button>
+                    </div>
+
+                    <div class="layui-card-body ">
+                        <table class="layui-table" lay-skin="nob">
+                            <colgroup>
+                                <col>
+                                <col>
+                                <col>
+                                <col>
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <td>用户ID</td>
+                                <td colspan="3">
+                                    <div id="id"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>姓名</td>
+                                <td>
+                                    <div id="nickName"></div>
+                                </td>
+                                <td>性别</td>
+                                <td>
+                                    <div id="sex"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>手机号</td>
+                                <td>
+                                    <div id="userPhone"></div>
+                                </td>
+                                <td>账户积分</td>
+                                <td>
+                                    <div id="integral"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>用户类型</td>
+                                <td colspan="3">
+                                    <div id="type"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4"></td>
+                            </tr>
+
+                            <tr>
+                                <td>证件类型</td>
+                                <td>
+                                    <div id="certificateType"></div>
+                                </td>
+                                <td>证件号</td>
+                                <td>
+                                    <div id="certificateNo"></div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>电子邮箱</td>
+                                <td>
+                                    <div id="email"></div>
+                                </td>
+                                <td>用户编号</td>
+                                <td>
+                                    <div id=""></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>地区</td>
+                                <td>
+                                    <div id="location"></div>
+                                </td>
+                                <td>详细地址</td>
+                                <td>
+                                    <div id="addressDetail"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>注册时间</td>
+                                <td colspan="3">
+                                    <div id="createTime"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>用户等级</td>
+                                <td colspan="3">
+                                    <table class="layui-table" lay-size="sm" style="width:100%">
+                                        <colgroup>
+                                            <col width="10%">
+                                            <col width="10%">
+
+                                        </colgroup>
+                                        <thead>
+                                        <th style="text-align: center">等级</th>
+                                        <th style="text-align: center">时间</th>
+                                        </thead>
+                                        <tbody id="grade">
+
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>神通卡</td>
+                                <td colspan="3">
+
+                                    <table class="layui-table" lay-size="sm" style="width:100%">
+                                        <colgroup>
+                                            <col width="25%">
+                                            <col width="30%">
+                                            <col width="25%">
+                                            <col width="20%">
+                                        </colgroup>
+                                        <thead>
+                                        <th style="text-align: center">神通卡卡号</th>
+                                        <th style="text-align: center">合作机构名称</th>
+                                        <th style="text-align: center">运营商</th>
+                                        <th style="text-align: center">绑定时间</th>
+
+                                        </thead>
+                                        <tbody id="card">
+
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+
+    $(function () {
+
+
+        if (id && id != null) {
+            var paramStr = "userId=" + id;
+            paramStr = encryptParamForUrlType(paramStr);
+            $.ajax({
+                type: "POST",
+                url: "/app/user/detail",
+                data: paramStr,
+                success: function (res) {
+                    if (res.code == 0) {
+                        var finalData = getAjaxData(res);
+
+                        if (finalData) {
+                            $("#id").text(finalData.id);
+                            $("#nickName").text(finalData.nickName);
+
+                            var sex = finalData.sex;
+                            var sexStr = "女";
+                            if (sex == 0) {
+                                sexStr = "女";
+                            } else if (sex == 1) {
+                                sexStr = "男";
+                            }
+                            $("#sex").text(sexStr);
+
+                            $("#userPhone").text(finalData.userPhone);
+                            $("#integral").text(finalData.integral);
+
+
+                            var type = finalData.type;
+                            var typeStr = "普通用户";
+
+                            if (type == 1) {
+                                statusStr = "普通用户";
+                            } else if (type == 2) {
+                                statusStr = "管理员用户";
+                            } else if (type == 3) {
+                                statusStr = "运营商用户";
+                            } else if (type == 4) {
+                                statusStr = "合作机构用户";
+                            }
+                            $("#type").text(typeStr);
+
+
+                            var recordType = finalData.recordType;
+                            var recordTypeStr = "充值";
+
+                            if (recordType == 0) {
+                                recordTypeStr = "充值";
+                            } else if (recordType == 1) {
+                                recordTypeStr = "消费";
+                            } else if (recordType == 2) {
+                                recordTypeStr = "调账";
+                            }
+                            $("#recordType").text(recordTypeStr);
+                            $("#certificateType").text(finalData.certificateType);
+                            $("#certificateNo").text(finalData.certificateNo);
+
+                            $("#email").text(finalData.email);
+
+                            if (finalData.belongProvince != undefined || finalData.belongProvince != null) {
+                                $("#location").text(finalData.belongProvince + "" + finalData.belongCity + "" + finalData.belongArea);
+                            }
+
+                            $("#addressDetail").text(finalData.addressDetail);
+
+                            var dataStr = "";
+                            if (finalData.createTime != undefined || finalData.createTime != null) {
+                                dataStr = new Date(finalData.createTime).format("yyyy-MM-dd hh:mm:ss");
+                            }
+                            $("#createTime").text(dataStr);
+
+
+                            var gradeContainer = $("#grade");
+                            for (var index = 0; index < finalData.gradeLogs.length; index++) {
+                                var dataStr = "";
+                                if (finalData.gradeLogs[index].createTime != undefined || finalData.gradeLogs[index].createTime != null) {
+                                    dataStr = new Date(finalData.gradeLogs[index].createTime).format("yyyy-MM-dd hh:mm:ss");
+                                }
+                                var trStr = "<tr style=\"text-align: center\">\n" + "<td>" + finalData.gradeLogs[index].gradeName + "</td>\n" +
+                                    "<td>" + dataStr + "</td>\n" + "</tr>";
+                                gradeContainer.append($(trStr));
+                            }
+
+
+                            var cardContainer = $("#card");
+                            for (var index = 0; index < finalData.magicCardList.length; index++) {
+
+                                var dataStr = "";
+                                if (finalData.magicCardList[index].bindingTime != undefined || finalData.magicCardList[index].bindingTime != null) {
+                                    dataStr = new Date(finalData.magicCardList[index].bindingTime).format("yyyy-MM-dd hh:mm:ss")
+                                }
+                                var trStr = "<tr style=\"text-align: center\">\n" + "<td>" + finalData.magicCardList[index].cardNo + "</td>\n" +
+                                    "<td>" + finalData.magicCardList[index].cooperName + "</td>\n" +
+                                    "<td>" + finalData.magicCardList[index].operatorName + "</td>\n" +
+                                    "<td>" + dataStr + "</td>\n" + "</tr>";
+                                cardContainer.append($(trStr));
+
+                            }
+                        }
+                    } else {
+                        parent.layer.msg("获取数据失败");
+                    }
+
+                },
+                error: function () {
+                    return parent.layer.msg("获取数据失败");
+                }
+            });
+
+
+        }
+
+        $("#cancelbtn").click(function () {
+            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+            // 切换到对应到选项卡下
+            top.element.tabChange('xbs_tab', fid);
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+
+
+</body>
+</html>

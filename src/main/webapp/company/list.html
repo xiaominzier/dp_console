@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>公司管理</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>公司管理</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">行业</label>
+                                <div class="layui-input-inline">
+                                    <div id="industryId" name="industryId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">更新时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="test16" placeholder="开始 到 结束">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">状态</label>
+                                <div class="layui-input-inline">
+                                    <div id="auditStatus" name="auditStatus" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">负责小组</label>
+                                <div class="layui-input-inline">
+                                    <div id="teamId" name="teamId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">填报人</label>
+                                <div class="layui-input-inline">
+                                    <div id="userId" name="userId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">区域</label>
+                                <div class="layui-input-inline">
+                                    <div id="areaId" name="areaId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">档案编号</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="fileNumber" id="fileNumber" autocomplete="off"
+                                           placeholder="档案编号"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="companyName" id="companyName" autocomplete="off"
+                                           placeholder="名称"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">企业执照</label>
+                                <div class="layui-input-inline">
+                                    <div id="licenseType" name="licenseType" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">运行状态</label>
+                                <div class="layui-input-inline">
+                                    <div id="runStatus" name="runStatus" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">经纬度</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="latitudeLongitude" id="latitudeLongitude" autocomplete="off"
+                                           placeholder="请输入经纬度"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">半径</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="radius" id="radius" autocomplete="off"
+                                           placeholder="请输入半径"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">整改状态</label>
+                                <div class="layui-input-inline">
+                                    <div id="zgStatus" name="zgStatus" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">整改方案状态</label>
+                                <div class="layui-input-inline">
+                                    <div id="readStatus" name="readStatus" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline" id="selectPrepend">
+                                <button class="layui-btn" type="button" id="searchBtn">搜索</button>
+
+                                <button type="reset" class="layui-btn layui-btn-primary" id="resetBtn1"
+                                        style="display: none;">重置
+                                </button>
+                                <button type="button" class="layui-btn layui-btn-primary" id="resetBtn">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                    <!--<div class="layui-btn-group demoTable" style="padding-top:10px">
+                        <button class="layui-btn" id="addBtn" type="button"><i
+                                class="layui-icon"></i>详情
+                        </button>
+                        <button class="layui-btn" id="auditBtn" type="button"><i
+                                class="layui-icon"></i>审核
+                        </button>
+                    </div>-->
+                    <!--<div class="layui-btn-group demoTable" style="padding-top:10px">
+                        <button class="layui-btn layui-btn-warm" id="updateBtn" type="button"
+                                per-code='app:user:grade:publishUserGrade'><i
+                                class="layui-icon"></i>更新
+                        </button>
+                    </div>-->
+                    <div class="layui-btn-group demoTable" style="padding-top:10px" >
+                        <a class="layui-btn" id="exportBtn" download="filename">导出公司信息</a>
+                    </div>
+                    <table id="table" lay-filter="table"></table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="bar">
+    {{#
+    var statusBtn = function(data){
+    var btnStr="";
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="detail">查看</a>';
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="loginPass">登录密码</a>';
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="exportOrPrint" download="filename">导出</a>';
+    if(d.auditStatus){
+    if(d.auditStatus=="1"||d.auditStatus=="3"){
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="improve">完善</a>';
+    }
+    if(d.auditStatus=="0"||d.auditStatus=="4"||d.auditStatus=="5"){
+    btnStr+='<a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="audit">审核</a>';
+    }
+    }
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="history">历史记录</a>';
+    btnStr+='<a class="layui-btn layui-btn-xs  layui-btn-danger" lay-event="delete">删除</a>';
+    return btnStr;
+    }
+    }}
+    {{statusBtn(d)}}
+
+
+</script>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<script>
+
+    var fid = self.frameElement.getAttribute("tab-id");
+    var industryId, auditStatus, teamId, userId, areaId, licenseType, runStatus,readStatus,zgStatus;
+    var beginTime, endTime;
+    var inputContent="";  //动态输入框内容
+    var selectOptions; //动态渲染下拉框名字
+    var selectOtherOptions;  //下拉框（含其他）
+    var uploadOptions;  //动态渲染上传框名字
+    var selectId="";  //动态渲染下拉框id
+    var selectOtherId="";
+    var dateId="";  //动态日期id
+    var inputId="";  //动态输入框id
+    var uploadId=""; //动态上传框id
+    var queryTime; //动态日期框内容
+    var inputIdArr = [];//循环的时候把多个元素放入数组里，然后遍历数组，取出这多个元素
+    var selectIdArr = []; 
+    var selectOtherIdArr = []; 
+    var dateIdArr = [];
+    var uploadIdArr = [];
+    function getParentField(id) {
+        var url = apiPath + '/industry/impIndustryFieldsRelease/getIndustryFieldsTree/' + id;
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (data) {
+                //回调需要两个参数, 第一个: 数据数组, 第二个: 总页码
+                parentId = xmSelect.render({
+                    el: '#parentId',
+                    // radio: true,
+                    // clickClose: true,
+                    prop: {
+                        name: 'fieldName',
+                        value: 'id',
+                        children: 'childs'
+
+                    },
+                    tree: {
+                        show: true,
+                        strict: false,
+                        expandedKeys: [-1],
+                    },
+                    toolbar: { // 工具条配置
+                        show: true, // 是否显示
+                        showIcon: false, // 显示图标
+                    },
+                    data: data.data
+                })
+            },
+            error: function () {
+
+            }
+        });
+    }
+    // function getNeedValue(needId,needFieldId,fieldSecondProperties){
+    //     if(fieldSecondProperties=="0"||fieldSecondProperties=="1"||fieldSecondProperties=="2"||fieldSecondProperties=="3"){
+    //         inputContent = $("#"+needId).val();
+    //     }
+    // }
+    layui.use(['table', 'form', 'element', 'laydate', 'layer'], function () {
+        var table = layui.table, layer = layui.layer;
+        var form = layui.form;
+        var element = layui.element;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#test16'
+            , type: 'datetime'
+            , range: '到'
+            , format: 'yyyy-M-d'
+            , done: function (value, date, endDate) {
+                var start_date,
+                    end_date,
+                    start_date_timestamp,
+                    end_date_timestamp;
+                // 初始化时间日期对象
+                console.log(date.month)
+                start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                end_date = new Date(endDate.year, endDate.month - 1, endDate.date, endDate.hours, endDate.minutes, endDate.seconds);
+                // 获取时间戳 -- 13 位
+                console.log(start_date.toLocaleDateString())
+                beginTime = start_date.getTime();
+                endTime = end_date.getTime();
+            }
+        });
+        auditStatus = xmSelect.render({
+            el: '#auditStatus',
+            // radio: true,
+            // clickClose: true,
+            // filterable: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            toolbar: { // 工具条配置
+                    show: true, // 是否显示
+                    showIcon: false, // 显示图标
+                },
+            data: [{id: 0, name: "待审核"}, {id: 1, name: "审核成功"}, {id: 2, name: "已驳回"}, {id: 3, name: "待更新"}, {
+                id: 4,
+                name: "已更新"
+            }, {id: 5, name: "待完善"}]
+        });
+        licenseType = xmSelect.render({
+            el: '#licenseType',
+            // radio: true,
+            // clickClose: true,
+            // filterable: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            toolbar: { // 工具条配置
+                    show: true, // 是否显示
+                    showIcon: false, // 显示图标
+                },
+            data: [{id: 1, name: "营业执照"}, {id: 2, name: "排污许可证"}, {id: 3, name: "应急预案"}, {
+                id: 4,
+                name: "食品经营许可证"
+            }, {id: 5, name: "维修经营许可证"}, {id: 6, name: "医疗机构执业许可证"}]
+        });
+        runStatus = xmSelect.render({
+            el: '#runStatus',
+            // radio: true,
+            // clickClose: true,
+            // filterable: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            toolbar: { // 工具条配置
+                    show: true, // 是否显示
+                    showIcon: false, // 显示图标
+                },
+            data: [{id: 0, name: "已关门"}, {id: 1, name: "暂停营业"}, {id: 2, name: "运行中"}]
+        });
+        readStatus = xmSelect.render({
+            el: '#readStatus',
+            // radio: true,
+            // clickClose: true,
+            // filterable: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            toolbar: { // 工具条配置
+                    show: true, // 是否显示
+                    showIcon: false, // 显示图标
+                },
+            data: [{id: 1, name: "企业已阅"}, {id: 0, name: "企业未阅"},, {id: 2, name: "无"}]
+        });
+        zgStatus = xmSelect.render({
+            el: '#zgStatus',
+            // radio: true,
+            // clickClose: true,
+            // filterable: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            toolbar: { // 工具条配置
+                    show: true, // 是否显示
+                    showIcon: false, // 显示图标
+                },
+            data: [{id: 0, name: "整改中"}, {id: 1, name: "整改完成"}]
+        });
+
+        var url = apiPath + '/industry/impIndustryInfo/query_page?size=60';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (data) {
+                if (data.code == 0) {
+                    industryId = xmSelect.render({
+                        el: '#industryId',
+                        radio: true,
+                        filterable: true,
+                        clickClose: true,
+                        prop: {
+                            name: 'name',
+                            value: 'id',
+                        },
+                        on: function(data){
+                            var arr = data.arr;
+                            var insId="";  //行业id
+                            $.each(arr,function(i,e){
+                                var str = e.id+",";
+                                insId = insId+str;
+                            })
+                            insId=insId.substring(0,insId.length-1);
+                            if(insId != ""){
+                                dynamincQuery(insId);
+                            }
+                        },
+                        // toolbar: { // 工具条配置
+                        //     show: true, // 是否显示
+                        //     showIcon: false, // 显示图标
+                        // },
+                        data: data.data.records,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+
+        // industryId, auditStatus, teamId, userId, areaId, licenseType, runStatus
+        url = apiPath + '/user/impTeamInfo/query_list';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (res) {
+                if (res.code == 0) {
+                    teamId = xmSelect.render({
+                        el: '#teamId',
+                        // radio: true,
+                        // filterable: true,
+                        // clickClose: true,
+                        prop: {
+                            name: 'teamName',
+                            value: 'id',
+                        },
+                        toolbar: { // 工具条配置
+                            show: true, // 是否显示
+                            showIcon: false, // 显示图标
+                        },
+                        data: res.data,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+        url = apiPath + '/user/impAreaInfo/query_trees_role/0';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (res) {
+                if (res.code == 0) {
+                    areaId = xmSelect.render({
+                        el: '#areaId',
+                        // radio: true,
+                        // filterable: true,
+                        // clickClose: true,
+                        prop: {
+                            name: 'areaName',
+                            value: 'id',
+                        },
+                        tree: {
+                            show: true,
+                            strict: false,
+                            expandedKeys: [-1],
+                        },
+                        toolbar: { // 工具条配置
+                            show: true, // 是否显示
+                            showIcon: false, // 显示图标
+                        },
+                        data: res.data,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+        url = apiPath + '/user/impUserInfo/query_list';
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            async: false,
+            success: function (res) {
+                if (res.code == 0) {
+                    userId = xmSelect.render({
+                        el: '#userId',
+                        // radio: true,
+                        // filterable: true,
+                        // clickClose: true,
+                        prop: {
+                            name: 'userName',
+                            value: 'id',
+                        },
+                        toolbar: { // 工具条配置
+                            show: true, // 是否显示
+                            showIcon: false, // 显示图标
+                        },
+                        data: res.data,
+                    })
+                }
+            },
+            error: function () {
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+
+        function dynamincQuery(insId){
+            $.ajax({
+                type: 'get',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/industry/impIndustryFieldsRelease/getQueryFieldsRelease?industryIds='+insId,
+                async: false,
+                success: function (data) {
+                    console.log(data);
+                    if (data.code == 0) {
+                        var industryInfo = data.data;
+                        var str = "";
+                        $(".dynamicAdd").remove();
+                        inputContent="";  //动态输入框内容
+                        selectOptions = undefined; //动态渲染下拉框名字
+                        selectOtherOptions = undefined;
+                        uploadOptions = undefined;  //动态渲染上传框名字
+                        selectId="";  //动态渲染下拉框id
+                        selectOtherId="";
+                        dateId="";  //动态日期id
+                        inputId="";  //动态输入框id
+                        uploadId=""; //动态上传框id
+                        queryTime = undefined; //动态日期框内容
+                        //重新置空数组
+                        inputIdArr.splice(0,inputIdArr.length);
+                        selectIdArr.splice(0,selectIdArr.length);
+                        selectOtherIdArr.splice(0,selectOtherIdArr.length);
+                        dateIdArr.splice(0,dateIdArr.length);
+                        uploadIdArr.splice(0,uploadIdArr.length);
+                        if(industryInfo.length>0){
+                            $.each(industryInfo,function(i,e){
+                                if(e.fieldSecondProperties == "0" || e.fieldSecondProperties == "1" || e.fieldSecondProperties == "2" || e.fieldSecondProperties == "3" || e.fieldSecondProperties == "14"){ //输入
+                                    inputId = "inputContent_" + e.id;
+                                    str+="<div class='layui-inline dynamicAdd'>"+
+                                    "<label class='layui-form-label' style='width:130px;'>"+e.fieldName+"</label>"+
+                                    "<div class='layui-input-inline'>"+
+                                        "<input type='text' id='" + inputId + "' autocomplete='off' placeholder='请输入' class='layui-input'>"+
+                                    "</div>"+
+                                    "</div>"
+                                    inputIdArr.push(inputId);
+                                }else if(e.fieldSecondProperties == "6" || e.fieldSecondProperties == "8" ){ //选择
+                                    selectId = "selectContent_" + e.id;
+                                    str+="<div class='layui-inline dynamicAdd'>"+
+                                    "<label class='layui-form-label' style='width:130px;'>"+e.fieldName+"</label>"+
+                                    "<div class='layui-input-inline'>"+
+                                        "<div id='" + selectId + "' class='xm-select-demo'></div>"+
+                                    "</div>"+
+                                    "</div>"
+                                    var obj={};
+                                    obj['selectId'] = selectId;
+                                    obj['options'] = e.options;
+                                    selectIdArr.push(obj);
+                                }else if(e.fieldSecondProperties == "7" || e.fieldSecondProperties == "9"){ //选择(含其他)
+                                    selectOtherId = "selectOtherContent_" + e.id;
+                                    str+="<div class='layui-inline dynamicAdd'>"+
+                                    "<label class='layui-form-label' style='width:130px;'>"+e.fieldName+"</label>"+
+                                    "<div class='layui-input-inline'>"+
+                                        "<div id='" + selectOtherId + "' class='xm-select-demo'></div>"+
+                                    "</div>"+
+                                    "</div>"
+                                    var obj={};
+                                    obj['selectOtherId'] = selectOtherId;
+                                    obj['options'] = e.options;
+                                    selectOtherIdArr.push(obj);
+                                }else if(e.fieldSecondProperties == "4" || e.fieldSecondProperties == "5"){  //时间
+                                    dateId = "dateContent_" + e.id;
+                                    str+="<div class='layui-inline dynamicAdd'>"+
+                                    "<label class='layui-form-label' style='width:130px;'>"+e.fieldName+"</label>"+
+                                    "<div class='layui-input-inline'>"+
+                                        "<input type='text' class='layui-input' id='" + dateId + "' autocomplete='off' lay-verify='required' placeholder='开始 到 结束'>"+
+                                    "</div>"+
+                                    "</div>"
+                                    dateIdArr.push(dateId);
+                                }else if(e.fieldSecondProperties == "10" || e.fieldSecondProperties == "11"){  //上传
+                                    uploadId = "uploadContent_" + e.id;
+                                    str+="<div class='layui-inline dynamicAdd'>"+
+                                    "<label class='layui-form-label' style='width:130px;'>"+e.fieldName+"</label>"+
+                                    "<div class='layui-input-inline'>"+
+                                        "<div id='" + uploadId + "' class='xm-select-demo'></div>"+
+                                    "</div>"+
+                                    "</div>"
+                                    uploadIdArr.push(uploadId);
+                                }
+                            })
+                            $("#selectPrepend").prepend(str);
+                            //变成全局变量 然后先渲染数据，再调用下拉框
+                            //渲染多选
+                            if(selectIdArr.length>0){
+                                console.log(selectIdArr)
+                                $.each(selectIdArr,function(i,e){
+                                    selectOptions = xmSelect.render({
+                                        el: '#'+e.selectId,
+                                        prop: {
+                                            name: 'options',
+                                            value: 'id',
+                                        },
+                                        data: [// 数据（JSON数组）
+
+                                        ],
+                                        toolbar: { // 工具条配置
+                                            show: true, // 是否显示
+                                            showIcon: false, // 显示图标
+                                        },
+                                    })
+                                    if (e.options) {
+                                        var dataArr = e.options.split(",");
+                                        var objArr = [];
+                                        $.each(dataArr,function(index,ele){
+                                            var obj = {};
+                                            obj['options'] = ele;
+                                            obj['id'] = index;
+                                            objArr.push(obj);
+                                        })
+                                        console.log(objArr);
+                                        selectOptions.update({
+                                            data: objArr
+                                        })
+                                    }
+                                })
+                            }
+                            if(selectOtherIdArr.length>0){
+                                console.log(selectOtherIdArr)
+                                $.each(selectOtherIdArr,function(i,e){
+                                    selectOtherOptions = xmSelect.render({
+                                        el: '#'+e.selectOtherId,
+                                        autoRow:false,
+                                        prop: {
+                                            name: 'options',
+                                            value: 'id',
+                                        },
+                                        data: [// 数据（JSON数组）
+
+                                        ],
+                                        toolbar: { // 工具条配置
+                                            show: true, // 是否显示
+                                            showIcon: false, // 显示图标
+                                        }
+                                    })
+                                    if (e.options) {
+                                        var dataArr = e.options.split(",");
+                                        dataArr.push("其他");
+                                        var objArr = [];
+                                        $.each(dataArr,function(index,ele){
+                                            var obj = {};
+                                            obj['options'] = ele;
+                                            obj['id'] = index;
+                                            objArr.push(obj);
+                                        })
+                                        console.log(objArr);
+                                        selectOtherOptions.update({
+                                            data: objArr
+                                        })
+                                    }
+                                })
+                            }
+                            if(dateIdArr.length>0){
+                                $.each(dateIdArr,function(i,e){
+                                    // laydate.render({
+                                    //     elem: '#'+e
+                                    //     , type: 'date'
+                                    //     , format: 'yyyy/MM/dd'
+                                    //     , done(value, date, endDate) {
+                                    //         queryTime = new Date(value).getTime();
+                                    //     }
+                                    // });
+                                    laydate.render({
+                                        elem: '#'+e
+                                        , type: 'datetime'
+                                        , range: '到'
+                                        , format: 'yyyy-M-d'
+                                        , done: function (value, date, endDate) {
+                                            var start_date,end_date;
+                                            // 初始化时间日期对象
+                                            start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                                            end_date = new Date(endDate.year, endDate.month - 1, endDate.date, endDate.hours, endDate.minutes, endDate.seconds);
+                                            // 获取时间戳 -- 13 位
+                                            // console.log(start_date.toLocaleDateString())
+                                            // beginTime = start_date.getTime();
+                                            // endTime = end_date.getTime();
+                                        }
+                                    });
+                                })
+                            }
+                            if(uploadIdArr.length>0){
+                                $.each(uploadIdArr,function(i,e){
+                                    uploadOptions = xmSelect.render({
+                                        el: '#'+e,
+                                        prop: {
+                                            name: 'name',
+                                            value: 'id',
+                                        },
+                                        data: [{id: 0, name: "全部"}, {id: 1, name: "已上传"}, {id: 2, name: "未上传"}],
+                                        tree: {
+                                            show: true,
+                                            strict: false,
+                                            expandedKeys: [-1],
+                                        },
+                                        toolbar: { // 工具条配置
+                                            show: true, // 是否显示
+                                            showIcon: false, // 显示图标
+                                        },
+                                    })
+                                })
+                            }
+                        }else{
+                            // $("#selectPrepend").remove(str);
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log(e.status);
+                    console.log(e.responseText);
+                }
+            });
+        }
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath + '/company/impCompanyInfo/query_page',
+            method: "get",
+            even: true,
+            page: true,
+            defaultToolbar: false,
+            // toolbar: "#toolbar",
+            cols: [[
+                {
+                    field: 'fileNumber', title: '档案编号', width: '10%', align: 'center', fixed: 'true'
+                },
+                {
+                    field: 'companyName', title: '名称', width: '15%', align: 'center'
+                },
+                {
+                    field: 'runStatus',
+                    title: '运行状态',
+                    width: '10%',
+                    align: 'center',
+                    templet: function (item) {
+                        let runStatus = "-";
+                        if (item.runStatus == 0) {
+                            runStatus = "关门";
+                        } else if (item.runStatus == 1) {
+                            runStatus = "暂停运行";
+                        } else if (item.runStatus == 2) {
+                            runStatus = "运行";
+                        }
+                        return runStatus;
+                    }
+                },
+                {
+                    field: 'mainIndustryName', title: '主行业', width: '10%', align: 'center'
+                },
+                {
+                    field: 'subIndustryName', title: '辅行业', width: '10%', align: 'center'
+                },
+                {
+                    field: 'team', title: '负责小组', width: '10%', align: 'center'
+                },
+                {
+                    field: 'area', title: '区域', width: '15%', align: 'center'
+                },
+                {
+                    field: 'warningTime', title: '预警时间', width: '10%', align: 'center'/*, templet: function (item) {
+                        if (item.warningTime == undefined || item.warningTime == null || item.warningTime == "") {
+                            return "";
+                        }
+                        return new Date(item.warningTime).format("yyyy-MM-dd hh:mm:ss");
+                    }*/
+                },
+                {
+                    field: 'updateTime', title: '更新时间', width: '10%', align: 'center', templet: function (item) {
+                        if (item.updateTime == undefined || item.updateTime == null) {
+                            return "";
+                        }
+                        return new Date(item.updateTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    field: 'distance', title: '距离', width: '10%', align: 'center', templet: function (item) {
+                        var returnLatitudeLongitude = item.latitudeLongitude;
+                        var inputLatitudeLongitude = $("#latitudeLongitude").val();
+                        if(inputLatitudeLongitude != ""){
+                            var returnLongtitude  = returnLatitudeLongitude.split("/")[0]; //经度
+                            var returnLatitude = returnLatitudeLongitude.split("/")[1]; //纬度
+                            var inputLongtitude = inputLatitudeLongitude.split("/")[0];
+                            var inputLatitude = inputLatitudeLongitude.split("/")[1];
+                            return space(returnLatitude, returnLongtitude, inputLatitude, inputLongtitude)*1000; 
+                        }else{
+                            return "";
+                        }
+                    }
+                },
+                {
+                    field: 'auditStatus', title: '状态', width: '10%', align: 'center', templet: function (item) {
+                        var auditStatus = "-"
+                        if (item.auditStatus) {
+                            if (item.auditStatus == "0") {
+                                auditStatus = "待审核";
+                            } else if (item.auditStatus == "1") {
+                                auditStatus = "审核成功";
+                            } else if (item.auditStatus == "2") {
+                                auditStatus = "已驳回";
+                            } else if (item.auditStatus == "3") {
+                                auditStatus = "待更新";
+                            } else if (item.auditStatus == "4") {
+                                auditStatus = "已更新";
+                            }
+                        }
+                        return auditStatus;
+                    }
+                },
+                {
+                    title: '操作', toolbar: '#bar', width: '20%', align: 'center', fixed: 'right'
+                }
+
+            ]],
+            id: 'testReload',
+
+            parseData: function (res) {
+                return {
+                    "code": res.code,
+                    "data": res.data.records,
+                    "count": res.data.total,
+                    "msg": res.message
+                };
+
+            },
+
+            request: {
+                pageName: 'page',
+                limitName: 'size'
+            }
+
+        });
+
+        function reload() {
+            var param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+                // sysOperatorId: $("#sysOperatorId").val(),
+            });
+
+        }
+
+        function getQueryParam() {
+            var param = {};
+            //拼接json字符串
+            var ss="{";
+            if(inputIdArr.length>0){
+                $.each(inputIdArr,function(i,e){
+                    var inputContent = $("#"+e).val();
+                    if(inputContent != ""){
+                        ss+="\"XX_"+e.substring(13)+"\" : \""+ inputContent  +"\",";
+                    }
+                })
+            }
+            if(selectIdArr.length>0){
+                $.each(selectIdArr,function(i,e){
+                    var valueStr = "";
+                    var selectContent = $("#"+e.selectId).find("div.label-content").attr("title");
+                    if(selectContent!=undefined){
+                        var selectContentArr = selectContent.split(",");
+                        for(var j=0;j<selectContentArr.length;j++){
+                            $("#"+e.selectId).find("div.xm-option-content").each(function(index,ele){
+                                if($(ele).html()==selectContentArr[j]){
+                                    valueStr += index+",";
+                                }
+                            });
+                        }
+                        if(selectContent != ""){
+                            ss+="\"XX_"+e.selectId.substring(14)+"\" : \""+ valueStr.substring(0,valueStr.length-1)  +"\",";
+                        }
+                    }
+                })
+            }
+            if(selectOtherIdArr.length>0){
+                $.each(selectOtherIdArr,function(i,e){
+                    var valueOtherStr = "";
+                    var selectOtherContent = $("#"+e.selectOtherId).find("div.label-content").attr("title");
+                    if(selectOtherContent!=undefined){
+                        var selectOtherContentArr = selectOtherContent.split(",");
+                        for(var j=0;j<selectOtherContentArr.length;j++){
+                            $("#"+e.selectOtherId).find("div.xm-option-content").each(function(index,ele){
+                                if($(ele).html()==selectOtherContentArr[j]){
+                                    if($(ele).html()=="其他"){
+                                        valueOtherStr += $(ele).html()+",";
+                                    }else{
+                                        valueOtherStr += index+",";
+                                    }
+                                }
+                            });
+                        }
+                        if(selectOtherContent != ""){
+                            ss+="\"XX_"+e.selectOtherId.substring(19)+"\" : \""+ valueOtherStr.substring(0,valueOtherStr.length-1)  +"\",";
+                        }
+                    }
+                })
+            }
+            if(dateIdArr.length>0){
+                $.each(dateIdArr,function(i,e){
+                    var dateContent = $("#"+e).val();
+                    if(dateContent != "" && dateContent != undefined){
+                        var startTime = dateContent.split("到")[0];
+                        var endTime = dateContent.split("到")[1];
+                    }
+                    if(startTime != "" && startTime != undefined){
+                        startTime = new Date(startTime).getTime();
+                        ss+="\"XX_ge_"+e.substring(12)+"\" : \""+ startTime +"\",";
+                    }
+                    if(endTime != "" && endTime != undefined){
+                        endTime = new Date(endTime).getTime();
+                        ss+="\"XX_le_"+e.substring(12)+"\" : \""+ endTime +"\",";
+                    }
+                })
+            }
+            if(uploadIdArr.length>0){
+                $.each(uploadIdArr,function(i,e){
+                    var uploadContent = $("#"+e).find("div.label-content").attr("title");
+                    if(uploadContent != "" && uploadContent != undefined){
+                        ss+="\"XX_"+e.substring(14)+"\" : \""+ uploadContent  +"\",";
+                    }
+                })
+            }
+            ss+="}";
+            var str_before = getStr(ss,"}");
+            str_before = str_before.substring(0, str_before.lastIndexOf(','));
+            if(str_before != ""){
+                str_before+="}";
+            }
+            console.log(str_before);
+            if(str_before != ""){
+                var jsonObj = $.parseJSON(str_before);  // str--JSON
+                $.extend(param,jsonObj);  //对象拼接
+            }
+            // industryId, auditStatus, teamId, userId, areaId, licenseType, runStatus
+            var fileNumber = $("#fileNumber").val();
+            if (fileNumber != "") {
+                param.lk_fileNumber = fileNumber;
+            }
+            var companyName = $("#companyName").val();
+            if (companyName != "") {
+                param.lk_companyName = companyName;
+            }
+            var latitudeLongitude = $("#latitudeLongitude").val();
+            if(latitudeLongitude != ""){
+                param.latitudeLongitude = latitudeLongitude;
+            }
+            var radius = $("#radius").val();
+            if(radius != ""){
+                param.radius = radius;
+            }
+            if (industryId && industryId.getValue().length > 0) {
+                param.in_industryId = industryId.getValue('valueStr');
+            }
+            if (auditStatus && auditStatus.getValue().length > 0) {
+                param.in_auditStatus = auditStatus.getValue('valueStr');
+            }
+            if (teamId && teamId.getValue().length > 0) {
+                param.in_teamId = teamId.getValue('valueStr');
+            }
+            if (userId && userId.getValue().length > 0) {
+                param.in_userId = userId.getValue('valueStr');
+            }
+            if (areaId && areaId.getValue().length > 0) {
+                param.in_areaId = areaId.getValue('valueStr');
+            }
+            if (licenseType && licenseType.getValue().length > 0) {
+                param.in_licenseType = licenseType.getValue('valueStr');
+            }
+            if (runStatus && runStatus.getValue().length > 0) {
+                param.in_runStatus = runStatus.getValue('valueStr');
+            }
+            if (readStatus && readStatus.getValue().length > 0) {
+                param.in_readStatus = readStatus.getValue('valueStr');
+            }
+            if (zgStatus && zgStatus.getValue().length > 0) {
+                param.in_zgStatus = zgStatus.getValue('valueStr');
+            }
+            if (beginTime) {
+                param.gt_updateTime = beginTime;
+            }
+            if (endTime) {
+                param.lt_updateTime = endTime;
+            }
+            return param;
+        }
+        function getStr(string,str){
+            var str_before = string.split(str)[0];
+            var str_after = string.split(str)[1];
+            return str_before;
+        }
+
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+
+
+        $("#searchBtn").click(function () {
+            reload();
+        })
+        $("#exportBtn").click(function () {
+            var param = getQueryParam();
+            var token = localStorage.getItem("token");
+            param = json_to_get(JSON.stringify(param));
+            if(param!=""){
+                url = apiPath + '/company/impCompanyInfo/download/excel/all?access_token='+token+"&"+param;
+            }else{
+                url = apiPath + '/company/impCompanyInfo/download/excel/all?access_token='+token;
+            }
+            $("#exportBtn")[0].setAttribute('href',url);
+        })
+        function json_to_get(sstr){
+            sstr = sstr.replace(/\t/g,"");
+            sstr = sstr.replace(/\"/g,"").replace("{","").replace("}","").
+            sstr = sstr.replace(",","&").replace(":","=");
+            sstr = sstr.replace(/\"/g,"").replace(/{/g,"").replace(/}/g,"")
+            sstr= sstr.replace(/,/g,"&").replace(/:/g,"=");
+            return sstr;
+        }
+        $("#resetBtn").click(function () {
+            $("#resetBtn1").click();
+            beginTime = undefined;
+            endTime = undefined;
+            $(".dynamicAdd").remove();
+            //重新置空数组
+            inputIdArr.splice(0,inputIdArr.length);
+            selectIdArr.splice(0,selectIdArr.length);
+            selectOtherIdArr.splice(0,selectOtherIdArr.length);
+            dateIdArr.splice(0,dateIdArr.length);
+            uploadIdArr.splice(0,uploadIdArr.length);
+        })
+        $("#addBtn").click(function () {
+            top.xadmin.add_tab("完善公司信息", "/company/improve.html?id=14");
+            // top.xadmin.add_tab("添加行业字段", "/industry/field/add.html?fid=" + fid);
+        })
+        $("#auditBtn").click(function () {
+            top.xadmin.add_tab("审核公司信息", "/company/audit.html?id=14");
+            // top.xadmin.add_tab("添加行业字段", "/industry/field/add.html?fid=" + fid);
+        })
+        $("#updateBtn").click(function () {
+            $.ajax({
+                url: apiPath + '/industry/impIndustryFieldsConfig/upStatus',
+                type: 'POST',
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('更新成功');
+                        reload();
+                    } else {
+                        top.layer.msg('更新失败,' + res.message);
+                    }
+                }
+            });
+        })
+
+
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            if (obj.event == 'detail') {
+                top.xadmin.add_tab("查看公司信息", "/company/detail.html?id=" + data.id + "&fid=" + fid);
+            }
+            else if (obj.event == 'loginPass') {
+                // top.xadmin.add_tab("登录密码", "/company/loginPassword.html?id=" + data.id + "&fid=" + fid);
+                var index = layer.open({
+                    type: 2,
+                    title: false ,
+                    closeBtn: false,
+                    area: ['480px', '300px'],
+                    shade: 0.8,
+                    id: 'LAY_layuipro11' ,//设定一个id，防止重复弹出
+                    // btn: ['取消', '添加'],
+                    btnAlign: 'c',
+                    shadeClose:'true',
+                    moveType: 1, //拖拽模式，0或者1
+                    content: "loginPassword.html?id=" + data.id + "&fid=" + fid,
+                    success: function(){
+
+                    }
+                });
+            }else if (obj.event == 'exportOrPrint') {
+                var index = layer.open({
+                    type: 2,
+                    title: false ,
+                    closeBtn: false,
+                    area: ['480px', '200px'],
+                    shade: 0.8,
+                    id: 'LAY_layuipro18' ,//设定一个id，防止重复弹出
+                    // btn: ['取消', '添加'],
+                    btnAlign: 'c',
+                    shadeClose:'true',
+                    moveType: 1, //拖拽模式，0或者1
+                    content: "exportOrPrint.html?id=" + data.id + "&fid=" + fid,
+                    success: function(){
+
+                    }
+                });
+            }
+            else if (obj.event == 'history') {
+                top.xadmin.add_tab("公司历史记录", "/company/allList.html?companyId=" + data.id + "&fid=" + fid);
+            } else if (obj.event == 'audit') {
+                top.xadmin.add_tab("审核公司信息", "/company/audit.html?id=" + data.id + "&fid=" + fid);
+            } else if (obj.event == 'improve') {
+                top.xadmin.add_tab("完善公司信息", "/company/improve.html?id=" + data.id + "&fid=" + fid);
+            } else if (obj.event == 'edit') {
+                top.xadmin.add_tab("编辑行业字段", "/industry/field/add.html?id=" + data.id + "&fid=" + fid);
+            } else if (obj.event == 'level') {
+                top.xadmin.add_tab("违规等级", "/industry/field/levelConfig.html?fieldId=" + data.id + "&fieldName=" + encodeURI(data.fieldName) + "&options=" + encodeURI(data.options) + "&fieldSecondProperties=" + data.fieldSecondProperties);
+            } else if (obj.event == 'delete') {
+                layer.confirm('确认删除吗？', function (index) {
+                    $.ajax({
+                        url: apiPath + '/company/impCompanyInfo/delete/' + data.id,
+                        type: "POST",
+                        success: function (res) {
+                            if (res.code == 0) {
+                                parent.layer.msg('删除成功');
+                                reload();
+                            } else {
+                                parent.layer.msg('删除失败');
+                            }
+                        }
+                    });
+                    layer.close(index);
+                });
+            } else if (obj.event == 'enable') {
+                $.ajax({
+                    url: apiPath + '/industry/impIndustryFieldsConfig/disable/' + data.id + "/1",
+                    type: "get",
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('启用成功');
+                            reload();
+                        } else {
+                            parent.layer.msg('启用失败');
+                        }
+                    }
+                });
+            } else if (obj.event == 'dis') {
+                $.ajax({
+                    url: apiPath + '/industry/impIndustryFieldsConfig/disable/' + data.id + "/0",
+                    type: "get",
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('禁用成功');
+                            reload();
+                        } else {
+                            parent.layer.msg('禁用失败');
+                        }
+                    }
+                });
+            }
+
+        })
+    })
+
+</script>
+</body>
+
+
+</html>

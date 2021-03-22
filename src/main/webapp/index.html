@@ -1,0 +1,383 @@
+<!doctype html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>世纪大千信息管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/login.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <link rel="stylesheet" href="/staticResource/css/theme10.min.css">
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script>
+        // 是否开启刷新记忆tab功能
+        // var is_remember = false;
+    </script>
+</head>
+<body class="index">
+<!-- 顶部开始 -->
+<div class="container">
+    <div class="logo">
+        <a href="./index.html">世纪大千信息管理系统</a></div>
+
+    <div class="left_open">
+        <a><i title="展开左侧栏" class="iconfont">&#xe699;</i></a>
+    </div>
+    <ul class="layui-nav right" lay-filter="">
+        <!--<li class="layui-nav-item">
+            <a onclick="xadmin.add_tab('提醒管理','/remind/list.html')"><i class="layui-icon">&#xe667;</i></a></li>-->
+        <li class="layui-nav-item">
+            <a href="javascript:;" id="loginUserName"></a>
+            <dl class="layui-nav-child">
+                <!-- 二级菜单 -->
+                <dd>
+                    <a onclick="xadmin.add_tab('修改信息','/adminManager/user/update.html')">修改信息</a></dd>
+                <dd>
+                    <a onclick="xadmin.add_tab('修改密码','/adminManager/user/updatePwd.html')">修改密码</a></dd>
+                <dd>
+                    <a href="javascript:logout()">退出</a></dd>
+            </dl>
+        </li>
+    </ul>
+</div>
+<!-- 顶部结束 -->
+<!-- 中部开始 -->
+<!-- 左侧菜单开始 -->
+<div class="left-nav">
+    <div id="side-nav">
+        <ul id="nav">
+            <!-- <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="数据统计">&#xe6b8;</i>
+                    <cite>数据统计</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a onclick="xadmin.add_tab('政府临时任务统计','statis/govTempTask.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>政府临时任务</cite></a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="公司管理">&#xe6b8;</i>
+                    <cite>公司管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a onclick="xadmin.add_tab('公司管理','company/list.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>公司管理</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('全部历史记录','company/allList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>全部历史记录</cite></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="政府临时任务">&#xe6b8;</i>
+                    <cite>政府临时任务</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                <ul class="sub-menu">
+                    <li>
+                        <a onclick="xadmin.add_tab('提报记录','/content/governmentTemporaryTasks/governmentTemporaryTasks-list.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>提报记录</cite></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="临时任务管理">&#xe6b8;</i>
+                    <cite>临时任务管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                <ul class="sub-menu">
+                    <li>
+                        <a onclick="xadmin.add_tab('临时任务管理','/content/temporaryTasks/temporaryTasks-list.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>临时任务管理</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('临时任务提报记录','/content/temporaryTasks/taskRecordList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>提报记录</cite></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="临时任务管理">&#xe6b8;</i>
+                    <cite>政策法规管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a onclick="xadmin.add_tab('政策法规管理','/content/policiesInfo/policiesInfo-list.html')">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>政策法规管理</cite></a>
+                        </li>
+                        <li>
+                            <a onclick="xadmin.add_tab('政策法规条例管理','/content/policiesRegulationsInfo/policiesRegulationsInfo-list.html')">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>政策法规条例管理</cite></a>
+                        </li>
+                    </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="临时任务管理">&#xe6b8;</i>
+                    <cite>整改方案管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a onclick="xadmin.add_tab('整改方案管理','content/rectificationPlan/rectificationPlan-list.html')">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>整改方案管理</cite></a>
+                        </li>
+                    </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="行业管理">&#xe6b8;</i>
+                    <cite>行业管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                <ul class="sub-menu">
+                    <li>
+                        <a onclick="xadmin.add_tab('行业字段管理','industry/field/list.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>行业字段管理</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('行业基本内容固定字段','industry/fixed/fixationList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>行业基本内容固定字段</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('行业预警管理','industry/warning/warningList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>行业预警管理</cite></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="企业公告管理">&#xe6b8;</i>
+                    <cite>企业公告管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                <ul class="sub-menu">
+                    <li>
+                        <a onclick="xadmin.add_tab('企业公告管理','content/official announcement/announcement.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>企业公告管理</cite></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="用户管理">&#xe6b8;</i>
+                    <cite>用户管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                <ul class="sub-menu">
+                    <li>
+                        <a onclick="xadmin.add_tab('地区管理','user/areaManage/areaList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>地区管理</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('小组管理','user/teamManage/teamInfoList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>小组管理</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('组成员管理','user/teamMemberManage/teamMemberList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>组成员管理</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('项目管理','user/projectManage/projectList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>项目管理</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('技术员管理','user/technicianManage/technicianList.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>技术员管理</cite></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont left-nav-li" lay-tips="系统配置">&#xe6b8;</i>
+                    <cite>系统配置</cite>
+                    <i class="iconfont nav_right">&#xe697;</i></a>
+                <ul class="sub-menu">
+                    <li>
+                        <a onclick="xadmin.add_tab('系统配置','system/systemConfig/edit.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>系统配置</cite></a>
+                    </li>
+                    <li>
+                        <a onclick="xadmin.add_tab('APP版本管理','system/appVersionManage/list.html')">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>APP版本管理</cite></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                        <a href="javascript:;">
+                            <i class="iconfont">&#xe70b;</i>
+                            <cite>权限管理</cite>
+                            <i class="iconfont nav_right">&#xe697;</i></a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a onclick="xadmin.add_tab('角色管理','adminManager/role/list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>角色管理</cite></a>
+                            </li>
+                            <li>
+                                <a onclick="xadmin.add_tab('管理员管理','adminManager/user/admin-list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>管理员管理</cite></a>
+                            </li>
+                            <li>
+                                <a onclick="xadmin.add_tab('操作日志','logs/list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>操作日志</cite></a>
+                            </li>
+                        </ul>
+                    </li>
+            </li> -->
+
+        </ul>
+    </div>
+</div>
+<!-- <div class="x-slide_left"></div> -->
+<!-- 左侧菜单结束 -->
+<!-- 右侧主体开始 -->
+<div class="page-content">
+    <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+        <ul class="layui-tab-title">
+            <li class="home">
+                <i class="layui-icon">&#xe68e;</i>控制面板
+            </li>
+
+        </ul>
+        <div class="layui-unselect layui-form-select layui-form-selected" id="tab_right">
+            <dl>
+                <dd data-type="this">关闭当前</dd>
+                <dd data-type="other">关闭其它</dd>
+                <dd data-type="all">关闭全部</dd>
+            </dl>
+        </div>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <iframe src='./welcome.html' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+            </div>
+        </div>
+        <div id="tab_show"></div>
+    </div>
+</div>
+<div class="page-content-bg"></div>
+<style id="theme_style"></style>
+<!-- 右侧主体结束 -->
+<!-- 中部结束 -->
+</body>
+
+</html>
+
+
+<script>
+    /* var loginUser = JSON.parse(localStorage.getItem("loginUser"));
+     if (loginUser) {
+         $("#loginUserName").html(loginUser.userName)
+     }*/
+    var loginUser = getLoginUser();
+    if (loginUser) {
+        $("#loginUserName").html(loginUser.username)
+    }
+
+    function logout() {
+        localStorage.removeItem("token");
+        location.href = "./login.html";
+    }
+
+    // var permisstionCodes = [];
+    $.ajax({
+        type: "GET",
+        // contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        url: apiPath+"/user/impResourcesInfo/getCurrUserResource",
+        success: function (result) {
+            var resObj = getAjaxData(result);
+            if (resObj) {
+                var parentNavs = $("#nav");
+                createNav(resObj,parentNavs);
+                // permisstionCodes = resObj.codes;
+            }
+            // if(data.code==0){
+            //     var encrpytStr=data.data.content[0];
+            //     console.log(encrpytStr);
+            //     console.log(rsaDecrypt(encrpytStr))
+            // }
+        }
+    });
+
+    /**
+     * 迭代生成左侧导航菜单。
+     * @param data 菜单数据
+     * @param parentNav 父导航对象。
+     */
+    function createNav(data, parentNav) {
+        if (data == null || data == undefined || data == "") {
+            return;
+        }
+        var tempObj;
+        for (var index = 0; index < data.length; index++) {
+            tempObj = data[index];
+            var liStr = "<li><a href='javascript:;'>"
+                +"<i class='iconfont left-nav-li' lay-tips='"+tempObj.resourcesName+"'>&#xe6b8;</i>"
+                +"<cite>"+tempObj.resourcesName+"</cite>"
+                +"<i class='iconfont nav_right'>&#xe697;</i></a>"
+                +"<ul class='sub-menu'>";
+            if(tempObj.children){
+                var childrens = tempObj.children;
+                for(var i = 0;i<childrens.length;i++){
+                    liStr += "<li><a onclick='xadmin.add_tab(\""+childrens[i].resourcesName+"\",\""+childrens[i].resourcesCode+"\")'>\
+                            <i class='iconfont'>&#xe6a7;</i>\
+                            <cite>"+childrens[i].resourcesName+"</cite></a>\
+                    </li>"
+                }
+            }
+            liStr += "</ul></li>";
+            parentNav.append(liStr);
+        }
+    }
+</script>

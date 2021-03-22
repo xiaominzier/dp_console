@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看技术员信息</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    
+</head>
+<body style="background-color: #fff;height: 100%;padding: 10px;">
+<style>
+    .layui-form-label {
+        width: 130px;
+    }
+
+    .layui-form-item .layui-input-inline {
+
+        width: 520px;
+    }
+
+    .layui-form-item {
+        margin-bottom: 25px;
+    }
+
+</style>
+
+<form class="layui-form layui-col-space5">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="text-align: right;">
+                        <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i
+                                class="layui-icon">&#x1006;</i>返回
+                        </button>
+                    </div>
+
+                    <div class="layui-card-body ">
+                        <table class="layui-table" lay-skin="nob">
+                            <!-- <colgroup>
+                                <col>
+                                <col>
+                                <col>
+                                <col>
+                            </colgroup> -->
+                            <tbody>
+                                <tr>
+                                    <td width="15%">姓名</td>
+                                    <td width="85%">
+                                        <div id="realName"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>联系方式</td>
+                                    <td>
+                                        <div id="tel"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>账号状态</td>
+                                    <td>
+                                        <div id="status"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>管理区域</td>
+                                    <td>
+                                        <div id="areaId"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- <table class="layui-table" lay-skin="nob">
+                            <thead>
+                                <tr>
+                                    <td>管理区域</td>
+                                    <td>生效时间段</td>
+                                    <td>更新时间</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+
+<script>
+    var id = getParam("id");
+    var areaName = "";
+    $(function () {
+        if (id && id != null) {
+            $.ajax({
+                type: "GET",
+                url: apiPath+"/user/impUserInfo/get/"+id,
+                success: function (res) {
+                    console.log("查看"+JSON.stringify(res.data));
+                    if (res.code == 0) {
+                        var finalData = getAjaxData(res);
+                        if (finalData) {
+                            $("#realName").text(finalData.realName);
+                            $("#tel").text(finalData.tel);
+                            var showStatus = "";
+                            if (finalData.status == 0) {
+                                showStatus = "禁用";
+                            } else {
+                                showStatus = "启用";
+                            }
+                            $("#status").text(showStatus);
+                            $.ajax({
+                                type: 'GET',
+                                url: apiPath+'/user/impAreaInfo/get/'+finalData.areaId,
+                                success: function (data) {
+                                    var json = getAjaxData(data);
+                                    areaName = json.areaName;
+                                    $("#areaId").text(areaName);
+                                }
+                            })
+                            
+                            // $("#technicianIds").text(technicianStr);
+                            // $("#teamIds").text(teamStr);
+                            // $("#createTime").text(new Date(finalData.createTime).format("yyyy-MM-dd hh:mm:ss"));
+                            // $("#updateTime").text(new Date(finalData.updateTime).format("yyyy-MM-dd hh:mm:ss"));
+                        } else {
+                            parent.layer.msg("获取数据失败");
+                        }
+                    }
+                },
+                error: function () {
+                    return parent.layer.msg("获取数据失败");
+                }
+            });
+        }
+
+        $("#cancelbtn").click(function () {
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+
+
+</body>
+</html>

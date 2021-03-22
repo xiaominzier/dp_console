@@ -1,0 +1,72 @@
+.flexbox_two {
+    margin: auto;
+    margin-top: 10px;
+    width: calc(50vw);
+    height: calc(100vh);
+    background: white;
+}
+
+.flexbox_parent_top_two {
+    height: 5%;
+    border-bottom: 1px solid #999999;
+}
+
+.flexbox_parent_two {
+    height: 95%;
+}
+
+.flexbox_child_two_1 {
+    height: 30%;
+    color: #999999;
+}
+
+.flexbox_child_two_2 {
+    height: 65%;
+}
+
+#flexbox_child_top_two_tree {
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    border-bottom: 1px solid #c3c3c3;
+}
+
+
+.flexbox_child_two_1 table {
+    width: 90%;
+    height: 100%;
+    margin: auto;
+}
+
+.tableSelect {
+    width: 80px;
+    height: 100%;
+    float: left;
+}
+
+.tableSelect form {
+    position: relative;
+    top: 25%;
+    bottom: 25%;
+}
+
+.tableInput {
+    width: 80px;
+    height: 100%;
+    float: left;
+}
+
+.tableInput form {
+    position: relative;
+    top: 25%;
+    bottom: 25%;
+}
+
+.flexbox_child_two_2 table {
+    width: 98%;
+    height: 100%;
+    border-color: #999999;
+    border-collapse: collapse;
+    margin: auto;
+}
+

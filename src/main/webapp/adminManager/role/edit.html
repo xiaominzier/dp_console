@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>编辑角色</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <link rel="stylesheet" href="/staticResource/lib/layui/css/layui.css">
+    <link rel="stylesheet" href="/staticResource/css/eleTree.css">
+    <style>
+        .layui-form-label.layui-required:after {
+            content: "*";
+            color: red;
+            position: absolute;
+        }
+
+    </style>
+</head>
+<body>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+
+                <div class="layui-card-body ">
+                    <form class="layui-form" lay-filter="role"> <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+                        <div class="layui-form-item">
+                            <label class="layui-form-label layui-required" style="top: 10px">角色名称</label>
+                            <div class="layui-input-block" style="top: 10px">
+                                <input type="text" name="roleName" placeholder="请输入" lay-verify="required"
+                                       autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">角色描述</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="remark" placeholder="请输入" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label layui-required">区域</label>
+                           <div class="layui-input-block" >
+                                <div id="areaIdStr" ></div>
+                           </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">状态</label>
+                            <div class="layui-input-block">
+                                <input type="radio" name="status" value="1" title="启用">
+                                <input type="radio" name="status" value="0" title="禁用" checked>
+                            </div>
+                        </div>
+                        <fieldset class="layui-elem-field">
+                            <legend>权限设置</legend>
+                            <div class="layui-field-box">
+                                <div id="dept_tree">
+
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block" style="text-align: right;">
+                                <button class="layui-btn layui-btn-danger" type="button" id="chancelBtn">取消</button>
+                                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>保存
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 更多表单结构排版请移步文档左侧【页面元素-表单】一项阅览 -->
+
+
+<style type="text/css">
+</style>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+    var areaIds;
+    var ele;
+    layui.config({
+        base: "/staticResource/lib/layui/lay/modules/"
+    }).extend({
+        xmSelect: 'xm-select'
+    }).use(['form', 'jquery', 'laydate', 'upload', 'layedit','eleTree','xmSelect'], function () {
+        var form = layui.form, layer = layui.layer,eleTree = layui.eleTree;
+        var $ = layui.$;
+       
+        // 管理区域下拉框选项初始化
+        var xmSelect = layui.xmSelect;
+        //渲染多选
+        areaIds = xmSelect.render({
+            el: '#areaIdStr', 
+            name: 'areaId',
+            prop: {
+                name: 'areaName',
+                value: 'id',
+                children: 'children'
+            },
+            tree: {
+                show: true,
+                strict: false,
+                // expandedKeys: [-1],
+            },
+            radio: true,
+            clickClose: true,
+            data: [// 数据（JSON数组）
+
+            ],
+            tips: '选择',	// 选项提示文字
+            // size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+            paging: true, // 是否分页，可选值：true、false
+            pageSize: 5, // 页大小，表示一页可显示多少数据
+            direction: 'down',	// 下拉方向，可选值为：auto、top、down
+            // filterable: true, // 是否启用搜索，可选值：true、false
+            empty: '呀, 没有用户呢', // 无数据时提示
+            toolbar: { // 工具条配置
+                show: true, // 是否显示
+                list: [ 'CLEAR'],
+                showIcon: false, // 显示图标
+            },
+        })
+        $.ajax({
+            type: 'GET',
+            url: apiPath+'/user/impAreaInfo/query_trees_role/0',
+            // async: false,
+            success: function (data) {
+                areaIds.update({
+                    data: data.data,
+                    autoRow: true,
+                })
+            }
+        })
+
+        var dataStr;
+        $.ajax({
+            type: "GET",
+            // data: JSON.stringify({"id": ids}),
+            url: apiPath+"/user/impResourcesInfo/query_list",  
+            async: false,
+            success: function (res) {
+                var info = getAjaxData(res);
+                dataStr = info;
+            }
+        });
+        ele = eleTree.render({
+            elem: '#dept_tree',
+            data: dataStr,
+            showCheckbox: true,
+            // showLine: true,
+            // checkStrictly: true,
+            contextmenuList: ["copy", "add", "edit", "remove"],
+            drag: true,
+            defaultExpandAll: true,
+            accordion: true,
+            request: {
+                name: "resourcesName",
+                key: "id",
+                children: "children",
+            },
+        });
+        $.ajax({
+            type: 'GET',
+            url: apiPath + '/user/impRoleInfo/get/' + id,
+            // async: false,
+            success: function (data) {
+                var json = getAjaxData(data);
+                form.val("role", json);
+                if(json.resourceIds){
+                    var ids = json.resourceIds;
+                    var arrIds = ids.split(',');
+                    ele.setChecked(arrIds,true);
+                }
+                if(json.areaId){
+                    var area = json.areaId;
+                    console.log(area);
+                    areaIds.setValue([area]);
+                }
+                form.render();
+                
+            }
+        })
+
+        form.on('submit(add)', function (data) {
+            var brchArrays = ele.getChecked(false, false); // 可以的
+            //var data= ele.checkcheckedData(".ele1")
+            var json = JSON.stringify(brchArrays);
+            if(json){
+                var arrs = [];
+                var p = eval(json);
+                for (var i = 0; i < p.length; i++) {
+                    var obj = p[i];
+                    var a = new Array();
+                    a[0] = obj["id"];
+                    arrs[i] = a;
+                }
+                data.field.resourceIds = arrs.toString();
+            }
+            //获取当前下拉多选选中的值
+            var selectArr = areaIds.getValue();
+            if(selectArr==""){
+                alert("区域必填，请选择");
+                return false;
+            }
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                // url: apiPath+'​/user​/impCompanyNotice​/update​/'+id,
+                url: apiPath + '/user/impRoleInfo/update/' + id,
+                data: JSON.stringify(data.field),
+                success: function (res) {
+                    console.log(res);
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+
+            })
+            return false;
+        });
+        $('#chancelBtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+
+</script>
+</body>
+</html>

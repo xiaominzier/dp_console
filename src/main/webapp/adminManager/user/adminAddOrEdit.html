@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加管理员</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+</head>
+<body>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 20px;padding-right: 20px">
+    <form class="layui-form" id="formid" lay-filter="adminForm">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+        </style>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">角色</label>
+            <div class="layui-input-block">
+                <!-- <select name="roles" lay-verify="required" lay-search="" lay-filter="roles" id="roles">
+                    <option value="">请选择</option>
+                </select> -->
+                <div id="roleInfo"></div>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label  layui-required">姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="realName" lay-verify="required" placeholder="请输入姓名" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">部门</label>
+            <div class="layui-input-block">
+                <input type="text" name="department" placeholder="请输入部门" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">联系电话</label>
+            <div class="layui-input-block">
+                <input type="text" name="tel" lay-verify="phone|userPhoneCheck" placeholder="请输入电话号码"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱</label>
+            <div class="layui-input-block">
+                <input type="text" name="email" placeholder="请输入邮箱" lay-verify="checkEmail" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">登录账号</label>
+            <div class="layui-input-block">
+                <input type="text"  name="hiddenUserName" style="display:none;" autocomplete="off"/>
+                <input type="text" name="userName" onchange="checkUserName()" lay-verify="checkUserName" placeholder="请输入登录账号" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">登录密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="hiddenPass" style="display:none;" autocomplete="off"/>
+                <input type="password" id="passwordShow" lay-verify="checkPwd" placeholder="请输入登录密码"
+                autocomplete="new-password"
+                       class="layui-input">
+                <!-- <input type="hidden" name="password" id="passwordHidden"> -->
+            </div>
+            <span style="color: darkgrey;">6到18位数字、大小写字母、下划线组合，最少包含两种类型</span>
+        </div>
+
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入内容" class="layui-textarea" name="introduction"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" title="启用" checked="">
+                <input type="radio" name="status" value="0" title="禁用">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: right;">
+                <button class="layui-btn layui-btn-danger" id="chancelBtn" lay-filter="cancel">取消</button>
+                <button class="layui-btn" lay-submit lay-filter="add">保存</button>
+            </div>
+        </div>
+
+
+    </form>
+</div>
+
+
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+    let data = "";
+    function checkMobile(str) { //写一个判断函数
+        var  re = /^1\d{10}$/    //正则表达式
+        if (!re.test(str)) {      //判断字符是否是11位数字
+            parent.layer.msg('请输入11位数字手机号');
+            return false;
+        }
+    }
+    function checkUserName(){
+        var userName = $("input[name='userName']").val();
+        var oldVal = $("input[name='userName']").attr('oldVal');
+        if(userName != "" && userName != oldVal){
+            $.ajax({
+                url: apiPath+'/user/impUserInfo/checkUserName/'+userName,
+                type: "GET",
+                // async: false,
+                success: function (res) {
+                    console.log(res);
+                    if (res.code == 0) {
+                        if (res.data == true) {
+                            parent.layer.msg("该登录账号已被占用，请换一个");
+                            return false;
+                        }
+                    }
+                }
+            })
+        }
+    }
+    layui.config({
+        base: "/staticResource/lib/layui/lay/modules/"
+    }).extend({
+        xmSelect: 'xm-select'
+    }).use(['form', 'jquery','xmSelect'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        $("input[name='tel']").blur(function(){
+            var tel = $(this).val(); //取值
+            checkMobile(tel);
+        })
+         // 管理区域下拉框选项初始化
+         var xmSelect = layui.xmSelect;
+        //渲染多选
+        var roleInfos = xmSelect.render({
+            el: '#roleInfo', 
+            name: 'roles',
+            prop: {
+                name: 'roleName',
+                value: 'id',
+            },
+            style: {
+               
+            },
+            data: [// 数据（JSON数组）
+
+            ],
+            tips: '请选择，(可多选)',	// 选项提示文字
+            // size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+            paging: true, // 是否分页，可选值：true、false
+            pageSize: 5, // 页大小，表示一页可显示多少数据
+            direction: 'down',	// 下拉方向，可选值为：auto、top、down
+            // filterable: true, // 是否启用搜索，可选值：true、false
+            empty: '呀, 没有用户呢', // 无数据时提示
+            toolbar: { // 工具条配置
+                show: true, // 是否显示
+                showIcon: false, // 显示图标
+            },
+        })
+        $.ajax({
+            type: 'GET',
+            url: apiPath+'/user/impRoleInfo/query_list?gt_id=3',
+            // async: false,
+            success: function (data) {
+                roleInfos.update({
+                    data: data.data,
+                    autoRow: true,
+                })
+            }
+        })
+        if(id!=""){
+            form.verify({
+                checkEmail: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if (value != "") {
+                        var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$");
+                        if (!reg.test(value)) { //正则验证不通过，格式不对
+                            return '邮箱格式不正确';
+                        }
+                    }
+                },
+                checkUserName: function(value,item){
+                    var oldVal = $("input[name='userName']").attr('oldVal');
+                    if(value != "" && value != oldVal){
+                        $.ajax({
+                            url: apiPath+'/user/impUserInfo/checkUserName/'+value,
+                            type: "GET",
+                            async: false,  //同步请求
+                            success: function (res) {
+                                if (res.code == 0) {
+                                    data = res.data;
+                                }
+                            }
+                        })
+                    }
+                    if(data != ""){   //这个判断不能写在回调函数里，不然会不生效
+                        if (data == true) {
+                            return '该登录账号已被占用，请换一个';
+                        }
+                    }
+                }
+            });
+        }else{
+            form.verify({
+                // userPhoneCheck: function (value, item) { //value：表单的值、item：表单的DOM对象
+                //     if (value != "") {
+                //         var param = "tel=" + value;
+                //         param += "&notUserType=1";
+                //         param = encryptParamForUrlType(param);
+                //         var checkRes = 0;
+                //         $.ajax({
+                //             url: '/app/user/checkPhone',
+                //             data: param,
+                //             type: "POST",
+                //             async: false,
+                //             success: function (res) {
+                //                 if (res.code == 0) {
+                //                     if (res.data == 1) {
+                //                         checkRes = res.data;
+                //                     }
+                //                 }
+                //             }
+                //         })
+                //         if (checkRes > 0) {
+                //             return "手机号已被占用";
+                //         }
+                //     }
+                // },
+                checkPwd: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    /*if (value == null || value.length < 6||value.length>18) {
+                        return "密码长度在6-18位之间";
+                    }*/
+                    var reg = new RegExp(/^(?!^[\d]+$)(?!^[-]+$)(?!^[_]+$)(?!^[a-zA-Z]+$)[\w-]{6,18}$/);
+                    // var reg = new RegExp(/^\w+$/);
+                    if (!reg.test(value)) {
+                        return "6到18位数字、大小写字母、下划线组合，最少包含两种类型";
+                    }
+                }, 
+                checkUserName: function(value,item){
+                    var oldVal = $("input[name='userName']").attr('oldVal');
+                    if(value != "" && value != oldVal){
+                        $.ajax({
+                            url: apiPath+'/user/impUserInfo/checkUserName/'+value,
+                            type: "GET",
+                            async: false,  //同步请求
+                            success: function (res) {
+                                if (res.code == 0) {
+                                    data = res.data;
+                                }
+                            }
+                        })
+                    }
+                    if(data != ""){   //这个判断不能写在回调函数里，不然会不生效
+                        if (data == true) {
+                            return '该登录账号已被占用，请换一个';
+                        }
+                    }
+                },
+                checkEmail: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if (value != "") {
+                        var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$");
+                        if (!reg.test(value)) { //正则验证不通过，格式不对
+                            return '邮箱格式不正确';
+                        }
+                    }
+                }
+            });
+        }
+        
+        if(id!=""){
+            $.ajax({
+                type: 'GET',
+                url: apiPath+'/user/impUserInfo/get/'+id,
+                // async: false,
+                success: function (data) {
+                    var json = getAjaxData(data);
+                    console.log(json);
+                    form.val("adminForm", json);
+                    var rolesStr = json.roles;
+                    var rolesArr = rolesStr.split(',');
+                    console.log(rolesArr)
+                    roleInfos.setValue(rolesArr);
+                    $("input[name='userName']").attr('oldVal',json.userName);
+                    // roleInfos.setValue([1,2,3])
+                    form.render();
+                }
+            })
+            form.on('submit(add)', function (data) {
+                data = data.field;
+                delete data.hiddenUserName;
+                delete data.hiddenPass;
+                var roleArr = roleInfos.getValue();
+                console.log(roleArr);
+                var roleId = "";
+                $.each(roleArr,function(i,o){
+                    roleId += o.id+",";
+                })
+                console.log(roleId);
+                var passwordShow = $("#passwordShow").val();
+                if(passwordShow!=""){
+                    data.password = passwordShow;
+                } 
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: apiPath+'/user/impUserInfo/manage/update/'+id,
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    }
+    
+                })
+                return false;
+            });
+        }else{
+            form.on('submit(add)', function (data) {
+                data = data.field;
+                delete data.hiddenUserName;
+                delete data.hiddenPass;
+                var roleArr = roleInfos.getValue();
+                console.log(roleArr);
+                var roleId = "";
+                $.each(roleArr,function(i,o){
+                    roleId += o.id+",";
+                })
+                console.log(roleId);
+                var passwordShow = $("#passwordShow").val();
+                if(passwordShow!=""){
+                    data.password = passwordShow;
+                }   
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: apiPath+'/user/impUserInfo/manage/save',
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    }
+    
+                })
+                return false;
+            });
+        }
+
+        $('#chancelBtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>编辑政府临时任务</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <style type="text/css">
+        .uploader-list {
+            margin-left: -15px;
+        }
+
+        .uploader-list .info {
+            position: relative;
+            margin-top: -25px;
+            background-color: black;
+            color: white;
+            filter: alpha(Opacity=80);
+            -moz-opacity: 0.5;
+            opacity: 0.5;
+            width: 100px;
+            height: 25px;
+            text-align: center;
+            display: none;
+        }
+
+        .uploader-list .handle {
+            position: relative;
+            background-color: black;
+            color: white;
+            filter: alpha(Opacity=80);
+            -moz-opacity: 0.5;
+            opacity: 0.5;
+            width: 100px;
+            text-align: right;
+            height: 18px;
+            margin-bottom: -18px;
+            display: none;
+        }
+
+        .uploader-list .handle i {
+            margin-right: 5px;
+        }
+
+        .uploader-list .handle i:hover {
+            cursor: pointer;
+        }
+
+        .uploader-list .file-iteme {
+            margin: 12px 0 0 15px;
+            padding: 1px;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script><script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form " id="formid" lay-filter="cooperForm">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+
+        <div class="layui-form-item">
+                <label class="layui-form-label ">点位名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="governmentName"  autocomplete="off"
+                           class="layui-input">
+                    <input type="hidden" name="verifier">
+                    <input type="hidden" name="teamId">
+                </div>
+        </div>
+
+        <div class="layui-form-item">
+                <label class="layui-form-label">类型</label>
+                <div class="layui-input-block">
+                    <input type="radio" lay-filter="typeRadio" name="type" value="0" title="督查核实" >
+                    <input type="radio" lay-filter="typeRadio" name="type" value="1" title="举报件核实单" >
+                    <input type="radio" lay-filter="typeRadio" name="type" value="2" title="联合执法单" >
+                    <input type="radio" lay-filter="typeRadio" name="type" value="3" title="道路扬尘检查单">
+                    <input type="radio" lay-filter="typeRadio" name="type" value="4" title="疫情防控单" >
+                    <input type="radio" lay-filter="typeRadio" name="type" value="5" title="施工工地检查单" >
+                    <input type="radio" id="otherType" lay-filter="typeRadio" name="type" value="6" title="其他" >
+                    <input type="text" id="other" style="display: none;" title="其他类型" placeholder="其他类型">
+                </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属大院/商场楼体/村落/园区</label>
+            <div class="layui-input-block">
+                <input type="text" name="belongsToArea"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">污染物类型</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="contaminantsType" lay-skin="primary" value="1" title="废气">
+                <input type="checkbox" name="contaminantsType" lay-skin="primary" value="2" title="废水">
+                <input type="checkbox" name="contaminantsType" lay-skin="primary" value="3" title="噪声">
+                <input type="checkbox" name="contaminantsType" lay-skin="primary" value="4" title="危废">
+                <input type="checkbox" name="contaminantsType" lay-skin="primary" value="5" title="扬尘">
+                <input type="checkbox" id="otherContamiType" lay-filter="switchCheckbox" name="contaminantsType"  lay-skin="primary" value="6" title="其他">
+                <input type="text" id="other1" style="display: none;" title="其他类型" placeholder="其他类型">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">实际地址</label>
+            <div class="layui-input-block">
+                <input type="text" name="physicalAddress"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系人</label>
+            <div class="layui-input-block">
+                <input type="text" name="linkman"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系电话</label>
+            <div class="layui-input-block">
+                <input type="text" name="linkmanTel"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">现场情况描述</label>
+            <div class="layui-input-block">
+                <textarea name="sceneDescription" required lay-verify="required" placeholder="请输入" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">现场情况处置结果</label>
+            <div class="layui-input-block">
+                <textarea name="sceneResult" required lay-verify="required" placeholder="请输入" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="remark" required lay-verify="required" placeholder="请输入" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">现场问题照片</label>
+            <input type="hidden" name="fileId" id="fileId" class="image" value="">
+            <div class="layui-upload-list uploader-list" style="overflow: auto;" id="uploader-list">
+
+            </div>
+            <div class="layui-upload layui-input-inline">
+                <button type="button" class="layui-btn" id="upImg">上传图片</button>
+            </div>
+        </div>
+        <span>点击查看大图</span>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: left;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>保存</button>
+            </div>
+        </div>
+
+
+    </form>
+</div>
+
+
+<script>
+
+    var fid = getParam("fid");
+    var id = getParam("id");
+    
+    layui.use(['form', 'jquery', 'laydate', 'upload'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+        var upload = layui.upload;
+        var arr=[];
+        var arra=[];
+        var imgStr = "";
+
+        form.on('radio(typeRadio)', function(data){
+            if(data.value == '6'){
+                $("#other").css({
+                    "display":"inline-block",
+                    "line-height":'30px',
+                    'border-color': '#e6e6e6',
+                    'outline':'0',
+                    'border-width': '1px',
+                    'border-style': 'solid',
+                });
+            }else {
+                $("#other").css("display", "none");
+            } 
+        });
+        // $("#other").blur(function(){  //输入框失去焦点
+        //     var otherVal = $(this).val();
+        //     if(otherVal){
+        //         $("#otherType").val(otherVal);
+        //     }
+        // }) 
+        
+        form.on('checkbox(switchCheckbox)', function(data){
+            if(data.elem.checked){
+                var value = data.value;
+                if(value == '6'){
+                    $("#other1").css({
+                        "display":"inline-block",
+                        "line-height":'28px',
+                        'border-color': '#e6e6e6',
+                        'outline':'0',
+                        'border-width': '1px',
+                        'border-style': 'solid',
+                    });
+                }else {
+                    $("#other1").css("display", "none");
+                }
+            }else {
+                $("#other1").css("display", "none");
+            }
+             
+        });
+        // $("#other1").blur(function(){  //输入框失去焦点
+        //     var otherVal = $(this).val();
+        //     if(otherVal){
+        //         $("#otherContamiType").val(otherVal);
+        //     }
+        // }) 
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#upImg'
+            ,url: apiPath+'/attached/file_upload'
+            ,accept:'images'
+            ,size:50000
+            ,multiple:true
+            ,before: function(obj){
+                obj.preview(function(index, file, result){
+                    $('#uploader-list').append(
+                        '<div id="" class="file-iteme">' +
+                        '<div  id='+arra[0]+' class="handle"><i class="layui-icon layui-icon-delete"></i></div>' +
+                        '<img  style="width: 100px;height: 100px;" src='+ result +'>' +
+                        '</div>'
+                    );
+                });
+            }
+            ,done: function(res){
+                //如果上传失败
+                if(res.code > 0){
+                    return top.layer.msg('上传失败');
+                }
+                //上传成功
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #4cae4c;">上传成功</span>');
+                var fileupload = $(".image");
+                if (imgStr == "") {
+                    imgStr = JSON.stringify(res.data);
+                } else {
+                    imgStr = imgStr + "," + JSON.stringify(res.data);
+                };
+                fileupload.attr("value",imgStr.substring(0, imgStr.length));
+                arr.push(res.data);
+                arra.push(res.data);
+                var cn = $("div[class=handle]:last");
+                cn.attr("id",res.data);
+            }
+            ,error: function(){
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function(){
+                    uploadInst.upload();
+                });
+            }
+        });
+
+
+        $.ajax({
+            type: 'get',
+            url: apiPath+'/content/impGovernmentTemporaryTasks/get/'+id,
+            async: false,
+            success: function (data) {
+                var json = getAjaxData(data);
+                 form.val("cooperForm", json);
+                $("input[type=checkbox][name='contaminantsType']").each(function(){
+                    $(this).prop("checked", false);
+                });
+                if (json) {
+
+                    if (json.contaminantsType) {
+                        var c = json.contaminantsType.split(",");
+                        $("input[type=checkbox][name='contaminantsType']").each(function () {
+                            for (var i = 0; i < c.length; i++) {
+                                if ($(this).val() == c[i]) {
+                                    $(this).prop("checked", true);
+                                }
+                            }
+
+                        })
+                    }
+
+                    if(json.fileId){
+                        var fdiv = document.getElementById("demo2");
+                        var f = json.fileId.split(",");
+                        arr = json.fileId.split(",");
+                        for(var i=0;i<f.length;i++){
+                            var url = apiPath + '/attached/show/' + f[i];
+                            $('#uploader-list').append(
+                                '<div id='+f[i]+' class="file-iteme">' +
+                                '<div id='+f[i]+' class="handle"><i class="layui-icon layui-icon-delete"></i></div>' +
+                                '<img  style="width: 100px;height: 100px;" src='+ url +'>' +
+                                '</div>'
+                            );
+
+                        }
+                        imgStr+=f.toString();
+                    }
+                }
+
+
+                form.render();
+            }
+            })
+
+        form.on('submit(add)', function (data) {
+
+            var contaminantsType = [];
+            $("input[name='contaminantsType']:checked").each(function(i){
+                contaminantsType.push($(this).val())
+            })
+            data = data.field;
+            data.contaminantsType=contaminantsType.toString();
+            console.log(JSON.stringify(data));
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath+'/content/impGovernmentTemporaryTasks/update/'+id,
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+
+            })
+            return false;
+        });
+
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+
+
+        $(document).on("mouseenter mouseleave", ".file-iteme", function(event){
+            if(event.type === "mouseenter"){
+                //鼠标悬浮
+                $(this).children(".info").fadeIn("fast");
+                $(this).children(".handle").fadeIn("fast");
+            }else if(event.type === "mouseleave") {
+                //鼠标离开
+                $(this).children(".info").hide();
+                $(this).children(".handle").hide();
+            }
+        });
+
+        // 删除图片
+        $(document).on("click", ".file-iteme .handle", function(event){
+            var imgid = $(this).attr("id");
+            $(this).parent().remove();
+            for(var i=0;i<arr.length;i++){
+                if(arr[i]==imgid){
+                    arr.splice(i,1);
+                }
+            }
+            imgStr=arr.toString();
+            $("#fileId").val(imgStr);
+        });
+
+        $(document).on("click", ".file-iteme img", function(e){
+            layer.photos({ photos: {"data": [{"src": e.target.src}]} });
+        });
+
+    });
+
+</script>
+
+
+</body>
+</html>

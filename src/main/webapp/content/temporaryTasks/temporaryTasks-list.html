@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>临时任务管理</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>临时任务管理</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" >
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="tasksName" autocomplete="off" id="tasksName"
+                                            placeholder="请输入"
+                                            class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">提报时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="timeShow" placeholder="开始 到 结束">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">状态</label>
+                                <div class="layui-input-inline">
+                                    <div id="status" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">修改时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" name="updateTime" id="updateTime"
+                                            autocomplete="off" lay-verify="required" placeholder="年/月/日">
+                                </div>
+                            </div>
+
+                            <!-- <div class="layui-inline">
+                                <label class="layui-form-label">项目名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="projectName" autocomplete="off" id="projectName"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">小组名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="teamName" autocomplete="off" id="teamName"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div> -->
+
+                            <div class="layui-inline">
+                                <button class="layui-btn" type="button" data-type="reload">搜索</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+
+                        </div>
+                    </form>
+                     <div class="layui-btn-group demoTable" style="padding-top:10px" >
+                         <button class="layui-btn" id="addBtn" type="button" per-code='sys:cooperator:add'><i
+                                 class="layui-icon"></i>添加
+                         </button>
+                     </div>
+                    <table id="table" lay-filter="table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script type="text/html" id="bar">
+    {{#
+    var genBtn = function(data){
+    var btnStr="";
+
+    btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="view">查看</a>';
+    btnStr+=' <a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="copy">复制</a>';
+    if(data.status){
+        if(data.status==""||data.status=="0"){
+            btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+            btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+        }else if(data.status=="1"){
+            btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="offline">下线</a>';
+            btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="viewReport">提报记录</a>';
+        }else if(data.status=="3"){
+            btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="viewReport">提报记录</a>';
+        }else if(data.status=="2"){
+            btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="viewReport">提报记录</a>';
+        }
+    }
+        return btnStr;
+    }
+    }}
+    {{genBtn(d)}}
+</script>
+
+<script>
+    var fid = self.frameElement.getAttribute("tab-id");
+    var statusStr;
+    layui.use(['table', 'jquery', 'form', 'element', 'laydate'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var element = layui.element;
+        var timeStart, timeEnd;
+        statusStr = xmSelect.render({
+            el: '#status',
+            tips: '全部（可多选）',	// 选项提示文字
+            // size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+            data: [
+                {name: '待开始', value: 0},
+                {name: '进行中', value: 1},
+                {name: '已结束', value: 2},
+                {name: '已下线', value: 3}
+            ]
+        })
+        var param = getQueryParam();
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath+'/content/impTemporaryTasks/query_page',
+            method: "get",
+            even: true,
+            page: true,
+            defaultToolbar: false,
+            where: param,
+
+            cols: [[
+                {
+                    field: 'tasksName', title: '名称', width: '11%', align: 'center'
+                },
+                // {
+                //     field: '', title: '提报人', width: '8%', align: 'center', templet: function (item) {
+                //         var res="-";
+                //         if (item.informantType == "2" && item.informantType) {  //返回项目名称
+                //             res= getDisStr2(item.projectName);
+                //         }else if(item.informantType == "1" && item.informantType) { //返回小组名称
+                //             res = getDisStr2(item.teamName);
+                //         }
+                //         return res;
+                //     }
+                // },
+                {
+                    field: 'teamNameOrProjectName', title: '提报人', width: '11%', align: 'center'
+                },
+                {
+                    field: 'remark', title: '简介', width: '21%', align: 'center'
+                },
+                {
+                    field: '', title: '提报时间', width: '12%', align: 'center', templet: function (item) {
+
+                        return new Date(item.timeStart).format("yyyy-MM-dd") +"-" +new Date(item.timeEnd).format("yyyy-MM-dd");
+                    }
+                },
+                {
+                    field: 'taskReport', title: '提报情况', width: '13%', align: 'center'
+                },
+                {
+                    field: 'updateTime', title: '修改时间', width: '12%', align: 'center', templet: function (item) {
+                        if (item.updateTime == undefined || item.updateTime == null) {
+                            return "";
+                        }
+                        return new Date(item.updateTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                   field: 'status', title: '状态', width: '8%', align: 'center',templet: function (item) {
+                        var auditStatus = "待开始"
+                        if (item.status) {
+                            // 待开始 0  进行中 1 已下线 2 已结束 3
+                            if (item.status == "0") {
+                                auditStatus = "待开始";
+                            } else if (item.status == "1") {
+                                auditStatus = "进行中";
+                            } else if (item.status == "2") {
+                                auditStatus = "已结束";
+                            } else if (item.status == "3") {
+                                auditStatus = "已下线";
+                            }
+                        }
+                        return auditStatus;
+                    }
+                },
+                {
+                    title: '操作', toolbar: '#bar', width: '15%', align: 'center',fixed: 'right'
+                }
+
+            ]],
+            id: 'testReload',
+
+            parseData: function (res) {
+
+                var json = getAjaxData(res);
+                return {
+                    "code": res.code,
+                    "data": json.records,
+                    "count": json.total,
+                    "msg": res.message
+                };
+
+            },
+
+            request: {
+                pageName: 'page',
+                limitName: 'size'
+            }
+
+        });
+        laydate.render({
+            elem: '#timeShow'
+            , type: 'datetime'
+            , range: '到'
+            , format: 'yyyy-M-d'
+            , done: function (value, date, endDate) {
+                var start_date,
+                    end_date,
+                start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                end_date = new Date(endDate.year, endDate.month - 1, endDate.date, endDate.hours, endDate.minutes, endDate.seconds);
+                // 获取时间戳 -- 13 位
+                console.log(start_date.toLocaleDateString())
+                timeStart = start_date.getTime();
+                timeEnd = end_date.getTime();
+            }
+        });
+        laydate.render({
+            elem: '#updateTime'
+            , type: 'datetime'
+            , format: 'yyyy/MM/dd'
+            , done(value, date, endDate) {
+                $("#updateTime").val(new Date(value).getTime());
+            }
+        });
+
+        var $ = layui.$, active = {
+
+            reload: function () {
+                var param = getQueryParam();
+                if (tableIns != null) {
+                    tableIns.where = {};  //置空where
+                    tableIns.page = {};
+                }
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        currPage: 1 //重新从第 1 页开始
+                    }
+                    , where: param,
+                    done: function () {
+                        tableIns = this;
+                    }
+                    // sysOperatorId: $("#sysOperatorId").val(),
+                });
+
+            }
+        };
+
+        function reload() {
+            var param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+                // sysOperatorId: $("#sysOperatorId").val(),
+            });
+
+        }
+        $('.layui-fluid .layui-form .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+         $("#addBtn").click(function () {
+             top.xadmin.add_tab("添加临时任务", "/content/temporaryTasks/temporaryTasks-add.html?fid=" + fid);
+         })
+
+        table.on('tool(table)', function (obj) {
+
+            var data = obj.data;
+            if (obj.event == 'del') {
+                $.ajax({
+                    type: "POST",
+                    url: apiPath+"/content/impTemporaryTasks/delete/"+data.id,
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('删除成功');
+                            reload();
+                        } else {
+                            parent.layer.msg('删除失败');
+                        }
+                    }
+                })
+            } else if (obj.event == 'edit') {
+                top.xadmin.add_tab("编辑临时任务", "/content/temporaryTasks/temporaryTasks-edit.html?fid=" + fid + "&id=" + data.id);
+            }else if (obj.event == 'view') {
+                top.xadmin.add_tab("查看", "content/temporaryTasks/temporaryTasks-check.html?fid=" + fid + "&id=" + data.id);
+            }else if (obj.event == 'viewReport') {
+                top.xadmin.add_tab("提报记录", "content/temporaryTasks/taskRecordList.html?fid=" + fid + "&id=" + data.id);
+            }else if (obj.event == 'copy') {
+                top.xadmin.add_tab("复制", "content/temporaryTasks/temporaryTasksCopy.html?fid=" + fid + "&id=" + data.id);
+            }else if (obj.event == 'offline') {
+                $.ajax({
+                    type: "GET",
+                    url: apiPath+"/content/impTemporaryTasks/offline/"+data.id+"/3",
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('下线成功');
+                            reload();
+                        } else {
+                            parent.layer.msg('下线失败');
+                        }
+                    }
+                })
+            }
+
+        })
+
+        function getQueryParam() {
+            var param = {};
+            var tasksName = $("#tasksName").val();
+            // var projectName = $("#projectName").val();
+            // var teamName = $("#teamName").val();
+
+            if (statusStr && statusStr.getValue().length > 0) {
+                param.in_status = statusStr.getValue("valueStr");
+            }
+
+            if (tasksName != "") {
+                param.lk_tasksName = tasksName;
+            }
+            // if (projectName != "") {
+            //     param.lk_projectName = projectName;
+            // }
+            // if (teamName != "") {
+            //     param.lk_teamName = teamName;
+            // }
+
+            // if (timeStart) {
+            //     param.gt_timeStart = timeStart;
+            // }
+            // if (timeEnd) {
+            //     param.lt_timeEnd = timeEnd;
+            // }
+
+
+            return param;
+        }
+        $('#search').on('click', function (data) {
+            reload();
+        });
+    })
+
+</script>
+</body>
+
+
+</html>

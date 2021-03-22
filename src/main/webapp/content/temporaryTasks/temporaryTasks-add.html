@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加临时任务</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+</head>
+<body>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form" id="formid" lay-filter="cooperForm">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label ">名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="tasksName" lay-verify="required" autocomplete="off"
+                       class="layui-input">
+                <input type="hidden" name="impTasksFieldsRelations">
+                <input type="hidden" name="status">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">简介</label>
+            <div class="layui-input-block">
+                <textarea name="remark" required lay-verify="required" placeholder="请输入" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">提报时间</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" name="timeStartShow" id="timeStartShow"
+                           autocomplete="off" lay-verify="required" placeholder="yyyy-MM-dd HH:mm:ss">
+                    <input type="hidden" class="layui-input" name="timeStart" id="timeStart"
+                           autocomplete="off">
+
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" name="timeEndShow" id="timeEndShow"
+                           autocomplete="off" lay-verify="required" placeholder="yyyy-MM-dd HH:mm:ss">
+                    <input type="hidden" class="layui-input" name="timeEnd" id="timeEnd"
+                           autocomplete="off">
+                </div>
+            </div>
+        </div>
+        <input type="hidden" class="layui-input" name="status" id="status"
+               autocomplete="off"  >
+        <input type="hidden" class="layui-input" name="updateTime" id="updateTime"
+               autocomplete="off"  >
+        <div class="layui-form-item">
+            <label class="layui-form-label">按项目组</label>
+            <div class="layui-input-inline">
+                <input type="radio" lay-filter="informantType" name="informantType" value="2" title="按项目">
+            </div>
+            <div class="layui-input-inline" id="projectIds" style="display: none;">
+
+            </div>
+
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">按小组</label>
+            <div class="layui-input-inline">
+                <input type="radio" lay-filter="informantType" name="informantType" value="1" title="按小组">
+            </div>
+            <div class="layui-input-inline" id="teamIds"  style="display: none;">
+
+            </div>
+        </div>
+        <table id="tableRun" class="layui-table">
+            <colgroup>
+                <col width="11%">
+                <col width="23%">
+                <col width="11%">
+                <col width="11%">
+                <col width="11%">
+                <col width="11%">
+                <col width="11%">
+                <col width="11%">
+              </colgroup>
+            <thead>
+                <tr>
+                    <th>字段名</th>
+                    <th>字段属性</th>
+                    <th>单位</th>
+                    <th>提示文字</th>
+                    <th>字段内容</th>
+                    <th>是否必填</th>
+                    <th>排序</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+
+            </tbody>
+            <button class="layui-btn" type="button" onclick="add()">添加字段配置</button>
+        </table>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin: 0 auto;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit="" lay-filter="save"><i class="layui-icon">&#xe61f;</i>保存</button>
+
+            </div>
+        </div>
+
+
+    </form>
+</div>
+
+<script>
+      var _len = 0;
+    function add(){
+        // var _len = $("#tbody tr").length;
+        $(this).keypress(function (e){
+            var key = window.event ? e.keyCode : e.which;
+            if (key.toString() == "13") {
+                return false;
+            }
+        });
+        _len ++;
+        var str = "<tr id="+_len+" align='center'>"
+            +"<td><input class='layui-input'  style='height:28px;' type='text' name='fieldName' placeholder='点击输入' /></td>"
+            +"<td class='do'>\
+                <select style='display:inline-block; width:50%; height:27px;border-color:#e6e6e6;' onchange='changeFirstOp("+_len+")' name='fieldFirstProperties'>\
+                            <option>请选择</option>\
+                            <option value='0'>文本</option>\
+                            <option value='1'>日期</option>\
+                            <option value='3'>上传</option>\
+                            <option value='2'>选择</option>\
+                        </select></td>"
+            +"<td><input class='layui-input'  style='height:28px;' type='text' name='unit' placeholder='点击输入' /></td>"
+            +"<td><input class='layui-input'  style='height:28px;' type='text' name='promptText' placeholder='点击输入' /></td>"
+            +"<td class='dynamicAdd'></td>"
+            +"<td><select name='isRequired'  style='display:block; width:100%; height:27px;border-color: #e6e6e6;'  >\
+                            <option value='0'>请选择</option>\
+                            <option value='1'>是</option>\
+                            <option value='2'>否</option>\
+                            </select></td>"
+            +"<td><input class='layui-input' style='height:28px;' type='number' onkeypress='return event.keyCode >= 49 && event.keyCode <= 57' name='sort' placeholder='点击输入' /></td>"
+            +"<td><a class='layui-btn layui-btn-danger layui-btn-xs' onclick='del("+_len+")'>删除</a></td>"
+        +"</tr>";
+        $("#tbody").append(str);
+    }
+    function changeFirstOp(index){
+        var value = $("tr[id='"+index+"']").find("td.do").find("option:selected").val()
+        if(value=='0'){
+            $("tr[id='"+index+"']").find('td.do').children().eq(1).remove();
+            $("tr[id='"+index+"']").find("td.do").append("<select name='fieldProperties' onchange='changeOp("+index+")' style='display:inline-block; width:50%; height:27px;border-color: #e6e6e6;' >\
+                            <option>请选择</option>\
+                            <option value='0'>短文本输入</option>\
+                            <option value='3'>长文本输入</option>\
+                            <option value='2'>数字输入</option>\
+                            </select>")
+        }else if(value=='1'){
+            $("tr[id='"+index+"']").find('td.do').children().eq(1).remove();
+            $("tr[id='"+index+"']").find("td.do").append("<select name='fieldProperties' onchange='changeOp("+index+")' style='display:inline-block; width:50%; height:27px;border-color: #e6e6e6;' >\
+                                 <option>请选择</option>\
+                                 <option value='4'>日期选择</option>\
+                                 <option value='5'>时间选择</option>\
+                                 </select>")
+        }else if(value=='2'){
+            $("tr[id='"+index+"']").find('td.do').children().eq(1).remove();
+            $("tr[id='"+index+"']").find("td.do").append("<select name='fieldProperties' onchange='changeOp("+index+")' style='display:inline-block; width:50%; height:27px;border-color: #e6e6e6;' >\
+                                 <option>请选择</option>\
+                                 <option value='6'>单选</option>\
+                                 <option value='8'>多选</option>\
+                                 </select>")
+        }else if(value=='3'){
+            $("tr[id='"+index+"']").find('td.do').children().eq(1).remove();
+            $("tr[id='"+index+"']").find("td.do").append("<select name='fieldProperties' onchange='changeOp("+index+")' style='display:inline-block; width:50%; height:27px;border-color: #e6e6e6;' >\
+                                 <option>请选择</option>\
+                                 <option value='10'>单图上传</option>\
+                                 <option value='11'>多图上传</option>\
+                                 </select>")
+        }
+    }
+    // add();
+    // function edit(index){
+    //     $("tr[id='"+index+"']").find("input,select").each(function(){
+    //         this.value = "";
+    //     });
+    // }
+    function changeOp(index){
+        var value = $("tr[id='"+index+"']").find("td.do").children().eq(1).find("option:selected").val()
+        if(value && value == '2'){
+            $("tr[id='"+index+"']").find('td.dynamicAdd').empty();
+            $("tr[id='"+index+"']").find('td.dynamicAdd').append("<select name='fieldContent'  style='display:block; width:100%; height:27px;border-color: #e6e6e6;'  >\
+                            <option>请选择</option>\
+                            <option value='0'>自然数</option>\
+                            <option value='1'>正数(保留两位小数)</option>\
+                            <option value='2'>正数</option>\
+                            </select>")
+        }
+        else if(value && value == '4'){
+            $("tr[id='"+index+"']").find('td.dynamicAdd').empty();
+            $("tr[id='"+index+"']").find('td.dynamicAdd').append("<select name='fieldContent'  style='display:block; width:100%; height:27px;border-color: #e6e6e6;'  >\
+                            <option>请选择</option>\
+                            <option value='1'>任意日期</option>\
+                            <option value='2'>不可大于提报日期</option>\
+                            <option value='3'>不可小于提报日期</option>\
+                            </select>")
+        }
+        else if(value && value == '5'){
+            $("tr[id='"+index+"']").find('td.dynamicAdd').empty();
+            $("tr[id='"+index+"']").find('td.dynamicAdd').append("<select name='fieldContent'  style='display:block; width:100%; height:27px;border-color: #e6e6e6;'  >\
+                            <option>请选择</option>\
+                            <option value='1'>任意日期</option>\
+                            <option value='2'>不可大于提报日期</option>\
+                            <option value='3'>不可小于提报日期</option>\
+                            </select>")
+        }
+        else if(value && (value == '8' || value == '6')){
+            $("tr[id='"+index+"']").find('td.dynamicAdd').empty();
+            $("tr[id='"+index+"']").find('td.dynamicAdd').append("<input class='layui-input'  style='display:block; width:100%; height:27px;border-color: #e6e6e6;' type='text' name='fieldContent' placeholder='请输入,英文逗号分隔' />")
+        }
+        else{
+            $("tr[id='"+index+"']").find('td.dynamicAdd').empty();
+        }
+    }
+    function del(index) {
+        $("tr[id='"+index+"']").remove();//删除当前行
+    }
+
+    var fid = getParam("fid");
+    var id = getParam("id");
+    let status;
+    //加载组件
+    layui.config({
+        base: '/staticResource/lib/layui/lay/modules/'
+    }).extend({
+        xmSelect: 'xm-select'
+    }).use(['form', 'table', 'jquery', 'laydate','xmSelect'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+        var xmSelect = layui.xmSelect;
+
+        var projectIds = xmSelect.render({
+            el: '#projectIds',
+            name: 'projectId',
+            prop: {
+                name: 'projectName',
+                value: 'id',
+            },
+            style: {
+
+            },
+            data: [// 数据（JSON数组）
+
+            ],
+            tips: '多选项目',	// 选项提示文字
+            size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+            paging: true, // 是否分页，可选值：true、false
+            pageSize: 5, // 页大小，表示一页可显示多少数据
+            direction: 'down',	// 下拉方向，可选值为：auto、top、down
+            // filterable: true, // 是否启用搜索，可选值：true、false
+            empty: '呀, 没有用户呢', // 无数据时提示
+            toolbar: { // 工具条配置
+                show: true, // 是否显示
+                showIcon: false, // 显示图标
+            },
+        })
+        $.ajax({
+            type: 'GET',
+            url: apiPath+'/user/impProjectManage/query_list',
+            // async: false,
+            success: function (data) {
+                projectIds.update({
+                    data: data.data,
+                    autoRow: true,
+                })
+            }
+        })
+        var teamIds = xmSelect.render({
+            el: '#teamIds',
+            name: 'teamId',
+            prop: {
+                name: 'teamName',
+                value: 'id',
+            },
+            style: {
+
+            },
+            data: [// 数据（JSON数组）
+
+            ],
+            tips: '多选小组',	// 选项提示文字
+            size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+            paging: true, // 是否分页，可选值：true、false
+            pageSize: 5, // 页大小，表示一页可显示多少数据
+            direction: 'down',	// 下拉方向，可选值为：auto、top、down
+            // filterable: true, // 是否启用搜索，可选值：true、false
+            empty: '呀, 没有用户呢', // 无数据时提示
+            toolbar: { // 工具条配置
+                show: true, // 是否显示
+                showIcon: false, // 显示图标
+            },
+        })
+        $.ajax({
+            type: 'GET',
+            url: apiPath+'/user/impTeamInfo/query_list',
+            // async: false,
+            success: function (data) {
+                teamIds.update({
+                    data: data.data,
+                    autoRow: true,
+                })
+            }
+        })
+
+        form.on('radio(informantType)', function (data) {
+            if (data.value == "2") {
+                $("#teamIds").hide();
+                $("#projectIds").show();
+
+            } else {
+                $("#teamIds").show();
+                $("#projectIds").hide();
+
+            }
+        });
+
+        var startTime = laydate.render({
+            elem: '#timeStartShow',
+            trigger: 'click',
+            type: 'datetime',
+            btns: ['confirm'],
+             min:0,
+             ready: function (date) {
+                //将上面的属性赋值给此对象方法
+                lay.extend(startTime.config.dateTime, {
+                    hours: 00,
+                    minutes: 00,
+                    seconds: 00,
+                });
+            },
+            done(value, date, endDate) {
+                endTime.config.min={                    
+                    year:date.year,
+                    month:date.month-1,//关键
+                    date:date.date
+                    ,hours:date.hours,
+                    minutes:date.minutes,
+                    seconds:date.seconds
+                };
+                $("#timeStart").val(new Date(value).getTime());
+            }
+        });
+        var endTime = laydate.render({
+            elem: '#timeEndShow',
+            trigger: 'click',
+            type: 'datetime',
+            btns: ['confirm'],
+            ready: function (date) {
+                //将上面的属性赋值给此对象方法
+                    lay.extend(endTime.config.dateTime, {
+                        hours: 23,
+                        minutes: 59,
+                        seconds: 59,
+                    });
+                },
+                done(value, date, endDate) {
+                    $("#timeEnd").val(new Date(value).getTime());
+                },
+        });
+
+        $("#updateTime").val(new Date().getTime());
+
+
+        form.on('submit(save)', function (data) {
+            var projectArr = projectIds.getValue();
+            // console.log(projectArr);
+            var projectId = "";
+            $.each(projectArr,function(i,o){
+                projectId += o.id+",";
+            })
+            var teamArr = teamIds.getValue();
+            var teamId = "";
+            $.each(teamArr,function(i,o){
+                teamId += o.id+",";
+            })
+            data = data.field;
+            data.status=0;
+            delete data.timeStartShow;
+            delete data.timeEndShow;
+            delete data.fieldName;
+            delete data.fieldFirstProperties;
+            delete data.fieldProperties;
+            delete data.unit;
+            delete data.isRequired;
+            delete data.sort;
+            delete data.promptText;
+            delete data.fieldContent;
+            // console.log(JSON.stringify(data));
+            //生成对象数组，传给后台
+            var impTasksFieldsRelations =[];
+            $("#tbody").find("tr").each(function(i,row){
+                var tdArr = $(this).children();
+                var item = {};
+                item.fieldName = tdArr.eq(0).children().val();
+                item.fieldProperties = tdArr.eq(1).children().eq(0).val()+","+tdArr.eq(1).children().eq(1).val();
+                item.unit = tdArr.eq(2).children().val();
+                item.promptText = tdArr.eq(3).children().val();
+                item.fieldContent = tdArr.eq(4).children().val()?tdArr.eq(4).children().val():"";
+                item.isRequired = tdArr.eq(5).children().val();
+                item.sort = tdArr.eq(6).children().val();
+                impTasksFieldsRelations.push(item);
+            })
+            // console.log(impTasksFieldsRelations);
+            data.impTasksFieldsRelations = impTasksFieldsRelations;
+            console.log(JSON.stringify(data));
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath+'/content/impTemporaryTasks/save',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+
+            })
+            return false;
+        });
+
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+
+
+</body>
+</html>

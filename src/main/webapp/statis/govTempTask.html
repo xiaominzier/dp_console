@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>政府临时任务统计</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+    <script src="/staticResource/lib/echarts/echarts.min.js" charset="utf-8"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<form class="layui-form " id="formid">
+    <div class="layui-fluid">
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="width: 28px;">时间</label>
+            <div class="layui-input-inline">
+                <select id="dateType" lay-filter="dateType">
+                    <option>请选择</option>
+                    <option value="1" selected>年</option>
+                    <option value="2">月</option>
+                </select>
+            </div>
+            <div class="layui-input-inline">
+                <select id="dateArg" lay-filter="dateArg">
+                    <option>请选择</option>
+                </select>
+            </div>
+        </div>
+        <!--<span id="dateType" class="xm-select-demo" style="width: 100px;"></span>
+        <span id="dateArg" class="xm-select-demo" style="width: 200px;"></span>-->
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md6">
+                <div class="layui-card">
+                    <div class="layui-card-body " style="text-align: center;">
+                        <div id="pie" style="width: 100%;height:500px;margin: auto;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <div class="layui-card">
+                    <div class="layui-card-body " style="text-align: center;">
+                        <div id="bar" style="width: 100%;height:500px;margin: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</form>
+</body>
+</html>
+<script>
+    var years = new Array();
+    $.ajax({
+        type: "get",
+        async: false,
+        url: apiPath + "/content/impGovernmentTemporaryTasks/yearList",
+        success: function (res) {
+            if (res.code == 0) {
+                years = res.data;
+                // 基于准备好的dom，初始化echarts实例
+            } else {
+                layer.msg("获取数据失败！");
+            }
+        }
+    })
+    layui.use(['form', 'element'], function () {
+        var form = layui.form;
+
+        //初始化图表数据start
+        var dateArgSel = $("#dateArg");
+        dateArgSel.empty();
+        if(years[0]!=undefined){
+            var val = years[0]+"/0"; //获取到当年的年份信息
+            dateArgSel.append("<option value='" + years[0] + "'>" + years[0] + "年</option>");
+            var url = apiPath + '/content/impGovernmentTemporaryTasks/statistics/' + val;
+            getCharts(url);
+        }else{
+            dateArgSel.append("<option>请选择</option>");
+        }
+        form.render();
+        //初始化图表数据end
+
+        form.on('select(dateType)', function (data) {
+            var val = data.value; //得到被选中的值
+            console.log(val)
+            var dateArgSel = $("#dateArg");
+            dateArgSel.empty();
+            dateArgSel.append("<option value=''>请选择</option>");
+            if (val == 1) {
+                for (var index in years) {
+                    dateArgSel.append("<option value='" + years[index] + "/0'>" + years[index] + "年</option>");
+                }
+            } else if (val == 2) {
+                for (var index in years) {
+                    for (var i = 1; i < 13; i++) {
+                        // argData.push({name: years[index] + "年" + i + "月", value: years[index] + "/" + i});
+                        dateArgSel.append("<option value='" + years[index] + "/" + i + "'>" + years[index] + "年" + i + "月</option>");
+                    }
+                }
+            }
+            form.render();
+        });
+
+        form.on('select(dateArg)', function (data) {
+            var val = data.value; //得到被选中的值
+            var url = apiPath + '/content/impGovernmentTemporaryTasks/statistics/' + val;
+            getCharts(url);
+        });
+    });
+    function getCharts(url){
+        $.ajax({
+            type: "get",
+            url: url,
+            success: function (res) {
+                if (res.code == 0) {
+                    var data = res.data;
+                    // 基于准备好的dom，初始化echarts实例
+                    if (data.pie) {
+                        var myChart = echarts.init(document.getElementById('pie'));
+                        var legendData = new Array(), selectedData = new Array(),
+                            seriesData = new Array();
+                        var pie = data.pie;
+                        for (var pieindex in pie) {
+                            var nameStr = pie[pieindex].typeName;
+                            var obj = {};
+                            obj[nameStr] = true;
+                            selectedData.push(obj);
+                            legendData.push(nameStr);
+                            seriesData.push({name: nameStr, value: pie[pieindex].count});
+                        }
+                        option = {
+                            /*title: {
+                            text: '公司行业分布',
+                            left: 'center'
+                        },*/
+                            tooltip: {
+                                trigger: 'item',
+                                formatter: '{b} : {c} ({d}%)'
+                            },
+                            legend: {
+                                type: 'scroll',
+                                orient: 'horizontal',
+                                right: 10,
+                                bottom: 20,
+                                data: legendData,
+
+                                selected: selectedData
+                            },
+                            series: [
+                                {
+                                    type: 'pie',
+                                    radius: '55%',
+                                    center: ['40%', '50%'],
+                                    label: {
+                                        formatter: '{b} : {d}%'
+                                    },
+                                    data: seriesData,
+                                    emphasis: {
+                                        itemStyle: {
+                                            shadowBlur: 10,
+                                            shadowOffsetX: 0,
+                                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                        }
+                                    }
+                                }
+                            ]
+                        };
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+                    }
+
+                    if (data.bar) {
+                        var myChart = echarts.init(document.getElementById('bar'));
+                        var xAxisData = new Array(), seriesData = new Array();
+                        var bar = data.bar;
+                        for (var barindex in bar) {
+                            xAxisData.push(bar[barindex].dt);
+                            seriesData.push(bar[barindex].count);
+                        }
+                        option = {
+                            color: ['#3398DB'],
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                                    type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                                }
+                            },
+                            grid: {
+                                left: '3%',
+                                right: '4%',
+                                bottom: '3%',
+                                containLabel: true
+                            },
+                            xAxis: [
+                                {
+                                    type: 'category',
+                                    data: xAxisData,
+                                    axisTick: {
+                                        alignWithLabel: true
+                                    }
+                                }
+                            ],
+                            yAxis: [
+                                {
+                                    type: 'value'
+                                }
+                            ],
+                            series: [
+                                {
+                                    name: '提报数量',
+                                    type: 'bar',
+                                    barWidth: '60%',
+                                    data: seriesData
+                                }
+                            ]
+                        };
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+                    }
+                } else {
+                    layer.msg("获取数据失败！");
+                }
+            }
+        })
+    }
+    function updateInfo() {
+        top.xadmin.add_tab("修改信息", '/adminManager/user/update.html');
+    }
+</script>

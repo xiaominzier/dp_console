@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html >
+<head>
+    <meta charset="UTF-8">
+    <title>政府临时任务提报记录</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+   <!-- <link rel="stylesheet" href="/staticResource/lib/layui/css/layui.css" media="all">-->
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>政府临时任务提报记录</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                        <div class="layui-form-item">
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">类型</label>
+                                <div class="layui-input-inline">
+                                    <div id="type" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">点位名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="governmentName" autocomplete="off" id="governmentName"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">污染物类型</label>
+                                <div class="layui-input-inline">
+                                    <div id="contaminantsType" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">小组</label>
+                                <div class="layui-input-inline">
+                                    <div id="teamId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">核实人</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="verifier" autocomplete="off" id="verifier"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">提交时间</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" id="test16" placeholder="开始 到 结束">
+                                    <input type="text" style="display: none" class="layui-input" name="beginTime" id="beginTime" >
+                                    <input type="text" style="display: none" class="layui-input" name="endTime" id="endTime" >
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <button class="layui-btn" type="button" data-type="reload">搜索</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+
+
+                        </div>
+                    </form>
+
+                    <table id="table" lay-filter="table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script type="text/html" id="bar">
+    <a class="layui-btn layui-btn-xs" lay-event="checkout" per-code="sys:cooperator:getDetail">查看</a>
+    {{#
+    var genBtn = function(){
+    var btnStr="";
+    btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+    btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+    return btnStr;
+    }
+    }}
+    {{genBtn()}}
+
+
+
+</script>
+
+<script>
+    // showOrHiddeBtnByPermission();
+    var fid = self.frameElement.getAttribute("tab-id");
+    var type, contaminantsType, teamId;
+    var pageSize = 10;
+    layui.use(['table', 'jquery', 'form', 'element', 'laydate'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        var form = layui.form;
+        var element = layui.element;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#test16'
+            , type: 'datetime'
+            , range: '到'
+            , format: 'yyyy-M-d H:m:s'
+            , done: function (value, date, endDate) {
+                var start_date,
+                    end_date,
+                    start_date_timestamp,
+                    end_date_timestamp;
+                // 初始化时间日期对象
+                console.log(date.month)
+                start_date = new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                end_date = new Date(endDate.year, endDate.month - 1, endDate.date, endDate.hours, endDate.minutes, endDate.seconds);
+                // 获取时间戳 -- 13 位
+                console.log(start_date.toLocaleDateString())
+                // beginTime = start_date.getTime();
+                // endTime = end_date.getTime();
+                $("#beginTime").val(start_date.getTime());
+                $("#endTime").val(end_date.getTime());
+            }
+        });
+
+
+
+         type = xmSelect.render({
+            el: '#type',
+            data: [
+                {name: '督察核实单', value: 0},
+                {name: '举报件核实单', value: 1},
+                {name: '联合执法单', value: 2},
+                {name: '道路扬尘检查单', value: 3},
+                {name: '疫情防控单', value: 4},
+                {name: '施工工地检查单', value: 5},
+                {name: '其他', value: 6},
+            ]
+        })
+
+         contaminantsType = xmSelect.render({
+            el: '#contaminantsType',
+            data: [
+                {name: '废气', value: 1},
+                {name: '废水', value: 2},
+                {name: '噪声', value: 3},
+                {name: '危废', value: 4},
+                {name: '扬尘', value: 5},
+                {name: '其他', value: 6},
+            ]
+        })
+
+        //小组下拉框
+        teamId = xmSelect.render({
+            el: '#teamId',
+            name: 'teamId',
+            prop: {
+                name: 'teamName',
+                value: 'id',
+            },
+            style: {
+
+            },
+            data: [// 数据（JSON数组）
+
+            ],
+            // radio: true,
+            tips: '请选择',	// 选项提示文字
+            paging: true, // 是否分页，可选值：true、false
+            pageSize: 5, // 页大小，表示一页可显示多少数据
+            direction: 'down',	// 下拉方向，可选值为：auto、top、down
+            // filterable: true, // 是否启用搜索，可选值：true、false
+            empty: '呀, 没有用户呢', // 无数据时提示
+            toolbar: { // 工具条配置
+                show: true, // 是否显示
+                showIcon: false, // 显示图标
+            },
+        })
+        $.ajax({
+            type: 'GET',
+            url: apiPath+'/user/impTeamInfo/query_list',
+            // async: false,
+            success: function (data) {
+                teamId.update({
+                    data: data.data,
+                    autoRow: true,
+                })
+            }
+        })
+
+        var param = getQueryParam();
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath+'/content/impGovernmentTemporaryTasks/query_page',
+            method: "get",
+            even: true,
+            page: true,
+            defaultToolbar: false,
+            where: param,
+            cols: [[
+               /* {
+                    type: 'checkbox', width: '5%', fixed: 'left'
+                },*/
+                {
+                    field: 'type', title: '类型', width: '9%', align: 'center', templet: function (item) {
+                        if (item.type == 0) {
+                            return "督察核实单"
+                        } else if (item.type == 1) {
+                            return "举报件核实单"
+                        }else if (item.type == 2) {
+                            return "联合执法单"
+                        }else if (item.type == 3) {
+                            return "道路扬尘检查单"
+                        }else if (item.type == 4) {
+                            return "疫情防控单"
+                        }else if (item.type == 5) {
+                            return "施工工地检查单"
+                        }else if (item.type == 6) {
+                            return "其他"
+                        }
+                    }
+                },
+                {
+                    field: 'governmentName', title: '点位名称', width: '9%', align: 'center'
+                },
+                {
+                    field: 'contaminantsType', title: '污染物类型', width: '9%', align: 'center', templet: function (item) {
+                            var c = item.contaminantsType.split(",");
+                            var ct=[];
+                            for(var i=0;i<c.length;i++){
+                                if (c[i] == 1) {
+                                    ct.push('废气');
+                                } else if (c[i] == 2) {
+                                    ct.push('废水');
+                                }else if (c[i] == 3) {
+                                    ct.push('噪声');
+                                }else if (c[i] == 4) {
+                                     ct.push('危废');
+                                }else if (c[i] == 5) {
+                                     ct.push('扬尘');
+                                }else if (c[i] == 6) {
+                                    ct.push('其他');
+                                }
+                            }
+                            return ct.toString();
+                        }
+
+                },
+                {
+                    field: 'linkman', title: '联系人', width: '9%', align: 'center'
+                },
+                {
+                    field: 'linkmanTel', title: '联系电话', width: '9%', align: 'center'
+                },
+                {
+                    field: 'belongsToArea', title: '所属大院/商场楼体/村落/园区', width: '17%', align: 'center'
+                },
+                {
+                    field: 'teamName', title: '小组', width: '9%', align: 'center'
+                },
+                {
+                    field: 'verifier', title: '核实人', width: '9%', align: 'center'
+                },
+                {
+                    field: 'updateTime', title: '修改时间', width: '10%', align: 'center', templet: function (item) {
+                        if (item.updateTime == undefined || item.updateTime == null) {
+                            return "";
+                        }
+                        return new Date(item.updateTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    title: '操作', toolbar: '#bar', width: '10%', align: 'center',fixed: 'right',
+                }
+
+            ]],
+            id: 'testReload',
+
+            parseData: function (res) {
+
+                var json = getAjaxData(res);
+                return {
+                    "code": res.code,
+                    "data": json.records,
+                    "count": json.total,
+                    "msg": res.message
+                };
+
+            },
+
+            request: {
+                pageName: 'page',
+                limitName: 'size'
+            }
+
+        });
+        // showOrHiddeBtnByPermission();
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+
+
+        var $ = layui.$, active = {
+
+            reload: function () {
+                var param = getQueryParam();
+                if (tableIns != null) {
+                    tableIns.where = {};  //置空where
+                    tableIns.page = {};
+                }
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        currPage: 1 //重新从第 1 页开始
+                    }
+                    , where: param,
+                    done: function () {
+                        tableIns = this;
+                    }
+                });
+
+            }
+        };
+
+        function reload() {
+            var param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+            });
+
+        }
+        $('.layui-fluid .layui-form .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+        table.on('tool(table)', function (obj) {
+
+            var data = obj.data;
+            if (obj.event == 'del') {
+                layer.confirm('删除后提报人无法查看此次提交记录，确认删除吗？', function (index) {
+                    var childParam = {id: data.id};
+                    $.ajax({
+                        type: "POST",
+                        url: apiPath+"/content/impGovernmentTemporaryTasks/delete/"+data.id,
+                        data: childParam,
+                        success: function (res) {
+                            if (res.code == 0) {
+                                top.layer.msg("删除成功！");
+                                reload();
+                            } else {
+                                top.layer.msg("删除失败！");
+                            }
+                        }
+                    })
+                    layer.close(index);
+                });
+
+            } else if (obj.event == 'edit') {
+                top.xadmin.add_tab("编辑政府临时任务", "/content/governmentTemporaryTasks/impGovernmentTemporaryTasks-edit.html?fid=" + fid + "&id=" + data.id);
+            }else if (obj.event == 'checkout') {
+                top.xadmin.add_tab("查看政府临时任务", "content/governmentTemporaryTasks/governmentTemporaryTasks-check.html?fid=" + fid + "&id=" + data.id);
+            }
+
+        })
+
+        function getQueryParam() {
+            var param = {};
+
+            if (type && type.getValue().length > 0) {
+                param.type = type.getValue("valueStr");
+            }
+
+            if (contaminantsType && contaminantsType.getValue().length > 0) {
+                param.contaminantsType = contaminantsType.getValue("valueStr");
+            }
+
+            if (teamId && teamId.getValue().length > 0) {
+                param.teamId = teamId.getValue("valueStr");
+            }
+
+            var governmentName = $("#governmentName").val();
+            var verifier = $("#verifier").val();
+
+
+            if (governmentName != "") {
+                param.governmentName = governmentName;
+            }
+
+            if (verifier != "") {
+                param.verifier = verifier;
+            }
+            var beginTime = $("#beginTime").val();
+            if (beginTime !="") {
+                param.starttime = beginTime;
+            }
+            var endTime = $("#endTime").val();
+            if (endTime !="") {
+                param.endtime = endTime;
+            }
+
+
+            return param;
+        }
+
+
+        $('#search').on('click', function (data) {
+            reload();
+        });
+
+
+    })
+
+</script>
+</body>
+
+
+</html>

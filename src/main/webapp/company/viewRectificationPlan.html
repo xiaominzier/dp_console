@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看整改方案</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <style>
+        .labelWidth{
+            width: 160px;
+        }
+        .tpl1{
+            display: none;
+        }
+        .tpl2{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <form class="layui-form layui-col-space5">
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body ">
+                            <table class="layui-table" lay-skin="nob">
+                                <tbody>
+                                    <tr>
+                                        <td width="30%" id="l1"></td>
+                                        <td width="70%" id="l2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td width="30%">违规等级</td>
+                                        <td width="70%" id="violationLevel"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <fieldset class="layui-elem-field">
+                                <legend>政策法规</legend>
+                                <div class="layui-field-box">
+                                    <table class="layui-table" >
+                                        <thead>
+                                            <th>政策法规</th>
+                                            <th>章</th>
+                                            <th>条例内容</th>
+                                        </thead>
+                                        <tbody id="policiesInfo">
+                                            <tr class="tpl1">
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </fieldset>
+                            <fieldset class="layui-elem-field">
+                                <legend>整改方案</legend>
+                                <div class="layui-field-box">
+                                    <table class="layui-table" >
+                                        <thead>
+                                            <th>整改方案内容</th>
+                                        </thead>
+                                        <tbody id="rectificationInfo">
+                                            <tr class="tpl2">
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+
+<script>
+    var fieldData = decodeURI(getParam('fieldData'));//字段内容
+    var fieldName = decodeURI(getParam('fieldName'));//字段名称
+    var policiesId = getParam('policiesId');
+    var rectificationId = getParam('rectificationId');
+    var violationLevel = getParam('violationLevel');
+    if(violationLevel == '0'){
+        violationLevel = '严重违规';
+    }else if(violationLevel == '1'){
+        violationLevel = '一般违规'
+    }else if(violationLevel == '2'){
+        violationLevel = '违规'
+    }else if(violationLevel == '3'){
+        violationLevel = '不违规'
+    }else{
+        violationLevel = '-';
+    }
+    var page;
+    var size;
+    $(function(){
+        $("#l1").text(fieldName);
+        $("#l2").text(fieldData);
+        $("#violationLevel").text(violationLevel);
+        page = 1;
+        size = 30;
+        //政策法规
+        $.ajax({
+            type: "GET",
+            url: apiPath+"/content/impPoliciesRegulationsInfo/query_page?page="+page+"&size="+size+"&in_id="+policiesId,
+            success: function (res) {
+                if (res.code == 0) {
+                    var finalData = getAjaxData(res);
+                    var records = finalData.records;
+                    if (records) {
+                        console.log(records);
+                        $(records).each(function(index,ele){
+                            var oCloneDom = $('.tpl1').clone().removeClass('tpl1');
+                            oCloneDom.find('td')
+                                .eq(0).text(ele.policiesRegulationsName)
+                                        .next().text(ele.chapter)
+                                            .next().text(ele.measures)
+                            $('#policiesInfo').append(oCloneDom);
+                        })
+                    } else {
+                        parent.layer.msg("获取数据失败");
+                    }
+                }
+            },
+            error: function () {
+                return parent.layer.msg("获取数据失败");
+            }
+        });
+        //整改方案
+        $.ajax({
+            type: "GET",
+            url: apiPath+"/content/impRectificationPlan/query_page?page="+page+"&size="+size+"&id="+rectificationId,
+            success: function (res) {
+                if (res.code == 0) {
+                    var finalData = getAjaxData(res);
+                    var records = finalData.records;
+                    if (records) {
+                        console.log(records);
+                        $(records).each(function(index,ele){
+                            var oCloneDom = $('.tpl2').clone().removeClass('tpl2');
+                            oCloneDom.find('td')
+                                .eq(0).text(ele.comment)
+                            $('#rectificationInfo').append(oCloneDom);
+                        })
+                    } else {
+                        parent.layer.msg("获取数据失败");
+                    }
+                }
+            },
+            error: function () {
+                return parent.layer.msg("获取数据失败");
+            }
+        });
+        page++;
+    })
+        
+
+
+</script>
+</body>
+
+
+</html>

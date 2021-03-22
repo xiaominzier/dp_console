@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>行业字段管理</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>行业预警管理</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-btn-group demoTable" style="padding-top:10px">
+                        <button class="layui-btn layui-btn-warm" id="updateBtn" type="button"
+                                per-code='app:user:grade:publishUserGrade'><i
+                                class="layui-icon"></i>更新
+                        </button>
+                    </div>
+                    <table id="table" lay-filter="table"></table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="bar">
+    <a class="layui-btn layui-btn-xs " lay-event="edit">编辑</a>
+   <a class="layui-btn layui-btn-xs " lay-event="check">查看</a>
+</script>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<script>
+
+    var fid = self.frameElement.getAttribute("tab-id");
+    layui.use(['table', 'jquery', 'form', 'element'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        var form = layui.form;
+        var element = layui.element;
+
+
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath + '/industry/impIndustryWarningInfo/queryList',
+            method: "get",
+            // even: true,
+            defaultToolbar: false,
+            page: false,
+            // toolbar: "#toolbar",
+            cols: [[
+                {
+                    field: 'industryId', title: 'ID', width: '5%', align: 'center', fixed: 'true'
+                },
+                {
+                    field: 'industryName', title: '行业', width: '10%', align: 'center', fixed: 'true'
+                },
+                {
+                    field: 'allWarningFrequency', title: '预警频率', width: '35%', align: 'center'
+                },
+                {
+                    field: 'updateTime', title: '更新时间', width: '15%', align: 'center', templet: function (item) {
+                        if (item.updateTime == undefined || item.updateTime == null) {
+                            return "";
+                        }
+                        return new Date(item.updateTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    field: 'status', title: '更新状态', width: '15%', align: 'center', templet: function (item) {
+                        var status = "-"
+                        if (item.status) {
+                            if (item.status == "3") {
+                                status = "待更新";
+                            } else if (item.status == "4") {
+                                status = "已更新";
+                            }
+                        }
+                        return status;
+                    }
+                },
+                {
+                    field: 'userName', title: '管理员', width: '10%', align: 'center'
+                },
+                {
+                    title: '操作', toolbar: '#bar', width: '10%', align: 'center', fixed: 'right'
+                }
+
+            ]],
+            id: 'testReload',
+
+            parseData: function (res) {
+                return {
+                    "code": res.code,
+                    "data": res.data,
+                    "msg": res.message
+                };
+
+            },
+        });
+
+
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+        var $ = layui.$, active = {
+
+            reload: function () {
+
+                if (tableIns != null) {
+                    // tableIns.where = {};  //置空where
+                    // tableIns.page = {};
+                }
+                //执行重载
+                table.reload('testReload', {
+                    // page: {
+                    //     currPage: 1 //重新从第 1 页开始
+                    // },
+                    done: function () {
+                        tableIns = this;
+                    }
+                });
+
+
+            }
+        };
+        $('.layui-fluid .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+        $("#updateBtn").click(function () {
+            $.ajax({
+                // url: apiPath+'​/industry​/impIndustryWarningInfo​/query_list',
+                url: apiPath + '/industry/impIndustryWarningInfo/updateStatus',
+                type: 'GET',
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('更新成功');
+                        tableIns.reload();
+                    } else {
+                        top.layer.msg('更新失败,' + res.message);
+                    }
+                }
+            });
+        })
+        table.on('tool(table)', function (obj) {
+
+            var data = obj.data;
+            if (obj.event == 'edit') {
+                top.xadmin.add_tab("编辑预警信息", "/industry/warning/warningEdit.html?id=" + data.industryId);
+            } else if (obj.event == 'check') {
+                top.xadmin.add_tab("查看预警信息", "/industry/warning/warningCheck.html?id=" + data.industryId);
+            }
+
+        })
+
+    })
+
+</script>
+</body>
+
+
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加APP版本</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form" id="formid">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">上传APP附件</label>
+            <div class="layui-input-block">
+                <div class="layui-upload">
+                    <button type="button" class="layui-btn" id="appUploadBtn"><i
+                            class="layui-icon">&#xe681;</i>上传APP附件
+                    </button>
+                    <p id="appUploadMsg"></p>
+                    <input class="layui-input" type="hidden" name="attachedId" id="attachedId">
+                    <div class="layui-progress layui-progress-big" lay-filter="demo" lay-showPercent="true">
+                        <div class="layui-progress-bar" lay-percent="0%"></div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+        <input class="layui-input" type="hidden" name="status" id="status" >
+
+        <div class="layui-row ">
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">系统</label>
+                <div class="layui-input-block">
+                    <select name="systemType" lay-verify="required" lay-search="" lay-filter="systemType" id="systemType">
+                        <option value="">请选择</option>
+                        <option value="1">android</option>
+                        <option value="2">IOS</option>
+                    </select>
+                </div>
+            </div>
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">版本号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="version" lay-verify="required" placeholder="请输入" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="layui-row ">
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">强制更新</label>
+                <div class="layui-input-block">
+                    <select name="forceUpdate" lay-verify="required" lay-search="" lay-filter="forceUpdate" id="forceUpdate">
+                        <option value="">请选择</option>
+                        <option value="1">是</option>
+                        <option value="0">否</option>
+                    </select>
+                </div>
+            </div>
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">推送时间</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" name="pushTimeShow" id="pushTimeShow"
+                           autocomplete="off" lay-verify="required" placeholder="年/月/日">
+                    <input type="hidden" id="pushTime" name="pushTime" autocomplete="off"
+                           class="layui-input">
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item layui-col-md5">
+            <label class="layui-form-label">版本说明</label>
+            <div class="layui-input-block">
+                <input type="text" name="versionExplain"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: left;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    var fid = getParam("fid");
+    layui.use(['form', 'jquery', 'laydate', 'upload','layer','element'], function () {
+        var form = layui.form;
+        var $ = layui.jquery,layer = layui.layer;
+        var laydate = layui.laydate;
+        var upload = layui.upload;
+        var element = layui.element;
+        var timer;//定义一个计时器
+
+        var uploadInst = upload.render({
+            elem: '#appUploadBtn'
+            , url: apiPath+'/attached/file_upload' //改成您自己的上传接口
+            ,accept: 'file' //普通文件
+            , before: function (obj) {
+                layer.load(); //上传loading
+                var n = 0;
+                timer = setInterval(function(){//按照时间随机生成一个小于95的进度，具体数值可以自己调整
+                    n = n + Math.random()*10|0;
+                    if(n>95){
+                        n = 95;
+                        clearInterval(timer);
+                    }
+                    element.progress('demo', n+'%');
+                }, 50+Math.random()*100);
+            }
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return top.layer.msg('上传失败');
+                }
+                //上传成功
+                if (res && res.code == 0) {
+                    clearInterval(timer);
+                    element.progress('demo', '100%');//一成功就把进度条置为100%
+                    layer.closeAll();
+                    top.layer.msg('上传成功')
+
+                    $("#attachedId").val(res.data);
+                    $('#appUploadMsg').html("");
+                }
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#appUploadMsg');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload-blic">重试</a>');
+                demoText.find('.demo-reload-blic').on('click', function () {
+                    uploadInst.upload();
+                });
+                clearInterval(timer);
+                element.progress('demo', '0%');
+                layer.closeAll();
+            }
+        });
+
+
+        laydate.render({
+            elem: '#pushTimeShow'
+            , type: 'datetime'
+            /*  , range: true
+             , theme: 'molv'
+             , calendar: true
+             , format: 'yyyy/MM/dd'*/
+            , done(value, date, endDate) {
+                $("#pushTime").val(new Date(value).getTime());
+            }
+        });
+
+
+        form.on('submit(add)', function (data) {
+            data = data.field;
+            delete data.pushTimeShow;
+            delete data.file;
+            var now = new Date().getTime();
+            if($("#pushTime").val() <=now){
+                data.status=1
+            }else{
+                data.status=0
+            }
+
+            if($("#attachedId").val()==""){
+                parent.layer.msg('请先上传APP附件');
+                return false;
+            }
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath+'/user/impAppConfig/save',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+
+            })
+            return false;
+        });
+
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+
+    });
+</script>
+
+
+</body>
+</html>

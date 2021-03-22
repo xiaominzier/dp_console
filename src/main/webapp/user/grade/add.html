@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加用户等级</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+</head>
+<body>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 20px;padding-right: 20px">
+    <form class="layui-form" id="formid">
+        <div class="layui-form-item">
+            <label class="layui-form-label">等级名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" placeholder="请输入等级名称" autocomplete="off" lay-verify="required"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">消费额度</label>
+            <div class="layui-input-inline">
+                <input type="text" name="spendingLimitBegin" lay-verify="required|number" placeholder="￥"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid">-</div>
+            <div class="layui-input-inline">
+                <input type="text" name="spendingLimitEnd" lay-verify="required|number" placeholder="￥"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <span style="color: darkgrey;display: block;padding-top: 6px;">例输入100-200，指100（含）-200</span>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">说明</label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入说明" class="layui-textarea" name="remarks"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item" style="text-align: right;">
+            <div class="layui-input-block" style="text-align: right;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+
+    var fid = getParam("fid");
+    layui.use(['form', 'jquery'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+
+
+        form.on('submit(add)', function (data) {
+            data = data.field;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: '/app/userGrade/saveOrUpdate',
+                data: JSON.stringify(data),
+                success: function (res) {
+
+                    if (res && res.code == 0) {
+                        top.layer.msg('添加成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('添加失败')
+                    }
+                }
+            })
+            return false;
+        });
+
+        $('#cancelbtn').on('click', function () {
+            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+            // 切换到对应到选项卡下
+            top.element.tabChange('xbs_tab', fid);
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+</body>
+</html>

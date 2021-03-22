@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加合作机构</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+    <style>
+        .layui-form-label.layui-required:after {
+            content: "*";
+            color: red;
+            position: absolute;
+        }
+        .text-align{
+            text-align: left;
+        }
+        .sizeChange{
+            height: 25px;
+            line-height: 25px;
+        }
+        .ml{
+            margin-left: 40px;
+        }
+    </style>
+    
+</head>
+<body>
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form" id="formid">
+        <fieldset class="layui-elem-field">
+            <legend>添加地区</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item">
+                    <label class="layui-form-label text-align">所属地区</label>
+                    <label class="layui-form-label text-align"><strong>无</strong></label>
+                    <input type="hidden" name="parentId" value=0>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label text-align">地区名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="areaName" lay-verify="required" placeholder="输入地区名称" autocomplete="off"
+                            class="layui-input" id="areaName">
+                    </div>
+                    <label class="layui-form-label text-align">20字以内</label>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label text-align">区域大写</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="acronyms" lay-verify="required|checkAcronyms" placeholder="只能输入大写字母" autocomplete="off"
+                        class="layui-input" id="acronyms">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="ml">
+                        <input type="radio" class="status" id="on" name="status" value=1 title="启用" checked>
+                        <input type="radio" class="status" id="off" name="status" value=0 title="禁用">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn layui-btn-danger text-align sizeChange" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                        </button>
+                        <button class="layui-btn text-align sizeChange" lay-submit="" lay-filter="save"><i class="layui-icon">&#xe61f;</i>保存</button>
+        
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+
+    </form>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script>
+    $('#acronyms').on('change',function(){
+       var val = $(this).val().trim();
+       var regu = /^[A-Z]+$/;;
+        if (regu.exec(val)) {
+            return true;
+        } else {
+            alert("请输入大写字母 ！");
+            return false;
+        }
+    })
+    layui.use(['form', 'jquery'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        form.verify({
+            checkAcronyms: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (value != "") {
+                    var regu = /^[A-Z]+$/;;
+                    if (!regu.exec(value.trim())) {
+                        return "请输入大写字母 ！";
+                    }
+                }
+            }
+        });
+        form.on('submit(save)', function (data) {
+            data = data.field;
+            console.log("o%",data);
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath+'/user/impAreaInfo/save',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        // top.layer.msg('保存成功');
+
+                        top.layer.msg('保存成功', {time:1000},function(){  //延时跳转并提示
+                            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.location.reload();//刷新父页面，注意一定要在关闭当前iframe层之前执行刷新
+                            parent.layer.close(index); //再执行关闭
+                        });
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+            })
+            return false;
+        });
+        $('#cancelbtn').on('click', function () {
+            var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+            parent.layer.close(index);
+        });
+
+    });
+</script>
+
+
+</body>
+</html>

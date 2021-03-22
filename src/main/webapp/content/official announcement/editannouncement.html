@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>编辑</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form" id="formid" lay-filter="announForm">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: right;">
+                <button class="layui-btn layui-btn-danger" type="button" id="chancelBtn">取消</button>
+                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>保存</button>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">公告标题</label>
+            <div class="layui-input-block">
+                <input type="text" name="noticeTitle" placeholder="请输入标题" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">来源</label>
+            <div class="layui-input-block">
+                <input type="text" name="source" placeholder="请输入来源" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">详情</label>
+            <div class="layui-input-block">
+                    <textarea id="demo" name="noticeContent" style="display: none;" lay-verify="noticeContent"
+                                class="field-noticeContent"></textarea>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+    var index;
+    layui.use(['form', 'jquery', 'layedit'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        var layedit = layui.layedit;
+        layedit.set({
+            uploadImage: {
+                url: apiPath + '/attached/lay_file_upload' //接口url
+                , type: 'post' //默认post
+            }
+        });
+        index = layedit.build('demo', {
+            height: 480 //设置编辑器高度
+        }); //建立编辑器
+        form.verify({
+            noticeContent: function (value) {
+                return layedit.sync(index);
+            }
+        })
+        layedit.getContent(index);
+        $.ajax({
+            type: 'GET',
+            // url: apiPath+'​/user​/impCompanyNotice​/get​/'+id,
+            url: apiPath + '/user/impCompanyNotice/get/' + id,
+            // async: false,
+            success: function (data) {
+                var json = getAjaxData(data);
+                // console.log(json);
+                form.val("announForm", json);
+                $("#demo").css('display','block').html(json.noticeContent);
+                form.render();
+                index = layedit.build("demo");
+            }
+
+        })
+        form.on('submit(add)', function (data) {
+            data = data.field;
+            // index = layedit.build("noticeContent");
+            // console.log("编辑器索引"+layedit.getContent(index));
+            // data.noticeContent = layedit.getContent(index);
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                // url: apiPath+'​/user​/impCompanyNotice​/update​/'+id,
+                url: apiPath + '/user/impCompanyNotice/update/' + id,
+                data: JSON.stringify(data),
+                success: function (res) {
+                    console.log(res);
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+
+            })
+            return false;
+        });
+        
+        $('#chancelBtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+
+</script>
+
+
+</body>
+</html>

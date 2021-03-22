@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>导出</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 20px;padding-right: 20px">
+    <form class="layui-form" id="formid" lay-filter="loginPassForm">
+        <fieldset class="layui-elem-field">
+            <legend>导出</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">文件类型</label>
+                    <div class="layui-input-block">
+                        <input type="radio" lay-filter="fileType" name="fileType" value="1" title="Excel">
+                        <input type="radio" lay-filter="fileType" name="fileType" value="2" title="企业档案">
+                        <input type="radio" lay-filter="fileType" name="fileType" value="3" title="图片">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn layui-btn-danger" type="button" id="cancelbtn" lay-filter="cancel">取消</button>
+                        <a class="layui-btn" type="button" id="exportOrPrint" lay-submit lay-filter="exportOrPrint">导出</a>
+                    </div>
+                </div>
+            </div>
+        </fieldset>      
+    </form>
+</div>
+
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+    var url;
+    layui.use(['form', 'jquery'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        form.on('radio(fileType)', function (data) {
+            if (data.value == "1") { //导出Excel
+                url = apiPath + '/company/impCompanyInfo/download/excel/'+ id;
+                console.log(url);
+                $("#exportOrPrint")[0].setAttribute('href',url);
+            } else if (data.value == "2"){ //打印
+                url = apiPath + '/company/impCompanyInfo/download/printExcel/'+ id;
+                console.log(url);
+                $("#exportOrPrint")[0].setAttribute('href',url);
+            }else { //图片
+                url = apiPath + '/company/impCompanyInfo/download/png/'+ id;
+                console.log(url);
+                $("#exportOrPrint")[0].setAttribute('href',url);
+            }
+        });
+        $('#cancelbtn').on('click', function () {
+            var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+            parent.layer.close(index);
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!doctype html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>世纪大千信息管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/login.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        .layui-form-label.layui-required:after {
+            content: "*";
+            color: red;
+            position: absolute;
+        }
+
+        #divimg {
+            position: relative;
+            top: 1px;
+            text-align: center;
+            width: 15px;
+            display: inline;
+            top: -50px;
+            right: 10px;
+
+        }
+
+        #img {
+            width: 25px;
+            height: 15px;
+        }
+
+        .password {
+            position: relative;
+        }
+
+        .password .n-txtCss {
+            width: 100% !important;
+        }
+
+        .password .fa {
+            position: absolute;
+            right: 10px;
+            top: 15px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="login-bg">
+
+<div class="login layui-anim layui-anim-up">
+    <div class="message">找回密码</div>
+    <div id="darkbannerwrap"></div>
+    <div id="findDiv">
+        <form method="post" class="layui-form">
+            <div class="layui-form-item">
+                <input type="text" name="userPhone" id="userPhone" placeholder="手机号" autocomplete="off"
+                       class="layui-input" style="display: inline;width: 100%;">
+                <input type="hidden" name="id" id="id">
+            </div>
+            <div class="layui-form-item">
+                <input type="text" name="code" id="code" placeholder="图形验证码" autocomplete="off"
+                       class="layui-input" style="display: inline;width: 63%;">
+                <img src="/getShearCaptcha" style="width: 35%;cursor: pointer;" onclick="changeImg()" id="checkCode"/>
+            </div>
+            <div class="layui-form-item">
+                <input type="text" name="msgCode" id="msgCode" placeholder="短信验证码" autocomplete="new-password"
+                       class="layui-input" style="display: inline;width: 63%;">
+                <span id="btnSpan"></span>
+            </div>
+            <div class="layui-form-item" style="text-align: right;margin-bottom: 5px;">
+                <input type="password" name="passWord" id="newPwd1" placeholder="新密码" autocomplete="new-password"
+                       class="layui-input LAY-user-login-password" style="display: inline;width: 100%;">
+                <span style="color: darkgrey;">6到18位数字、大小写字母、下划线组合，最少包含两种类型</span>
+                <div id="divimg"><img id="img" class="showImg" onclick="hideShowPsw()"
+                                      src="/staticResource/images/icon-invisible.png"></div>
+            </div>
+            <div class="layui-form-item" style="text-align: right;">
+                <input type="password" id="newPwd2" placeholder="确认密码" autocomplete="off"
+                       class="layui-input LAY-user-login-password" style="display: inline;width: 100%;">
+                <span style="color: darkgrey;">6到18位数字、大小写字母、下划线组合，最少包含两种类型</span>
+                <div id="divimg"><img id="img" class="showImg" onclick="hideShowPsw()"
+                                      src="/staticResource/images/icon-invisible.png"></div>
+            </div>
+            <input value="确认" lay-submit lay-filter="modify" style="width:100%;" type="button">
+            <hr class="hr20">
+            <div style="text-align: right;">
+                <a href="/login.html" style="color: blue;">返回</a>&nbsp;
+            </div>
+        </form>
+    </div>
+    <div id="okDiv" style="display: none;">&nbsp;&nbsp;
+        密码修改成功，10秒钟以后自动跳转或者手动点击&nbsp;&nbsp;<a href="/login.html" style="color: blue;">返回</a>&nbsp;&nbsp;。
+    </div>
+</div>
+
+<script>
+    var demoImg = $(".showImg");
+    var PWD = $(".LAY-user-login-password");
+
+    function hideShowPsw() {
+        PWD.each(function () {
+            var pwd = this;
+            if (pwd.type == "password") {
+                pwd.type = "text";
+                demoImg.each(function () {
+                    $(this).attr("src", "/staticResource/images/icon-visible.png");
+                })
+            } else {
+                pwd.type = "password";
+                demoImg.each(function () {
+                    $(this).attr("src", "/staticResource/images/icon-invisible.png");
+                })
+            }
+        })
+
+    }
+
+    function initBtn() {
+        $("#btnSpan").html("<input type=\"button\" style=\"width: 35%;cursor: pointer;\" onclick=\"sendMsgCode()\" id=\"checkCodeBtn\"\n" +
+            "                       value=\"短信验证码\"/>");
+    }
+
+    function changeImg() {
+        $("#checkCode").attr("src", "/getShearCaptcha?r=" + Math.random())
+    }
+
+    var afterSecondNums = 90;
+    var timeoutId;
+
+    function sendMsgCode() {
+        var phoneNo = $("#userPhone").val();
+        var paramStr = "phoneNo=" + phoneNo;
+        // 尝试加密参数，是否加密根据配置决定
+        paramStr = encryptParamForUrlType(paramStr);
+        $.ajax({
+            type: "POST",
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            url: "/sendModyfyUserPwdCode",
+            data: paramStr,
+            success: function (result) {
+                if (result.code == 0) {
+                    // intervalId=set(afterSeconds(),1000);
+                    afterSeconds();
+                    layer.msg('验证码已发送', {icon: 1});
+                } else {
+                    layer.msg('验证码发送失败,' + result.message, {icon: 5});
+                }
+            }
+        });
+    }
+
+    function afterSeconds() {
+        if (afterSecondNums > 0) {
+            $("#checkCodeBtn").attr("disabled", "disabled");
+            $("#checkCodeBtn").addClass("layui-disabled");
+            $("#checkCodeBtn").val("重新发送 " + afterSecondNums + "s");
+            afterSecondNums = afterSecondNums - 1;
+            timeoutId = setTimeout(function () {
+                afterSeconds()
+            }, 1000);
+        } else {
+            layui.config({
+                base: "/staticResource/lib/layui/lay/modules/"
+            }).use('form', function () {
+                var form = layui.form;
+                initBtn();
+                form.render();
+            });
+            afterSecondNums = 90;
+            clearTimeout(timeoutId);
+        }
+
+    }
+
+    layui.use('form', function () {
+        var form = layui.form;
+        initBtn();
+
+        function checkPwd() {
+            var newPwd1 = $("#newPwd1").val();
+            var newPwd2 = $("#newPwd2").val();
+            if (newPwd1 != newPwd2) {
+                layer.msg('两次密码输入不一致', {icon: 2});
+                $("#newPwd2").focus();
+                $("#newPwd2").addClass("layui-form-danger");
+                return false;
+            }
+            return true;
+        }
+
+        //监听提交
+        form.on('submit(modify)', function (data) {
+            var newPwd1 = $("#newPwd1").val();
+            var newPwd2 = $("#newPwd2").val();
+            if (newPwd1 != newPwd2) {
+                layer.msg('两次密码输入不一致', {icon: 2});
+                $("#newPwd2").focus();
+                $("#newPwd2").addClass("layui-form-danger");
+                return false;
+            }
+            var param = data.field;
+            // 尝试加密参数，是否加密根据配置决定
+            param = encryptParamForObjType(param);
+            $.ajax({
+                type: "POST",
+                contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                url: "/user/modifyUserPwd",
+                data: param,
+                success: function (result) {
+                    if (result.code == 0 && result.data > 0) {
+                        layer.msg('修改成功', {icon: 1});
+                        $("#findDiv").hide();
+                        $("#okDiv").show();
+                        setTimeout(function () {
+                            location.href = "/login.html"
+                        }, 10000);
+                    } else {
+                        layer.msg('修改失败：' + result.message, {icon: 5});
+                    }
+                }
+            });
+            return false;
+        });
+        $("#newPwd2").on("blur", function () {
+            checkPwd();
+        });
+
+    });
+</script>
+<!-- 底部结束 -->
+</body>
+</html>

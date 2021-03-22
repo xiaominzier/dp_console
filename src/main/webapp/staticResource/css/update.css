@@ -1,0 +1,370 @@
+/*公共部分*/
+.layui-layout-admin .layui-layout-left,
+.layadmin-pagetabs,
+.layui-layout-admin .layui-body,
+.layui-layout-admin .layui-footer {
+    left: 0 !important;
+}
+
+.layadmin-side-shrink .layui-layout-admin .layui-layout-left,
+.layadmin-side-shrink .layadmin-pagetabs,
+.layadmin-side-shrink .layui-layout-admin .layui-body,
+.layadmin-side-shrink .layui-layout-admin .layui-footer {
+    left: 0 !important;
+}
+
+.layui-bg-white {
+    background-color: #fff !important;
+}
+
+.layui-tit-white {
+    color: #fff !important;
+}
+
+.layui-tit-red {
+    color: #FF5722 !important
+}
+
+.layui-tit-orange {
+    color: #FFB800 !important
+}
+
+.layui-tit-green {
+    color: #009688 !important
+}
+
+.layui-tit-cyan {
+    color: #2F4056 !important
+}
+
+.layui-tit-blue {
+    color: #1E9FFF !important
+}
+
+.layui-tit-black {
+    color: #393D49 !important
+}
+
+.layui-tit-gray {
+    color: #999 !important;
+}
+
+.pl10 {
+    padding-left: 10px !important;
+}
+
+.pr10 {
+    padding-right: 10px !important;
+}
+
+.pt10 {
+    padding-top: 10px !important;
+}
+
+.pb10 {
+    padding-bottom: 10px !important;
+}
+
+.plr10 {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+.ptb10 {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.p10 {
+    padding: 10px !important;
+}
+
+.pl0 {
+    padding-left: 0% !important;
+}
+
+.pr0 {
+    padding-right: 0% !important;
+}
+
+.pt0 {
+    padding-top: 0% !important;
+}
+
+.pb0 {
+    padding-bottom: 0% !important;
+}
+
+.plr0 {
+    padding-left: 0% !important;
+    padding-right: 0% !important;
+}
+
+.ptb0 {
+    padding-top: 0% !important;
+    padding-bottom: 0% !important;
+}
+
+.p0 {
+    padding: 0% !important;
+}
+
+.ml10 {
+    margin-left: 10px !important;
+}
+
+.mr10 {
+    margin-right: 10px !important;
+}
+
+.mt10 {
+    margin-top: 10px !important;
+}
+
+.mb10 {
+    margin-bottom: 10px !important;
+}
+
+.mlr10 {
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+}
+
+.mtb10 {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+.m10 {
+    margin: 10px !important;
+}
+
+.ml0 {
+    margin-left: 0% !important;
+}
+
+.mr0 {
+    margin-right: 0% !important;
+}
+
+.mt0 {
+    margin-top: 0% !important;
+}
+
+.mb0 {
+    margin-bottom: 0% !important;
+}
+
+.mlr0 {
+    margin-left: 0% !important;
+    margin-right: 0% !important;
+}
+
+.mtb0 {
+    margin-top: 0% !important;
+    margin-bottom: 0% !important;
+}
+
+.m0 {
+    margin: 0% !important;
+}
+
+.fl {
+    float: left;
+}
+
+.fr {
+    float: right;
+}
+
+.tl {
+    text-align: left;
+}
+
+.tr {
+    text-align: right;
+}
+
+.tc {
+    text-align: center;
+}
+
+.clear:after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+/*文字排版*/
+.f12 {
+    font-size: 12px
+}
+
+.f13 {
+    font-size: 13px
+}
+
+.f14 {
+    font-size: 14px
+}
+
+.f16 {
+    font-size: 16px
+}
+
+.f18 {
+    font-size: 18px
+}
+
+.f20 {
+    font-size: 20px
+}
+
+.f22 {
+    font-size: 22px
+}
+
+.f24 {
+    font-size: 24px
+}
+
+.f26 {
+    font-size: 26px
+}
+
+.f28 {
+    font-size: 28px
+}
+
+.f30 {
+    font-size: 30px
+}
+
+.f40 {
+    font-size: 40px
+}
+
+/*重置样式*/
+.layui-tree-checkedFirst .layui-tree-txt {
+    color: #009688;
+    text-decoration: underline;
+}
+
+.update-layui-fluid {
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.update-layui-fluid-scroll {
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.update-iframe {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.update-iframe::-webkit-scrollbar,
+.update-layui-fluid-scroll::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.update-iframe::-webkit-scrollbar-track,
+.update-layui-fluid-scroll::-webkit-scrollbar-track {
+    width: 4px;
+    background-color: #ccc;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.update-iframe::-webkit-scrollbar-thumb,
+.update-layui-fluid-scroll::-webkit-scrollbar-thumb {
+    background-color: #999;
+    background-clip: padding-box;
+    min-height: 28px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.update-layui-fluid-scroll > .layui-card {
+    min-height: 100%;
+}
+
+.update-title-box {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.update-title-h1 {
+    font-size: 16px;
+}
+
+.update-title-msg {
+    font-size: 12px;
+    color: #999 !important;
+    padding: 0 5px !important;
+}
+
+.update-text * {
+    max-width: 100%;
+}
+
+.update-tree .layui-tree-txt {
+    font-size: 18px;
+}
+
+.update-toggle-hide {
+    display: none;
+}
+
+.update-toggle-hide.on {
+    display: block;
+}
+
+.update-iframe-out {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.width100 {
+    width: 100%;
+}
+
+.height100 {
+    height: 100%;
+}
+
+/*ueditor*/
+.editor-style,
+.editor-style * {
+    box-sizing: content-box;
+}
+
+.editor-style.edui-default .edui-editor {
+    border-radius: 0px !important;
+    border: 1px solid #ededed;
+}
+
+.editor-style.edui-default .edui-editor-toolbarbox {
+    box-shadow: none;
+}
+
+.editor-style.edui-default .edui-editor-toolbarboxouter {
+    background: #F0F0F0;
+}
+
+.editor-style.edui-default .edui-editor-bottomContainer td {
+    border-top: 1px solid #ededed;
+}

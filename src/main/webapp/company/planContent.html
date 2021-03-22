@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>整改方案</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>整改方案</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="cooperForm">
+                        <div class="layui-form-item">
+                                <label class="layui-form-label">标题</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="title"  autocomplete="off" class="layui-input">
+                                </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                                <label class="layui-form-label">整改方案</label>
+                                <div class="layui-input-block">
+                                    <textarea id="comment" style="display: none;" name="comment" lay-verify="comment"
+                                              class="layui-textarea" ></textarea>
+                                </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block" style="text-align: center;">
+                                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#xe61f;</i>关闭
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="bar">
+    {{#
+    var statusBtn = function(data){
+    var btnStr="";
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="detail">查看</a>';
+    return btnStr;
+    }
+    }}
+    {{statusBtn(d)}}
+
+
+</script>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<script>
+
+    var fid = self.frameElement.getAttribute("tab-id");
+    // var fid = getParam("fid");
+    var id = getParam("id");
+
+
+    layui.use(['table', 'form', 'element','layer', 'layedit'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+        var layer = layui.layer;
+        var layedit = layui.layedit;
+        var index = layedit.build('comment', {
+            height: 480 //设置编辑器高度
+        }); //建立编辑器
+        form.verify({
+            comment: function (value) {
+                return layedit.sync(index);
+            }
+        })
+
+        $.ajax({
+            type: 'get',
+            url: apiPath+'/content/impRectificationPlan/get/'+id,
+            async: false,
+            success: function (data) {
+                var json = getAjaxData(data);
+                form.val("cooperForm", json);
+
+                if(json){
+                    if (json.comment) {
+                        var index = layedit.build('comment', {
+                            height: 480 //设置编辑器高度
+                        });
+                    }
+                }
+
+                form.render();
+            }
+        })
+
+        function reload() {
+            var param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+                // sysOperatorId: $("#sysOperatorId").val(),
+            });
+
+        }
+
+
+
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+
+
+        $("#cancelbtn").click(function () {
+            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index);
+        })
+
+
+
+    })
+
+</script>
+</body>
+
+
+</html>

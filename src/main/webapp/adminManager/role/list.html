@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>角色管理</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">角色</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="roleName" id="roleName" autocomplete="off"
+                                           placeholder="请输入"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">状态</label>
+                                <div class="layui-input-inline">
+                                    <div name="status" id="status">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <button class="layui-btn" type="button" data-type="reload">搜索</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="layui-btn-group demoTable" style="padding-top:10px">
+                        <button class="layui-btn" id="addBtn" type="button" per-code='app:user:grade:saveOrUpdate'><i
+                                class="layui-icon"></i>添加
+                        </button>
+                    </div>
+                    <table id="table" lay-filter="table"></table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="bar">
+
+    {{#
+    var statusBtn = function(data){
+    var btnStr="";
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="edit">编辑</a>';
+    btnStr+='<a class="layui-btn layui-btn-xs  layui-btn-danger" lay-event="delete">删除</a>';
+    if(d.status){
+    if(d.status=="0"){
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="enable">启用</a>';
+    }else if(d.status=="1"){
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="dis">禁用</a>';
+    }
+    }
+    return btnStr;
+    }
+    }}
+    {{statusBtn(d)}}
+</script>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<script>
+
+    var statusSel;
+    var fid = self.frameElement.getAttribute("tab-id");
+    layui.use(['table', 'jquery', 'form', 'layer'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+
+        statusSel = xmSelect.render({
+            el: '#status',
+            radio: true,
+            clickClose: true,
+            prop: {
+                name: 'name',
+                value: 'id'
+
+            },
+            tree: {
+                show: true,
+                strict: false,
+                expandedKeys: [-1],
+            },
+            data: [{id: 0, name: "禁用"}, {id: 1, name: "启用"}]
+        });
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath + '/user/impRoleInfo/query_page?gt_id=3',
+            method: "get",
+            even: true,
+            page: true,
+            defaultToolbar: false,
+            // toolbar: "#toolbar",
+            cols: [[
+                {
+                    field: 'id', title: 'ID', width: '10%', align: 'center', fixed: 'true'
+                },
+                {
+                    field: 'roleName', title: '角色', width: '15%', align: 'center'
+                },
+                {
+                    field: 'remark', title: '描述', width: '35%', align: 'center'
+                },
+                {
+                    field: 'status', title: '状态', width: '10%', align: 'center', templet: function (item) {
+                        var res = "-"
+                        if (item.status) {
+                            if (item.status == "0") {
+                                res = "禁用";
+                            } else if (item.status == "1") {
+                                res = "启用";
+                            }
+                        }
+                        return res;
+                    }
+                },
+                {
+                    field: 'updateTime', title: '修改时间', width: '10%', align: 'center', templet: function (item) {
+                        if (item.updateTime == undefined || item.updateTime == null) {
+                            return "";
+                        }
+                        return new Date(item.updateTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                },
+                {
+                    title: '操作', toolbar: '#bar', width: '20%', align: 'center', fixed: 'right'
+                }
+
+            ]],
+            id: 'projectReload',
+
+            parseData: function (res) {
+                return {
+                    "code": res.code,
+                    "data": res.data.records,
+                    "count": res.data.total,
+                    "msg": res.message
+                };
+
+            },
+
+            request: {
+                pageName: 'page',
+                limitName: 'size'
+            }
+
+        });
+
+        var active = {
+            reload: function () {
+                var param = getQueryParam();
+                console.log(param);
+                if (tableIns != null) {
+                    tableIns.where = {};  //置空where
+                    tableIns.page = {};
+                }
+                //执行重载
+                table.reload('projectReload', {
+                    page: {
+                        currPage: 1 //重新从第 1 页开始
+                    }
+                    , where: param,
+                    done: function () {
+                        tableIns = this;
+                    }
+                });
+
+            }
+        };
+
+        $('.layui-fluid .layui-form .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            if (obj.event == 'edit') {
+                top.xadmin.add_tab("编辑", "/adminManager/role/edit.html?fid=" + fid + "&id=" + data.id);
+            } else if (obj.event == 'delete') {
+                layer.confirm('确认删除吗？', function (index) {
+
+                    var param = {"id": data.id};
+                    param = encryptParamForObjType(param);
+                    $.ajax({
+                        url: apiPath + '/user/impRoleInfo/delete/' + data.id,
+                        data: param,
+                        type: "POST",
+                        success: function (res) {
+                            if (res.code == 0) {
+                                parent.layer.msg('删除成功');
+                                tableIns.reload();
+                            } else {
+                                parent.layer.msg('删除失败');
+                            }
+                        }
+                    });
+                    layer.close(index);
+                });
+            } else if (obj.event == 'enable') {
+                $.ajax({
+                    url: apiPath + '/user/impRoleInfo/disable/' + data.id + "/1",
+                    type: "get",
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('启用成功');
+                            tableIns.reload();
+                        } else {
+                            parent.layer.msg('启用失败');
+                        }
+                    }
+                });
+            } else if (obj.event == 'dis') {
+                $.ajax({
+                    url: apiPath + '/user/impRoleInfo/disable/' + data.id + "/0",
+                    type: "get",
+                    success: function (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('禁用成功');
+                            tableIns.reload();
+                        } else {
+                            parent.layer.msg('禁用失败');
+                        }
+                    }
+                });
+            }
+
+        })
+    })
+
+    function getQueryParam() {
+        var param = {};
+        var roleName = $("#roleName").val();
+        if (roleName != "") {
+            param.lk_roleName = roleName;
+        }
+        if (statusSel && statusSel.getValue().length > 0) {
+            param.in_status = statusSel.getValue("valueStr");
+        }
+        return param;
+    }
+    $("#addBtn").click(function () {
+        top.xadmin.add_tab("添加", "/adminManager/role/add.html?fid=" + fid);
+    })
+
+
+</script>
+</body>
+
+
+</html>

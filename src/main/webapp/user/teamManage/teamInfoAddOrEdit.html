@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加/编辑小组信息</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+</head>
+<body>
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form" id="formid" lay-filter="teamInfoForm">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: right;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>确认保存</button>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">小组名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="teamName" lay-verify="required" placeholder="请输入名称" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">管理区域</label>
+           <div class="layui-input-block" >
+                <div id="areaId" ></div>
+           </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">负责人姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="userName" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">负责人联系方式</label>
+            <div class="layui-input-block">
+                <input type="text" name="userTel" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-required">账号状态</label>
+            <div class="layui-input-block">
+                <select name="status" lay-verify="required" lay-search="" lay-filter="status" id="status">
+                    <option value="1">启用</option>
+                    <option value="0">禁用</option>
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+
+<script>
+    var fid = getParam("fid");
+    var id = getParam("id");
+    var areaId;
+    function checkMobile(str) { //写一个判断函数
+        var  re = /^1\d{10}$/    //正则表达式
+        if (!re.test(str)) {      //判断字符是否是11位数字
+            parent.layer.msg('请输入11位数字手机号');
+            return false;
+        }
+    }
+    layui.config({
+        base: "/staticResource/lib/layui/lay/modules/"
+    }).extend({
+        xmSelect: 'xm-select'
+    }).use(['form', 'jquery','laydate','xmSelect'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+
+        $("input[name='userTel']").blur(function(){
+            var tel = $(this).val(); //取值
+            checkMobile(tel);
+        })
+        // 管理区域下拉框选项初始化
+        var xmSelect = layui.xmSelect;
+        //渲染多选
+        areaId = xmSelect.render({
+            el: '#areaId',
+            name: 'areaId',
+            prop: {
+                name: 'areaName',
+                value: 'id',
+                children: 'children'
+            },
+            tree: {
+                show: true,
+                strict: false,
+                expandedKeys: [-1],
+            },
+            radio: true,
+            clickClose: true,
+            style: {
+
+            },
+            data: [// 数据（JSON数组）
+
+            ],
+            tips: '选择',	// 选项提示文字
+            // size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+            paging: true, // 是否分页，可选值：true、false
+            pageSize: 5, // 页大小，表示一页可显示多少数据
+            direction: 'down',	// 下拉方向，可选值为：auto、top、down
+            // filterable: true, // 是否启用搜索，可选值：true、false
+            empty: '呀, 没有用户呢', // 无数据时提示
+            toolbar: { // 工具条配置
+                show: true, // 是否显示
+                showIcon: false, // 显示图标
+            },
+        })
+        $.ajax({
+            type: 'GET',
+            url: apiPath+'/user/impAreaInfo/query_trees/0',
+            async: false,
+            success: function (data) {
+                areaId.update({
+                    data: data.data,
+                    autoRow: true,
+                })
+            }
+        })
+        if(id!=""){
+            $.ajax({
+                type: 'GET',
+                url: apiPath+'/user/impTeamInfo/get/'+id,
+                // async: false,
+                success: function (data) {
+                    var json = getAjaxData(data);
+                    // console.log(json);
+                    form.val("teamInfoForm", json);
+                    form.render();
+                    var area = json.areaId;
+                    console.log(area);
+                    areaId.setValue([area]);
+                }
+
+            })
+            form.on('submit(add)', function (data) {
+                data = data.field;
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: apiPath+'/user/impTeamInfo/update/'+id,
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        console.log("小组信息修改成功"+res);
+                        if (res && res.code == 0) {
+                            top.layer.msg('保存成功');
+                            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                            // 切换到对应到选项卡下
+                            top.element.tabChange('xbs_tab', fid);
+                            // 关闭顶层框架tab
+                            var id = self.frameElement.getAttribute("tab-id");
+                            top.element.tabDelete('xbs_tab', id);
+                        } else {
+                            top.layer.msg('保存失败');
+                        }
+                    }
+
+                })
+                return false;
+            });
+        }
+        else{
+            form.on('submit(add)', function (data) {
+                //获取当前下拉多选选中的值
+                var selectArr = areaId.getValue();
+                if(selectArr==""){
+                    alert("区域必填，请选择");
+                    return false;
+                }
+                data = data.field;
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: apiPath+'/user/impTeamInfo/save',
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        console.log("小组添加成功"+res);
+                        if (res && res.code == 0) {
+                            top.layer.msg('保存成功');
+                            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                            // 切换到对应到选项卡下
+                            top.element.tabChange('xbs_tab', fid);
+                            // 关闭顶层框架tab
+                            var id = self.frameElement.getAttribute("tab-id");
+                            top.element.tabDelete('xbs_tab', id);
+                        } else {
+                            top.layer.msg('保存失败');
+                        }
+                    }
+
+                })
+                return false;
+            });
+        }
+
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+
+    });
+</script>
+
+
+</body>
+</html>

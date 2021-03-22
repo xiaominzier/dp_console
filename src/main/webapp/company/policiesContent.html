@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html >
+<head>
+    <meta charset="UTF-8">
+    <title>已选法规条例</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<div class="layui-fluid" >
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <input type="hidden" id="idstr" name="idstr" lay-verify="required"
+                           autocomplete="off" class="layui-input">
+                    <table id="table" lay-filter="table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script type="text/html" id="bar">
+
+    {{#
+    var genBtn = function(){
+    var btnStr="";
+    btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+    return btnStr;
+    }
+    }}
+    {{genBtn()}}
+
+
+
+</script>
+
+<script>
+    var id = getParam('id');
+
+    var arr=id.split(',');
+
+
+    layui.use(['table', 'jquery', 'form'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        var form = layui.form;
+        var pageSize=10;
+
+
+        var param = getQueryParam();
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath+'/content/impPoliciesRegulationsInfo/query_page',
+            method: "get",
+            even: true,
+            page: true,
+            defaultToolbar: false,
+            where: param,
+
+            cols: [[
+                {
+                    field: 'policiesRegulationsName', title: '政策法规', width: '15%', align: 'center',
+                },
+                {
+                    field: 'chapter', title: '章', width: '10%', align: 'center'
+                },
+                {
+                    field: 'measures', title: '条例内容', width: '45%', align: 'center',
+                },
+                {
+                    field: 'materialDate', title: '实施日期', width: '20%', align: 'center', templet: function (item) {
+                        if (item.materialDate == undefined || item.materialDate == null) {
+                            return "";
+                        }
+                        return new Date(item.materialDate).format("yyyy-MM-dd");
+                    }
+                },
+                {
+                    title: '操作', toolbar: '#bar', width: '10%', align: 'center',fixed: 'right',
+                }
+
+            ]],
+            id: 'testReload',
+
+            parseData: function (res) {
+
+                var json = getAjaxData(res);
+                return {
+                    "code": res.code,
+                    "data": json.records,
+                    "count": json.total,
+                    "msg": res.message
+                };
+
+            },
+
+            request: {
+                pageName: 'page',
+                limitName: 'size'
+            }
+
+        });
+
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+
+
+        var $ = layui.$, active = {
+
+            reload: function () {
+                var param = getQueryParam();
+                if (tableIns != null) {
+                    tableIns.where = {};  //置空where
+                    tableIns.page = {};
+                }
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        currPage: 1 //重新从第 1 页开始
+                    }
+                    , where: param,
+                    done: function () {
+                        tableIns = this;
+                    }
+                });
+
+            }
+        };
+
+        function reload() {
+            var param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+            });
+
+        }
+        $('.layui-fluid .layui-form .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+        table.on('tool(table)', function (obj) {
+
+            var data = obj.data;
+            if (obj.event == 'del') {
+                for(var i=0;i<arr.length;i++){
+                    if(arr[i]==data.id){
+                        arr.splice(i,1);
+                    }
+                }
+               id=arr.toString();
+                $("#arr").val(id);
+                parent.delChecked(data.id);
+               reload();
+            }
+
+        })
+
+        function getQueryParam() {
+            var param = {};
+
+            if (id != "") {
+                param.IN_id = id;
+            }else{
+                param.IN_id = "9999999999";
+            }
+
+            return param;
+        }
+
+
+        $('#search').on('click', function (data) {
+            reload();
+        });
+    })
+
+</script>
+</body>
+
+
+</html>

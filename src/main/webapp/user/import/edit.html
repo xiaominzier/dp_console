@@ -1,0 +1,441 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>编辑用户</title>
+    <!--
+        <link href="layui/css/layui.css" rel="stylesheet" />-->
+
+    <!-- <script src="layui/layui.js" type="text/javascript"></script>
+     <script src="js/jquery.min.js" type="text/javascript"></script>-->
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <link rel="stylesheet" href="/staticResource/lib/layui/css/layui.css">
+    <style>
+        .layui-form-label.layui-required:after {
+            content: "*";
+            color: red;
+            position: absolute;
+        }
+
+    </style>
+</head>
+</head>
+
+<body>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card" style="padding: 15px;">
+                <form class="layui-form" lay-filter="userForm">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">姓名</label>
+                        <div class="layui-input-block">
+                            <input type="hidden" id="id" name="id">
+                            <input type="hidden" id="agencyId" name="agencyId">
+                            <input type="tel" name="nickName" id="nickName" lay-verify="required" autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">性别</label>
+                        <div class="layui-input-block">
+                            <select name="sex" id="sex" lay-verify="required" lay-search>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">手机号</label>
+                        <div class="layui-input-block">
+                            <input type="tel" name="userPhone" id="userPhone" onblur="userPhoneCheck()"
+                                   lay-verify="phone"
+                                   autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">用户类型</label>
+                        <div class="layui-input-block">
+                            <select name="appUserType" id="appUserType" lay-verify="required" lay-search>
+                                <option value="0">普通用户</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">证件类型</label>
+                        <div class="layui-input-block">
+                            <select name="certificateType" id="certificateType" lay-verify="required" lay-search>
+                                <option value="身份证">身份证</option>
+                                <option value="军官证">军官证</option>
+                                <option value="港澳通行证">港澳通行证</option>
+                                <option value="护照">护照</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">证件号码</label>
+                        <div class="layui-input-block">
+                            <input name="certificateNo" id="certificateNo" onblur="checkedCertifyNO()"
+                                   lay-verify="required"
+                                   autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">出生日期</label>
+                        <div class="layui-input-block">
+                            <input name="birthday" id="birthday" autocomplete="off" onclick="selectDate()"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">电子邮箱</label>
+                        <div class="layui-input-block">
+                            <input name="email" id="email" autocomplete="off" lay-verify="email"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">地区</label>
+                        <div class="layui-inline">
+                            <select name="belongProvince" id="belongProvince" lay-search
+                                    lay-filter="belongProvince">
+                                <option value="">省份</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline">
+                            <select name="belongCity" id="belongCity" lay-search
+                                    lay-filter="belongCity">
+                                <option value="">地级市</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline">
+                            <select name="belongArea" id="belongArea" lay-filter="belongArea"
+                                    lay-search>
+                                <option value="">县/区</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label layui-required">详细地址</label>
+                        <div class="layui-input-block">
+                            <input type="tel" name="addressDetail" id="addressDetail" lay-verify="required"
+                                   autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item" style="text-align: right;">
+                        <button class="layui-btn layui-btn-danger" type="button" id="chancelBtn">取消</button>
+                        <button class="layui-btn" lay-submit lay-filter="saveData">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+<script type="text/javascript">
+    var fid = getParam("fid");
+    var id = getParam("id");
+    var birthday;
+    var birthStr;
+    var laydate;
+    layui.config({
+        base: "/staticResource/lib/layui/lay/modules/"
+    }).use(['form', 'laydate', 'jquery', 'tree', 'eleTree', 'layer', 'laydate'], function () {
+        var form = layui.form,
+            $ = layui.jquery,
+            eleTree = layui.eleTree;
+
+        var layer = layui.layer;
+        laydate = layui.laydate;
+
+        var belongProvince = $("#belongProvince"),
+            belongCity = $("#belongCity"),
+            belongArea = $("#belongArea");
+
+        //初始将省份下拉框数据
+        for (var i = 0; i < provinceList.length; i++) {
+            addEle(belongProvince, provinceList[i].name);
+        }
+        var option = {
+            elem: '#birthday'
+            , type: 'date'
+            , theme: 'molv'
+            , calendar: true
+            , format: 'yyyy-MM-dd'
+            , done(value, date) {
+
+            }
+        };
+        laydate.render(option);
+
+        //赋予完成 重新渲染select
+        form.render('select');
+
+        //向select中 追加内容
+        function addEle(ele, value) {
+            var optionStr = "";
+            optionStr = "<option value=" + value + " >" + value + "</option>";
+            ele.append(optionStr);
+        }
+
+        //移除select中所有项 赋予初始值
+        function removeEle(ele) {
+            ele.find("option").remove();
+            var optionStar = "<option value=" + "" + ">" + "请选择" + "</option>";
+            ele.append(optionStar);
+        }
+
+        var provinceText,
+            cityText,
+            cityItem;
+        //选定省份后 将该省份的数据读取追加上1
+        form.on('select(belongProvince)', function (data) {
+            provinceText = data.value;
+
+            $.each(provinceList, function (i, item) {
+                if (provinceText == item.name) {
+                    cityItem = i;
+                    return cityItem;
+                }
+            });
+            removeEle(belongCity);
+            removeEle(belongArea);
+            $.each(provinceList[cityItem].cityList, function (i, item) {
+                addEle(belongCity, item.name);
+            })
+            form.render('select');
+        })
+
+
+        ////选定市或直辖县后 将对应的数据读取追加上1
+        form.on('select(belongCity)', function (data) {
+            cityText = data.value;
+            removeEle(belongArea);
+            $.each(provinceList, function (i, item) {
+                if (provinceText == item.name) {
+                    cityItem = i;
+                    return cityItem;
+                }
+            });
+            $.each(provinceList[cityItem].cityList, function (i, item) {
+                if (cityText == item.name) {
+                    for (var n = 0; n < item.areaList.length; n++) {
+                        addEle(belongArea, item.areaList[n]);
+                    }
+                }
+            })
+            form.render('select');
+        })
+
+
+        //监听提交
+        form.on('submit(saveData)', function (data) {
+            var str = JSON.stringify(data.field);
+            $.ajax({
+                url: '/app/user/import/saveOrUpdate',
+                data: JSON.stringify(data.field),
+                type: "POST",
+                dataType: "json",
+                contentType: 'application/json',
+                success: function (res) {
+                    if (res.code == 0) {
+                        parent.layer.msg('修改成功');
+                        // var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                        // parent.layer.close(index);
+                        // parent.reloadTable();
+                        //刷新个人稿库tab
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        parent.layer.msg('修改失败');
+                    }
+                }
+            })
+            return false;
+        });
+        $("#chancelBtn").click(function () {
+            // var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            // parent.layer.close(index)
+            var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+            $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+            // 切换到对应到选项卡下
+            top.element.tabChange('xbs_tab', fid);
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+
+        var datas = {id: id};
+        datas = encryptParamForObjType(datas);
+        if (id) {
+            $("#id").val(id);
+            $.ajax({
+                url: '/app/user/import/findById',
+                type: "POST",
+                data: datas,
+                success: function (res) {
+                    if (res.code == 0) {
+                        var data = getAjaxData(res);
+                        layui.config({
+                            base: "/staticResource/lib/layui/lay/modules/"
+                        }).use(['form'], function () {
+                            var form = layui.form;
+
+                            data.birthday = data.birthday.substring(0, 10);
+
+                            form.val("userForm", data);
+
+                            if (data.belongProvince) {
+                                var select1 = 'dd[lay-value=' + data.belongProvince + ']';
+                                $('#belongProvince').siblings("div.layui-form-select").find('dl').find(select1).click();
+                            }
+                            if (data.belongCity) {
+                                var select1 = 'dd[lay-value=' + data.belongCity + ']';
+                                $('#belongCity').siblings("div.layui-form-select").find('dl').find(select1).click();
+                            }
+                            if (data.belongArea) {
+                                var select1 = 'dd[lay-value=' + data.belongArea + ']';
+                                $('#belongArea').siblings("div.layui-form-select").find('dl').find(select1).click();
+                            }
+                        });
+                    }
+                }
+            })
+        }
+
+    });
+    //checkedPhone 0---允许提交表单，1--不允许提交表单
+    var checkedPhone = 0;
+
+    function userPhoneCheck() {
+        var userPhone = $("#userPhone").val();
+        if (userPhone != "") {
+            var param = "phone=" + userPhone;
+            param = encryptParamForUrlType(param);
+            $.ajax({
+                url: '/app/user/checkPhone',
+                data: param,
+                type: "POST",
+                success: function (res) {
+                    if (res.code == 0) {
+                        if (res.data == 1) {
+                            parent.layer.msg('手机号已被占用');
+                            $("#userPhone").addClass("layui-form-danger");
+                            $("#userPhone").focus();
+                            checkedPhone = 1;
+                        } else {
+                            $("#userPhone").removeClass("layui-form-danger");
+                            checkedPhone = 0;
+                        }
+                    }
+                }
+            })
+        }
+
+    }
+
+
+    function checkBirthday() {
+        var birthday = $("#birthday").val();
+        if (birthday != "") {
+            var reg = /^(d{4})-(d{2})-(d{2})$/;
+
+            if (reg.test(birthday) == false) {
+                parent.layer.msg('生日格式不正确，例如：1999-01-01');
+                $("#birthday").addClass("layui-form-danger");
+                $("#birthday").focus();
+                return;
+            }
+        }
+    }
+
+    var checkedCertify = 0;
+
+    function checkedCertifyNO() {
+        var certificateNo = $("#certificateNo").val();
+        var certificateType = $("#certificateType").val();
+        if (certificateType == "身份证") {
+            var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+
+            if (reg.test(certificateNo) == false) {
+                parent.layer.msg('身份证信息不正确');
+                $("#certificateNo").addClass("layui-form-danger");
+                $("#certificateNo").focus();
+                return;
+            }
+        }
+
+        if (certificateNo != "") {
+            var param = "certificateNo=" + certificateNo + "&certificateType=" + certificateType;
+            param = encryptParamForUrlType(param);
+            $.ajax({
+                url: '/app/user/checkCertificate',
+                data: param,
+                type: "POST",
+                success: function (res) {
+                    if (res.code == 0) {
+                        if (res.data == 1) {
+                            parent.layer.msg('身份信息已被占用');
+                            $("#certificateNo").addClass("layui-form-danger");
+                            $("#certificateNo").focus();
+                            checkedCertify = 1;
+                        } else {
+                            $("#certificateNo").removeClass("layui-form-danger");
+                            checkedCertify = 0;
+                        }
+                    }
+                }
+            })
+
+            birthday = certificateNo.substring(6, 14);
+            birthStr = certificateNo.substring(6, 10) + '-' + certificateNo.substring(10, 12) + '-' + certificateNo.substring(12, 14);
+            selectDate(birthStr);
+        }
+
+    }
+
+    function selectDate(dateStr) {
+        var option = {
+            elem: '#birthday'
+            , type: 'date'
+            , theme: 'molv'
+            , calendar: true
+            , format: 'yyyy-MM-dd'
+            , done(value, date) {
+
+                $("#birthday").val(new Date(value).getTime());
+
+            }
+        };
+        if (dateStr) {
+            option.value = dateStr;
+        }
+        laydate.render(option);
+    }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>法规条例</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form-item">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" id="l1"></label>
+                            <div class="layui-input-block">
+                                <input id="l2" readonly class="layui-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">已选法规</label>
+                        <label id="num" class="layui-form-label"></label>
+                        <label class="layui-form-label"><a onclick="getCheckData()" style="color: blue;">点击查看</a>
+                        </label>
+                    </div>
+
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                        <div class="layui-form-item">
+
+                            <input type="hidden" id="industryFieldsId" name="industryFieldsId" autocomplete="off"
+                                   class="layui-input">
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">政策法规</label>
+                                <div class="layui-input-inline">
+                                    <div id="policiesId" name="policiesId" class="xm-select-demo"></div>
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">条例</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="measures" name="measures" lay-verify="required" placeholder="请输入"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">关键词</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="keywords" name="keywords" lay-verify="required" placeholder="请输入"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <button class="layui-btn" type="button" data-type="reload">搜索</button>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <input type="checkbox" lay-skin="primary" lay-filter="type1" name="type1" id="type1"
+                                   title="仅显示此字段关联政策法规条例">
+                        </div>
+                    </form>
+
+
+                    <div class="layui-btn-group demoTable" style="padding-top:10px">
+                        <button class="layui-btn" id="addBtn" type="button"><i
+                                class="layui-icon"></i>选定
+                        </button>
+                        <button class="layui-btn layui-btn-danger" id="chooseBtn" type="button"><i
+                                class="layui-icon">&#xe605;</i>确定选择
+                        </button>
+                        <button class="layui-btn layui-btn-primary" id="channelBtn" type="button"><i
+                                class="layui-icon">&#x1006;</i>取消</button>
+                    </div>
+                    <table id="table" lay-filter="table"></table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script type="text/html" id="bar">
+
+    {{#
+    var genBtn = function(){
+    var btnStr="";
+    btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+    btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+    return btnStr;
+    }
+    }}
+    {{genBtn()}}
+
+
+</script>
+
+<script>
+    Array.prototype.push2 =function(){
+        for(var i=0; i<arguments.length; i++){
+            var ele = arguments[i];
+            if(this.indexOf(ele) == -1){
+                this.push(ele);
+            }
+        }
+    };
+    var policiesId;
+    // 选中id数组
+    var arr = new Array();
+    var industryFieldsId = getParam('industryFieldsId');//字段id
+    var policiesBtn = getParam('policiesBtn');//字段id
+    var content = decodeURI(getParam('content'));//字段内容
+    var fieldName = decodeURI(getParam('fieldName'));//字段名称
+    if(fieldName){
+        $("#l1").text(fieldName);
+    }
+    if(content){
+        $("#l2").val(content);
+    }
+    var policies = getParam('policies');//已选内容
+
+    if(policies){
+        var policyArr=policies.split(",");
+        for(var index in policyArr){
+            if(isNaN(index)==false){
+                arr.push2(parseInt(policyArr[index]));
+            }
+        }
+    }
+
+    function delChecked(val){
+        if(arr.indexOf(val)>-1){
+            arr.splice(arr.indexOf(val),1);
+            $("#num").text(arr.length + "条");
+        }
+    }
+
+    function getCheckData() {
+        layer.open({
+            type: 2,
+            skin: 'layui-layer-demo', //样式类名
+            title: '已选法规条例',
+            closeBtn: 1,
+            anim: 2,
+            area: ['893px', '600px'],
+            shadeClose: true, //开启
+            content: '/company/policiesContent.html?id=' + arr.toString(),//这里content是一个普通的String
+            success: function (layero, index) {
+                var body = layer.getChildFrame('body', index);
+                var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                var ids = body.find('input').val();
+            }
+        });
+
+    }
+
+
+    layui.use(['table', 'jquery', 'form'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        var form = layui.form;
+        var pageSize = 10;
+        var tableData;
+        var i = 1;
+
+        $("#num").text(arr.length + "条");
+
+        form.on('checkbox(type1)', function (data) {
+            if (i % 2 == 0) {
+                $("#industryFieldsId").val("");
+            } else {
+                $("#industryFieldsId").val(industryFieldsId);
+            }
+            i++;
+            reload();
+        });
+
+        //政策法规下拉框初始化
+        policiesId = xmSelect.render({
+            el: '#policiesId',
+            paging: true,
+            pageSize: pageSize,
+            pageRemote: true,
+            radio: true,
+            filterable: true,
+            remoteSearch: true,
+            clickClose: true,
+            toolbar: {show: true},
+            prop: {
+                name: 'policiesName',
+                value: 'id',
+            },
+            remoteMethod: function (val, cb, show, pageIndex) {
+                //val: 搜索框的内容, 不开启搜索默认为空, cb: 回调函数, show: 当前下拉框是否展开, pageIndex: 当前第几页
+                var url = apiPath + '/content/impPoliciesInfo/query_page?page=' + pageIndex;
+                if (val != "") {
+                    url += "&policiesName=" + val;
+                }
+                $.ajax({
+                    type: 'get',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: url,
+                    success: function (data) {
+                        //回调需要两个参数, 第一个: 数据数组, 第二个: 总页码
+                        cb(data.data.records, parseInt((data.data.total + pageSize - 1) / pageSize));
+                    },
+                    error: function () {
+                        cb([], 0);
+                    }
+                });
+            }
+        })
+
+        var param = getQueryParam();
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath + '/content/impPoliciesRegulationsInfo/query_page',
+            method: "get",
+            even: true,
+            page: true,
+            defaultToolbar: false,
+            where: param,
+            cols: [[
+                {
+                    type: 'checkbox', width: '5%', fixed: 'left'
+                },
+                {
+                    field: 'policiesRegulationsName', title: '政策法规', width: '15%', align: 'center',
+                },
+                {
+                    field: 'chapter', title: '章', width: '10%', align: 'center'
+                },
+                {
+                    field: 'measures', title: '条例内容', width: '35%', align: 'center',
+                },
+                {
+                    field: 'keywords', title: '关键词', width: '10%', align: 'center'
+                },
+                {
+                    field: 'industryAssociatedFields', title: '行业&关联字段', width: '15%', align: 'center'
+                },
+
+                {
+                    field: 'materialDate', title: '实施日期', width: '10%', align: 'center', templet: function (item) {
+                        if (item.materialDate == undefined || item.materialDate == null) {
+                            return "";
+                        }
+                        return new Date(item.materialDate).format("yyyy-MM-dd");
+                    }
+                }
+
+            ]],
+            id: 'testReload',
+            parseData: function (res) {
+
+                var json = getAjaxData(res);
+                return {
+                    "code": res.code,
+                    "data": json.records,
+                    "count": json.total,
+                    "msg": res.message
+                };
+
+            },
+            done: function (res, curr, count) {
+                //如果是异步请求数据方式，res即为你接口返回的信息。
+                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+                tableData = res.data;
+                // for(var i=0;i<tableData.length;i++){
+                //     for(var j=0;j<arr.length;j++){
+                //         if(tableData[i].id == arr[j]){
+                //             //下面三句是通过更改css来实现选中的效果
+                //             var index = tableData[i]['LAY_TABLE_INDEX'];
+                //             $('tr[data-index=' + index + '] input[type="checkbox"]').prop('checked', true);
+                //             $('tr[data-index=' + index + '] input[type="checkbox"]').next().addClass('layui-form-checked');
+                //         }
+                //     }
+                // }
+
+            },
+            request: {
+                pageName: 'page',
+                limitName: 'size'
+            }
+
+        });
+
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+
+
+        var $ = layui.$, active = {
+
+            reload: function () {
+                var param = getQueryParam();
+                if (tableIns != null) {
+                    tableIns.where = {};  //置空where
+                    tableIns.page = {};
+                }
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        currPage: 1 //重新从第 1 页开始
+                    }
+                    , where: param,
+                    done: function () {
+                        tableIns = this;
+                    }
+                });
+
+            }
+        };
+
+        function reload() {
+            var param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+            });
+
+        }
+
+        $('.layui-fluid .layui-form .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+        //选定
+        $("#addBtn").click(function () {
+            // arr.splice(0, arr.length);
+            $(".laytable-cell-checkbox").each(function (i, item) {
+                var checkBox = $(item).children('div.layui-form-checkbox');
+                if ($(checkBox).hasClass("layui-form-checked")) {
+                    var i = item.parentNode.parentNode.rowIndex;
+                    arr.push2(tableData[i].id);
+                }
+            })
+            $("#num").text(arr.length + "条");
+        })
+        //确定选择
+        $("#chooseBtn").click(function () {
+            parent.policyBtnClick(policiesBtn,arr.join(","));
+            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index);
+        })
+        //取消选择
+        $("#channelBtn").click(function () {
+            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index);
+        })
+
+
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            if (obj.event == 'del') {
+                var childParam = {id: data.id};
+
+                $.ajax({
+                    type: "POST",
+                    url: apiPath + "/content/impPoliciesRegulationsInfo/delete/" + data.id,
+                    data: childParam,
+                    success: function (res) {
+                        if (res.code == 0) {
+                            reload();
+                        } else {
+                            layer.msg("删除失败！");
+                        }
+                    }
+                })
+            } else if (obj.event == 'edit') {
+                top.xadmin.add_tab("编辑政策法规", "/content/policiesRegulationsInfo/policiesRegulationsInfo-edit.html?fid=" + fid + "&id=" + data.id);
+
+            }
+
+        })
+
+        function getQueryParam() {
+            var param = {};
+
+
+            var industryFieldsId = $("#industryFieldsId").val();
+            if (industryFieldsId != "") {
+                param.industryFieldsId = industryFieldsId;
+            }
+
+            if (policiesId && policiesId.getValue().length > 0) {
+                param.policiesId = policiesId.getValue()[0].id;
+            }
+
+            var measures = $("#measures").val();
+            if (measures != "") {
+                param.LK_measures = measures;
+            }
+
+            var keywords = $("#keywords").val();
+            if (keywords != "") {
+                param.LK_keywords = keywords;
+            }
+
+            return param;
+        }
+
+
+        $('#search').on('click', function (data) {
+            reload();
+        });
+    })
+
+</script>
+</body>
+
+
+</html>

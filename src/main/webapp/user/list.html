@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="utf-8">
+    <title>用户管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    <link rel="stylesheet" href="/staticResource/lib/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+<body>
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a>
+          <cite>用户管理</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form" action="">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <input type="text" name="magicCardNo" id="magicCardNo"
+                                           autocomplete="on" placeholder="神通卡"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <input type="text" name="nickName" id="nickName"
+                                           autocomplete="on" placeholder="姓名"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <input type="text" name="certificateNo" id="certificateNo"
+                                           autocomplete="on" placeholder="证件"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <input type="text" name="userPhone" id="userPhone"
+                                           autocomplete="on" placeholder="手机号"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <select name="userStatus" id="userStatus">
+                                        <option value="">状态</option>
+                                        <option value="0">启用</option>
+                                        <option value="1">禁用</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <div class="layui-input-inline">
+                                    <select name="appUserType" id="userStatus">
+                                        <option value="">全部用户类型</option>
+                                        <option value="0">普通用户</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <div class="layui-input-inline">
+                                        <select name="userLevel" id="userLevel">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="elt_createTime" placeholder="添加时间开始" id="pushBeginTime"
+                                               autocomplete="off" class="layui-input">
+                                    </div>
+                                    <div class="layui-form-mid" style="padding:  5px 0!important;">-</div>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="egt_createTime" id="pushEndTime" placeholder="添加时间结束"
+                                               autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <select name="belongProvince" id="belongProvince" lay-search
+                                            lay-filter="belongProvince">
+                                        <option value="">省份</option>
+                                    </select>
+                                </div>
+                                <div class="layui-inline">
+                                    <select name="belongCity" id="belongCity" lay-search lay-filter="belongCity">
+                                        <option value="">地级市</option>
+                                    </select>
+                                </div>
+                                <div class="layui-inline">
+                                    <select name="belongArea" id="belongArea" lay-search lay-filter="belongArea">
+                                        <option value="">县/区</option>
+                                    </select>
+                                </div>
+                                <div class="layui-inline">
+                                    <div class="layui-input-inline">
+                                        <button type="button" class="layui-btn" lay-event="search" id="search">搜索
+                                        </button>
+                                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="layui-btn-group demoTable">
+                        <button class="layui-btn" id="addBtn" type="button" per-code='app:user:saveOrUpdate'><i
+                                class="layui-icon"></i>添加
+                        </button>
+                        <button class="layui-btn layui-btn-sm" id="bacthExcel" per-code='app:user:batchExport'><i
+                                class="layui-icon">&#xe67d;</i> 批量导出
+                        </button>
+                    </div>
+                    <table id="demo" lay-filter="demo" style="margin-left: 50px">
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="barDemo">
+    {{#
+    var permisstionCodes = top.permisstionCodes;
+    var genBtn = function(status){
+
+    var loginUser = JSON.parse(localStorage.getItem("loginUser"));
+    var btnStr="";
+    if(status==0){
+    if (permisstionCodes.indexOf('app:user:detail') > -1) {
+    btnStr+='<a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>';
+    }
+    if(loginUser&&loginUser.type==4){
+    if (permisstionCodes.indexOf('sys:cooper:user:opSaveOrUpdateUser') > -1) {
+    btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+    }
+    }else{
+    if (permisstionCodes.indexOf('app:user:saveOrUpdate') > -1) {
+    btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+    }
+    }
+    if (permisstionCodes.indexOf('app:user:dis') > -1) {
+    btnStr+=' <a class=" layui-btn-xs layui-btn layui-btn-danger"
+                 lay-event="status_dis">禁用</a>'
+    }
+    if (permisstionCodes.indexOf('app:user:del') > -1) {
+    btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+    }
+    }else {
+    if (permisstionCodes.indexOf('app:user:detail') > -1) {
+    btnStr+='<a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>';
+    }
+    if(loginUser&&loginUser.type==4){
+    if (permisstionCodes.indexOf('sys:cooper:user:opSaveOrUpdateUser') > -1) {
+    btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+    }
+    }else{
+    if (permisstionCodes.indexOf('app:user:saveOrUpdate') > -1) {
+    btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+    }
+    }
+    if (permisstionCodes.indexOf('app:user:enable') > -1) {
+    btnStr+='<a class=" layui-btn-xs layui-btn layui-btn-warm"
+                lay-event="status_en">启用</a>'
+    }
+    if (permisstionCodes.indexOf('app:user:del') > -1) {
+    btnStr+='<a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+    }
+    }
+    return btnStr;
+    }
+    }}
+    {{genBtn(d.userStatus)}}
+</script>
+
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+<script>
+
+    var loginUser = JSON.parse(localStorage.getItem("loginUser"));
+    showOrHiddeBtnByPermission();
+    var tableIns;
+    layui.use(['table', 'form', 'element', 'laydate'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#pushBeginTime'
+            , type: 'datetime'
+            , theme: 'molv'
+            , calendar: true
+            , format: 'yyyy-MM-dd HH:mm:ss'
+            , done(value, date, endDate) {
+                $("#pushBeginTime").val(new Date(value).getTime());
+            }
+        });
+        laydate.render({
+            elem: '#pushEndTime'
+            , type: 'datetime'
+            , theme: 'molv'
+            , calendar: true
+            , format: 'yyyy-MM-dd HH:mm:ss'
+            , done(value, date, endDate) {
+                $("#pushEndTime").val(new Date(value).getTime());
+            }
+        });
+        var p = $("#belongProvince"),
+            c = $("#belongCity"),
+            d = $("#belongArea");
+
+        //初始将省份数据赋予2
+        for (var i = 0; i < provinceList.length; i++) {
+            addEle(p, provinceList[i].name);
+        }
+        //初始化业务下拉框
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: '/app/user/userGradeLogs',
+            success: function (data) {
+                $('#userLevel').empty();
+                $('#userLevel').append(new Option("用户等级", ""));
+                var json = getAjaxData(data);
+                $.each(json, function (index, value) {
+                    $('#userLevel').append(new Option(value.name, value.name));
+                });
+                form.render('select');
+            }
+        });
+        //赋予完成 重新渲染select
+        form.render('select');
+
+        //向select中 追加内容
+        function addEle(ele, value) {
+            var optionStr = "";
+            optionStr = "<option value=" + value + " >" + value + "</option>";
+            ele.append(optionStr);
+        }
+
+        //移除select中所有项 赋予初始值
+        function removeEle(ele) {
+            ele.find("option").remove();
+            var optionStar = "<option value=" + "" + ">" + "请选择" + "</option>";
+            ele.append(optionStar);
+        }
+
+        //选定省份后 将该省份的数据读取追加上2
+        form.on('select(belongProvince)', function (data) {
+
+            pText = data.value;
+            $.each(provinceList, function (i, item) {
+                if (pText == item.name) {
+                    cItem = i;
+                    return cItem;
+                }
+            });
+            removeEle(c);
+            removeEle(d);
+            $.each(provinceList[cItem].cityList, function (i, item) {
+                addEle(c, item.name);
+            })
+            //重新渲染select
+            form.render('select');
+        })
+
+
+        ////选定市或直辖县后 将对应的数据读取追加上2
+        form.on('select(belongCity)', function (data) {
+            cText = data.value;
+            removeEle(d);
+            $.each(provinceList, function (i, item) {
+                if (pText == item.name) {
+                    cItem = i;
+                    return cItem;
+                }
+            });
+            $.each(provinceList[cItem].cityList, function (i, item) {
+                if (cText == item.name) {
+                    for (var n = 0; n < item.areaList.length; n++) {
+                        addEle(d, item.areaList[n]);
+                    }
+                }
+            })
+            //重新渲染select
+            form.render('select');
+        })
+
+        tableIns = table.render({
+            elem: '#demo',
+            url: '/app/user/query',
+            method: 'post',
+            where: getQueryParam(),
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            cols: [[
+                {field: 'id', title: 'ID', width: '10%', fixed: 'left', align: 'center', unresize: true}
+                , {field: 'nickName', title: '姓名', width: '10%', fixed: 'left', align: 'center', unresize: true}
+                , {field: 'userPhone', title: '手机号', width: '10%', align: 'center', unresize: true}
+                , {field: 'certificateNo', title: '证件号', width: '10%', align: 'center', unresize: true}
+                , {
+                    field: 'appUserType', title: '用户类型', width: '10%', align: 'center', unresize: true,
+                    templet: function (d) {
+                        if (d.appUserType == 0) {
+                            return "普通用户";
+                        } else {
+                            return "特殊用户";
+                        }
+                    }
+                }
+                , {field: 'userLevel', title: '用户等级', width: '10%', align: 'center', unresize: true}
+                , {field: 'magicCards', title: '神通卡', width: '10%', align: 'center', unresize: true}
+                , {field: 'integral', title: '账户积分', width: '10%', align: 'center', unresize: true}
+                , {
+                    field: 'name',
+                    title: '地区',
+                    width: '10%',
+                    align: 'center',
+                    unresize: true,
+                    templet: function (d) {
+                        var res = "";
+                        if (d.belongProvince) {
+                            res += d.belongProvince + " ";
+                        }
+                        if (d.belongCity) {
+                            res += d.belongCity + " ";
+                        }
+                        if (d.belongArea) {
+                            res += d.belongArea + " ";
+                        }
+                        return res;
+                    }
+                }
+                , {
+                    field: 'createTime', title: '添加时间', width: '10%', align: 'center', templet: function (item) {
+                        if (item.createTime == undefined || item.createTime == null) {
+                            return "";
+                        }
+                        return new Date(item.createTime).format("yyyy-MM-dd hh:mm:ss");
+                    }
+                }
+                , {
+                    field: 'userStatus', title: '状态', align: 'center', width: '10%', templet: function (d) {
+                        if (d.userStatus == 0)
+                            return '启用'
+                        else
+                            return '禁用'
+                    }
+                }
+                , {fixed: 'right', title: '操作', align: 'center', toolbar: '#barDemo', width: '15%'}
+            ]],
+            id: "opTable",
+            parseData: function (res) { //res 即为原始返回的数据
+                var config = getAjaxData(res);
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": config.totalSize,
+                    "data": config.content  //解析数据列表
+                };
+            },
+            even: true,
+            limits: [10, 15, 30],
+            limit: 10,
+            page: true,
+
+        });
+        showOrHiddeBtnByPermission();
+        //防止表格工具按钮隐藏失效
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {
+                var childParam = {userId: data.id};
+                $.ajax({
+                    type: "POST",
+                    url: "/app/user/hasCommitInfo",
+                    data: childParam,
+                    success: function (res) {
+                        if (res.code == 0 && res.data == false) {
+                            layer.confirm('删除用户后，用户关联的神通卡也将删除，是否确认删除用户?', function (index) {
+                                //向服务端发送删除指令
+                                var param = {"userId": data.id};
+                                param = encryptParamForObjType(param);
+                                $.ajax({
+                                    url: '/app/user/del',
+                                    data: param,
+                                    type: "POST",
+                                    success: function (res) {
+                                        if (res.code == 0) {
+                                            parent.layer.msg('删除成功');
+                                            reloadTable();
+                                        } else {
+                                            parent.layer.msg(res.message);
+                                        }
+                                    }
+                                });
+                                layer.close(index);
+                            });
+                        } else {
+                            top.layer.msg("包含待审核记录，禁止删除！");
+                        }
+                    }
+                })
+
+            } else if (obj.event === 'edit') {
+                if (loginUser && loginUser.type == 4) {
+                    top.xadmin.add_tab("编辑用户", "/user/opAdd.html?fid=" + fid + "&id=" + data.id);
+                } else {
+                    top.xadmin.add_tab("编辑用户", "/user/add.html?fid=" + fid + "&id=" + data.id);
+                }
+            } else if (obj.event == 'status_en') {
+                var formData = {
+                    "userId": data.id
+                };
+                formData = encryptParamForObjType(formData);
+                $.ajax({
+                    type: "POST",
+                    url: "/app/user/enable",
+                    data: formData,
+                    success: function (res) {
+                        if (res.code == 0) {
+                            top.layer.msg("启用成功");
+                            reloadTable();
+                        } else {
+                            top.layer.msg(res.message);
+                        }
+                    }
+                })
+
+            } else if (obj.event == 'status_dis') {
+                var formData = {
+                    "userId": data.id
+                };
+                formData = encryptParamForObjType(formData);
+                $.ajax({
+                    type: "POST",
+                    url: "/app/user/dis",
+                    data: formData,
+                    success: function (res) {
+                        if (res.code == 0) {
+                            top.layer.msg("禁用成功");
+                            reloadTable();
+                        } else {
+                            top.layer.msg(res.message);
+                        }
+                    }
+                })
+            } else if (obj.event == 'detail') {
+                top.xadmin.add_tab("查看用户管理", "/user/detail.html?id=" + data.id);
+            }
+        });
+
+
+        $('#search').on('click', function (data) {
+            reloadTable();
+        });
+    });
+
+    function getQueryParam() {
+        var param = {};
+        var name = $("#nickName").val();
+        if (name != "") {
+            param.like_nickName = name;
+        }
+        var magicCardNo = $("#magicCardNo").val();
+        if (magicCardNo != "") {
+            param.magicCardNo = magicCardNo;
+        }
+        var certificateNo = $("#certificateNo").val();
+        if (certificateNo != "") {
+            param.like_certificateNo = certificateNo;
+        }
+        var userPhone = $("#userPhone").val();
+        if (userPhone != "") {
+            param.like_userPhone = userPhone;
+        }
+        var userStatus = $("#userStatus").val();
+        if (userStatus != "") {
+            param.userStatus = userStatus;
+        }
+        var userLevel = $("#userLevel").val();
+        if (userLevel != "") {
+            param.userLevel = userLevel;
+        }
+        var belongProvince = $("#belongProvince").val();
+        if (belongProvince != "") {
+            param.like_belongProvince = belongProvince;
+        }
+        var belongCity = $("#belongCity").val();
+        if (belongCity != "") {
+            param.like_belongCity = belongCity;
+        }
+        var belongArea = $("#belongArea").val();
+        if (belongArea != "") {
+            param.like_belongArea = belongArea;
+        }
+        var pushBeginTime = $("#pushBeginTime").val();
+        if (pushBeginTime != "") {
+            param.gt_createTime = pushBeginTime;
+        }
+        var pushEndTime = $("#pushEndTime").val();
+        if (pushEndTime != "") {
+            param.lt_createTime = pushEndTime;
+        }
+        return param;
+    }
+
+    function reloadTable() {
+        var param = getQueryParam();
+        if (tableIns != null) {
+            tableIns.where = {};  //置空where
+            tableIns.page = {};
+        }
+        layui.use(['table'], function () {
+            var table = layui.table;
+            //执行重载
+            table.reload('opTable', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                },
+                where: param,
+                done: function () {
+                    tableIns = this;
+                }
+            }, 'data');
+            table.render();
+        });
+
+    }
+
+    var fid = self.frameElement.getAttribute("tab-id");
+    //添加按钮
+    $("#addBtn").click(function () {
+        var index = top.xadmin.add_tab("添加用户", "/user/add.html?fid=" + fid);
+    });
+    //批量导出按钮
+    $("#bacthExcel").click(function () {
+        layer.confirm('是否批量导出？', function (index) {
+            var param = getQueryParam();
+            window.open('/app/user/batchExport?args=' + encodeURI(JSON.stringify(param)));
+            layer.close(index);
+        });
+    });
+
+
+</script>
+</body>
+</html>

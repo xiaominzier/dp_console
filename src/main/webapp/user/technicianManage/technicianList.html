@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>技术员管理</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+
+<body>
+    <div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a style="font-size:3px">
+                <cite>技术员管理</cite></a>
+        </span>
+        <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+            onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+    </div>
+
+
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body ">
+                        <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">姓名</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="realName" name="realName" lay-verify="required" placeholder="请输入"
+                                        autocomplete="off" class="layui-input">
+                                </div>
+                                <label class="layui-form-label">联系方式</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="tel" name="tel" lay-verify="required" placeholder="请输入"
+                                        autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">区域</label>
+                                    <div class="layui-input-inline">
+                                        <div id="areaIds"></div>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <button class="layui-btn" type="button" data-type="reload">搜索</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="layui-btn-group demoTable" style="padding-top:10px">
+                            <button data-method="addArea" class="layui-btn" id="addBtn" type="button">添加</button>
+                        </div>
+                        <table id="table" lay-filter="table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<script type="text/html" id="toolbar">-->
+    <!--    <button class="layui-btn layui-btn-sm" lay-event="add" ><i class="layui-icon" per-code="sys:cooperator:add">&#xe608;</i> 添加</button>-->
+    <!--</script>-->
+
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+    <script src="/staticResource/lib/common-js/util.js"></script>
+
+    <script type="text/html" id="bar">
+    {{#
+    var statusbtn = function(){
+        var btnStr="";
+        btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';
+        btnStr+='<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+        btnStr+=' <a class="layui-btn layui-btn-xs" lay-event="view">查看</a>';
+        return btnStr;
+    }
+    }}
+    {{statusbtn()}}
+</script>
+    <script>
+        var fid = self.frameElement.getAttribute("tab-id");
+        var areaIds;
+        layui.config({
+            base: "/staticResource/lib/layui/lay/modules/"
+        }).extend({
+            xmSelect: 'xm-select'
+        }).use(['table', 'jquery', 'form', 'layer','xmSelect'], function () {
+            var table = layui.table;
+            var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+            // 管理区域下拉框选项初始化
+            var xmSelect = layui.xmSelect;
+            //渲染多选
+            areaIds = xmSelect.render({
+                el: '#areaIds',
+                name: 'areaId',
+                prop: {
+                    name: 'areaName',
+                    value: 'id',
+                    children: 'children'
+                },
+                tree: {
+                    show: true,
+                    strict: false,
+                    expandedKeys: [-1],
+                },
+                // radio: true,
+                // clickClose: true,
+                style: {
+
+                },
+                data: [// 数据（JSON数组）
+
+                ],
+                tips: '全部(可多选)',	// 选项提示文字
+                // size: 'mini',	// 元素大小，可选值：large、medium、small、mini
+                paging: true, // 是否分页，可选值：true、false
+                pageSize: 5, // 页大小，表示一页可显示多少数据
+                direction: 'down',	// 下拉方向，可选值为：auto、top、down
+                // filterable: true, // 是否启用搜索，可选值：true、false
+                empty: '呀, 没有用户呢', // 无数据时提示
+                toolbar: { // 工具条配置
+                    show: true, // 是否显示
+                    showIcon: false, // 显示图标
+                },
+            })
+            $.ajax({
+                type: 'GET',
+                url: apiPath+'/user/impAreaInfo/query_trees/0',
+                // async: false,
+                success: function (data) {
+                    areaIds.update({
+                        data: data.data,
+                        autoRow: true,
+                    })
+                }
+            })
+            var param = getQueryParam();
+            var tableIns = table.render({
+                elem: '#table',
+                url: apiPath+'/user/impUserInfo/technician/query_page',
+                method:'get',
+                even: true,
+                page: true,
+                // toolbar: "#toolbar",
+                defaultToolbar: false,
+                where: param,
+                cols: [[
+                    {
+                        field: 'id', title: 'ID', width: '5%', align: 'center',
+                    },
+                    {
+                        field: 'realName', title: '姓名', width: '15%', align: 'center'
+                    },
+                    {
+                        field: 'tel', title: '联系方式', width: '8%', align: 'center'
+                    },
+                    {
+                        field: 'userName', title: '登录账号', width: '8%', align: 'center'
+                    },
+                    {
+                        field: 'areaName', title: '区域', width: '28%', align: 'center'
+                    },
+                    {
+                        field: 'updateTime', title: '时间', width: '10%', align: 'center',templet:function(item){
+                            if (item.updateTime == undefined || item.updateTime == null) {
+                                return "";
+                            }
+                            return new Date(item.updateTime).format("yyyy-MM-dd hh:mm:ss");
+                            }
+                    },
+                    {
+                        field: 'status', title: '账号状态', width: '10%', align: 'center', templet: function (item) {
+                            if (item.status == 0) {
+                                return "禁用";
+                            } else {
+                                return "启用";
+                            }
+                        }
+                    },
+                    {
+                        title: '操作', toolbar: '#bar', width: '16%', align: 'center',
+                    }
+                ]],
+                id: 'technicianReload',
+                parseData: function (res) {
+                    // console.log(res);
+
+                // var json = getAjaxData(res);
+                    return {
+                        "code": res.code,
+                        "data": res.data.records,
+                        "count": res.data.total,
+                        "msg": res.message
+                    };
+                },
+                request: {
+                    pageName: 'page',
+                    limitName: 'size'
+                }
+            });
+            //触发事件
+            var active = {
+                reload: function () {
+                    var param = getQueryParam();
+                    console.log(param);
+                    if (tableIns != null) {
+                        tableIns.where = {};  //置空where
+                        tableIns.page = {};
+                    }
+                    //执行重载
+                    table.reload('technicianReload', {
+                        page: {
+                            currPage: 1 //重新从第 1 页开始
+                        }
+                        , where: param,
+                        done: function () {
+                            tableIns = this;
+                        }
+                        // sysOperatorId: $("#sysOperatorId").val(),
+                    });
+
+                }
+            };
+            $('.layui-fluid .layui-form .layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+            $("#addBtn").click(function () {
+                top.xadmin.add_tab("添加", "user/technicianManage/technicianAddOrEdit.html?fid=" + fid);
+            })
+
+            table.on('tool(table)', function (obj) {
+                var data = obj.data;
+                if (obj.event == 'del') {
+                    layer.confirm('确认删除？', function (index) {
+                        //向服务端发送删除指令
+                        $.ajax({
+                            url: apiPath+"/user/impUserInfo/delete/" + data.id,
+                            dataType: 'json',
+                            type: "POST",
+                            success: function (res) {
+                                console.log("删除信息"+res);
+                                if(res && res.code == 0){
+                                    top.layer.msg("操作成功");
+                                    tableIns.reload();
+                                }
+                            },
+                            error:function(xhr){
+                                console.log("状态码："+xhr.status);
+                                console.log("错误信息:"+xhr.statusText );
+　　　　　　　　                  console.log("返回响应信息："+xhr.responseText );//这里是详细的信息
+                            }
+                        });
+                        layer.close(index);
+                    });
+                }
+                else if (obj.event == 'edit') {
+                    top.xadmin.add_tab("编辑", "user/technicianManage/technicianAddOrEdit.html?fid=" + fid + "&id=" + data.id);
+                } else if(obj.event == 'view') {
+                    top.xadmin.add_tab("查看", "user/technicianManage/technicianCheck.html?fid=" + fid + "&id=" + data.id);
+                }
+            })
+            function getQueryParam() {
+                var param = {};
+                var realName = $("#realName").val();
+                if (realName != "") {
+                    param.lk_realName = realName;
+                }
+                var tel = $("#tel").val();
+                if (tel != "") {
+                    param.lk_tel = tel;
+                }
+                if (areaIds && areaIds.getValue().length > 0) {
+                    param.in_areaId = areaIds.getValue("valueStr");
+                }
+                return param;
+            }
+        });
+
+    </script>
+</body>
+
+
+</html>

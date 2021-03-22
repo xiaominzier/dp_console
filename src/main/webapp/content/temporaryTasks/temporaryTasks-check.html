@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看临时任务</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+    
+</head>
+<body style="background-color: #fff;height: 100%;padding: 10px;">
+<style>
+    .layui-form-label {
+        width: 130px;
+    }
+
+    .layui-form-item .layui-input-inline {
+
+        width: 520px;
+    }
+
+    .layui-form-item {
+        margin-bottom: 25px;
+    }
+    .tpl{
+        display: none;
+    }
+
+</style>
+
+<form class="layui-form layui-col-space5">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="text-align: right;">
+                        <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i
+                                class="layui-icon">&#x1006;</i>返回
+                        </button>
+                    </div>
+                    <div class="layui-card-body ">
+                        <table class="layui-table" lay-skin="nob">
+                            <!-- <colgroup>
+                                <col>
+                                <col>
+                                <col>
+                                <col>
+                            </colgroup> -->
+                            <tbody>
+                                <tr>
+                                    <td width="15%">名称</td>
+                                    <td width="85%">
+                                        <div id="tasksName"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>提报人</td>
+                                    <td>
+                                        <div id="informantType"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>简介</td>
+                                    <td>
+                                        <div id="remark"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>提报时间</td>
+                                    <td>
+                                        <!-- <span id="timeStart"></span>
+                                        <span id="timeEnd"></span> -->
+                                        <div id="time"></div>
+                                    </td>
+                                </tr>
+                                <!-- <tr>
+                                    <td>提报情况</td>
+                                    <td>
+                                        <div id="reportSituation"></div>
+                                    </td>
+                                </tr> -->
+                                <tr>
+                                    <td>修改时间</td>
+                                    <td>
+                                        <div id="updateTime"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>状态</td>
+                                    <td>
+                                        <div id="status"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="layui-table" >
+                            <thead>
+                                <th>字段名</th>
+                                <th>字段属性</th>
+                                <th>单位</th>
+                                <th>提示文字</th>
+                                <th>字段内容</th>
+                                <th>是否必填</th>
+                                <th>排序</th>
+                            </thead>
+                            <tbody id="tasks">
+                                <tr class="tpl">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+
+<script>
+    var id = getParam("id");
+
+    $(function () {
+        if (id && id != null) {
+            $.ajax({
+                type: "GET",
+                url: apiPath+"/content/impTemporaryTasks/get/"+id,
+                success: function (res) {
+                    console.log("查看"+JSON.stringify(res.data));
+                    if (res.code == 0) {
+                        var finalData = getAjaxData(res);
+                        if (finalData) {
+                            // var projectStr = '';
+                            // $.each(finalData.projectName,function(i,o){
+                            //     projectStr += o.realName+",";
+                            //     var lastIndex = projectStr.lastIndexOf(',');
+                            //     if (lastIndex > -1) {
+                            //         projectStr = projectStr.substring(0, lastIndex) + projectStr.substring(lastIndex + 1, projectStr.length);
+                            //     }
+                            // })
+                            // var teamStr = '';
+                            // $.each(finalData.teamId,function(i,o){
+                            //     teamStr += o.teamName+",";
+                            //     var lastIndex = teamStr.lastIndexOf(',');
+                            //     if (lastIndex > -1) {
+                            //         teamStr = teamStr.substring(0, lastIndex) + teamStr.substring(lastIndex + 1, teamStr.length);
+                            //     }
+                            // })
+                            $("#tasksName").text(finalData.tasksName);
+                            $("#remark").text(finalData.remark);
+                            $("#time").text(new Date(finalData.timeStart).format("yyyy-MM-dd")+"-"+new Date(finalData.timeEnd).format("yyyy-MM-dd"));
+                            if(finalData.informantType=="2"){
+                                $("#informantType").text(finalData.projectName);
+                            }else if(finalData.informantType=="1"){
+                                $("#informantType").text(finalData.teamName);
+                            }
+                            // $("#teamIds").text(teamStr);
+                            // $("#reportSituation").text(finalData.reportSituation);
+                            if(finalData.status){
+                                var status = '-';
+                                if(finalData.status == '0'){
+                                    status = '待开始';
+                                }else if(finalData.status == '1'){
+                                    status = '进行中';
+                                }else if(finalData.status == '2'){
+                                    status = '已结束';
+                                }else if(finalData.status == '3'){
+                                    status = '已下线';
+                                }
+                            }
+                            $("#status").text(status);
+                            $("#updateTime").text(new Date(finalData.updateTime).format("yyyy-MM-dd hh:mm:ss"));
+                            var tasks = finalData.impTasksFieldsRelations;
+                            $(tasks).each(function(index,ele){
+                                var fieldFirstProperties = "";
+                                var fieldSecondProperties = "";
+                                var fieldContent = "";
+                                var isRequired = "";
+                                if(ele.fieldProperties){
+                                    if(ele.fieldProperties.substr(0,1)=='0'){
+                                    fieldFirstProperties="文本";
+                                }else if(ele.fieldProperties.substr(0,1)=='1'){
+                                    fieldFirstProperties="时间";
+                                }else if(ele.fieldProperties.substr(0,1)=='2'){
+                                    fieldFirstProperties="选择";
+                                }else if(ele.fieldProperties.substr(0,1)=='3'){
+                                    fieldFirstProperties="上传";
+                                }
+
+                                if(ele.fieldProperties.substr(2,3)=="0"){
+                                    fieldSecondProperties="短文本输入";
+                                }
+                                else if(ele.fieldProperties.substr(2,3)=="3"){
+                                    fieldSecondProperties="长文本输入";
+                                }
+                                else if(ele.fieldProperties.substr(2,3)=="2"){
+                                    fieldSecondProperties="数字输入";
+                                    if(ele.fieldContent=="0"){
+                                        fieldContent = "自然数";
+                                    }else if(ele.fieldContent=="1"){
+                                        fieldContent = "正数(保留两位小数)";
+                                    }else if(ele.fieldContent=="2"){
+                                        fieldContent = "正数";
+                                    }
+                                }
+                                else if(ele.fieldProperties.substr(2,3)=="4"){
+                                    fieldSecondProperties="日期选择";
+                                    if(ele.fieldContent=="1"){
+                                        fieldContent = "任意日期";
+                                    }else if(ele.fieldContent=="2"){
+                                        fieldContent = "不可大于提报日期";
+                                    }else if(ele.fieldContent=="3"){
+                                        fieldContent = "不可小于提报日期";
+                                    }
+                                }
+                                else if(ele.fieldProperties.substr(2,3)=="5"){
+                                    fieldSecondProperties="时间选择";
+                                    if(ele.fieldContent=="1"){
+                                        fieldContent = "任意日期";
+                                    }else if(ele.fieldContent=="2"){
+                                        fieldContent = "不可大于提报日期";
+                                    }else if(ele.fieldContent=="3"){
+                                        fieldContent = "不可小于提报日期";
+                                    }
+                                }
+                                else if(ele.fieldProperties.substr(2,3)=="10"){
+                                    fieldSecondProperties="单图上传";
+                                }
+                                else if(ele.fieldProperties.substr(2,3)=="11"){
+                                    fieldSecondProperties="多图上传";
+                                }
+                                else if(ele.fieldProperties.substr(2,3)=="6"){
+                                    fieldSecondProperties="单选";
+                                    fieldContent = ele.fieldContent;
+                                }
+                                else if(ele.fieldProperties.substr(2,3)=="8"){
+                                    fieldSecondProperties="多选";
+                                    fieldContent = ele.fieldContent;
+                                }
+                                }
+                                if(ele.isRequired){
+                                    if(ele.isRequired=="1"){
+                                        isRequired="是";
+                                    }
+                                    else if(ele.isRequired=="2"){
+                                        isRequired="否";
+                                    }
+                                }
+                                var oCloneDom = $('.tpl').clone().removeClass('tpl');
+                                oCloneDom.find('td')
+                                    .eq(0).text(ele.fieldName)
+                                        .next().text(fieldFirstProperties+","+fieldSecondProperties)
+                                            .next().text(ele.unit)
+                                                .next().text(ele.promptText)
+                                                    .next().text(fieldContent)
+                                                        .next().text(isRequired)
+                                                            .next().text(ele.sort);
+                                $('#tasks').append(oCloneDom);
+                            })
+                            
+                        } else {
+                            parent.layer.msg("获取数据失败");
+                        }
+                    }
+                },
+                error: function () {
+                    return parent.layer.msg("获取数据失败");
+                }
+            });
+        }
+
+        $("#cancelbtn").click(function () {
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+
+
+</body>
+</html>

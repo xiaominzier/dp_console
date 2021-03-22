@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>提报信息审核</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+</head>
+<body style="background-color: #fff;height: 100%;padding: 10px;">
+
+<form class="layui-form layui-col-space5">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <!-- <div class="layui-card-header" style="text-align: right;">
+                        <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i
+                                class="layui-icon">&#x1006;</i>返回
+                        </button>
+                    </div> -->
+                    <div class="layui-card-body ">
+                        <table class="layui-table" lay-skin="nob">
+                            <tbody>
+                                <tr>
+                                    <td width="15%">临时任务id</td>
+                                    <td width="35%">
+                                        <div id="taskId"></div>
+                                    </td>
+                                    <td width="15%">临时任务名称</td>
+                                    <td width="35%">
+                                        <!-- <div id="taskName"></div> -->
+                                        <input type="text" disabled id="taskName" name="taskName" lay-verify="required" autocomplete="off"
+                                             class="layui-input">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="15%">临时任务简介</td>
+                                    <td width="35%">
+                                        <!-- <div id="remarks"></div> -->
+                                        <input type="text" disabled id="remarks" name="remarks" lay-verify="required" autocomplete="off"
+                                             class="layui-input">
+                                    </td>
+                                    <td width="15%">任务提报时间</td>
+                                    <td width="35%">
+                                        <!-- <div id="taskTime"></div> -->
+                                        <div class="layui-input-inline">
+                                            <input type="text" disabled class="layui-input" name="timeStartShow" id="timeStartShow"
+                                                   autocomplete="off" lay-verify="required" placeholder="年/月/日">
+                                            <input type="hidden" disabled class="layui-input" name="firstTime" id="timeStart"
+                                                   autocomplete="off"  placeholder="年/月/日">
+                        
+                                        </div>
+                                        <div class="layui-input-inline">
+                                            <input type="text" disabled class="layui-input" name="timeEndShow" id="timeEndShow"
+                                                   autocomplete="off" lay-verify="required" placeholder="年/月/日">
+                                            <input type="hidden" disabled class="layui-input" name="thisTime" id="timeEnd"
+                                                   autocomplete="off"  placeholder="年/月/日">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="15%">提报人</td>
+                                    <td width="35%">
+                                        <!-- <div id="creator"></div> -->
+                                        <input type="text" disabled id="creator" name="creatorTeamName" lay-verify="required" autocomplete="off"
+                                             class="layui-input">
+                                    </td>
+                                    <td width="15%">提报时间</td>
+                                    <td width="35%">
+                                        <!-- <div id="thisTime"></div> -->
+                                        <div class="layui-input-inline">
+                                            <input type="text" disabled class="layui-input" name="timeEndShow" id="thisTimeEndShow"
+                                                   autocomplete="off" lay-verify="required" placeholder="年/月/日">
+                                            <input type="hidden" disabled class="layui-input" name="thisTime" id="thisTimeEnd"
+                                                   autocomplete="off"  placeholder="年/月/日">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="15%">区域</td>
+                                    <td width="35%">
+                                        <!-- <div id="creator"></div> -->
+                                        <input type="text" disabled id="" name="" lay-verify="required" autocomplete="off"
+                                             class="layui-input">
+                                    </td>
+                                    <td width="15%">经纬度</td>
+                                    <td width="35%">
+                                        <!-- <div id="thisTime"></div> -->
+                                        <div class="layui-input-inline">
+                                            <input type="text" disabled class="layui-input" name="" id=""
+                                                   autocomplete="off" lay-verify="required">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="15%">审核状态</td>
+                                    <td width="35%">
+                                        <div id="status"></div>
+                                        <!-- <select name="status" disabled lay-verify="required" lay-search="" lay-filter="status" id="status">
+                                            <option value=0>待审核</option>
+                                            <option value=1>审核成功</option>
+                                            <option value=2>已驳回</option>
+                                            <option value=3>待更新</option>
+                                            <option value=4>已更新</option>
+                                        </select> -->
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <fieldset class="layui-elem-field">
+                            <legend>任务内容</legend>
+                            <div class="layui-field-box" id="taskInfos">
+                            </div>
+                        </fieldset>
+                        <!--审核信息开始-->
+                        <fieldset class="layui-elem-field">
+                            <legend>审核</legend>
+                            <div class="layui-field-box">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">审核结果</label>
+                                    <div class="layui-input-block">
+                                        <input type="radio" lay-filter="auditResult" name="auditResult" value="1" title="通过" checked="">
+                                        <input type="radio" lay-filter="auditResult" name="auditResult" value="2" title="驳回">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">驳回原因</label>
+                                    <div class="layui-input-block">
+                                        <textarea id="auditReason" disabled="true" name="auditReason" autocomplete="off" placeholder="驳回原因" class="layui-textarea"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <!--审核信息结束-->
+                        <div class="layui-card-header" style="text-align: right;">
+                            <button class="layui-btn" id="auditBtn" type="button" lay-filter="audit"><i
+                                    class="layui-icon">&#xe605;</i>审核
+                            </button>
+                            <button class="layui-btn layui-btn-danger" type="button" id="cancelbtn1"
+                                    lay-filter="cancel"><i
+                                    class="layui-icon">&#x1006;</i>关闭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script src="/staticResource/lib/layui/layui.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+
+<script>
+    var id = getParam("id");
+    var fid = getParam("fid");
+    var form;
+    var laydate;
+    var $;
+    var upload;
+    layui.use(['form', 'jquery','laydate', 'upload'], function () {
+        form = layui.form;
+        $ = layui.jquery;
+        laydate = layui.laydate;
+        upload = layui.upload;
+        form.on('radio(auditResult)', function(data){
+            if(data.value == '1'){ //通过，不能进行编辑原因
+                $("#auditReason").val("");
+                $("#auditReason").attr("disabled",true);
+            } else {
+                $("#auditReason").attr("disabled",false);
+            }
+        });
+        if (id && id != null) {
+            $.ajax({
+                type: "GET",
+                url: apiPath+"/content/impTemporaryTasksRecord/get/"+id,
+                success: function (res) {
+                    console.log("查看"+JSON.stringify(res.data));
+                    if (res.code == 0) {
+                        var finalData = getAjaxData(res);
+                        console.log("finalData====="+finalData);
+                        if (finalData) {
+                            $("#taskId").text(finalData.impTemporaryTasks.id);
+                            $("#taskName").val(finalData.impTemporaryTasks.tasksName);
+                            $("#remarks").val(finalData.impTemporaryTasks.remark);
+                            $("#creator").val(finalData.creatorTeamName);
+                            $("#timeStartShow").val(new Date(finalData.impTemporaryTasks.timeStart).format("yyyy-MM-dd"));
+                            $("#timeEndShow").val(new Date(finalData.impTemporaryTasks.timeEnd).format("yyyy-MM-dd"));
+                            $("#thisTimeEndShow").val(new Date(finalData.thisTime).format("yyyy-MM-dd hh:mm:ss"));
+                            var auditStatus = "-";
+                            if (finalData.status == 0) {
+                                $("#status").text("待审核");
+                            } else if (finalData.status == 1) {
+                                $("#status").text("审核成功");
+                            } else if (finalData.status == 2) {
+                                $("#status").text("已驳回");
+                            } else if (finalData.status == 3) {
+                                $("#status").text("待更新");
+                            } else if (finalData.status == 4) {
+                                $("#status").text("已更新");
+                            }
+                            showDynField(finalData.impTasksFieldsRelation);
+                        } else {
+                            parent.layer.msg("获取数据失败");
+                        }
+                    }
+                },
+                error: function () {
+                    return parent.layer.msg("获取数据失败");
+                }
+            });
+        }
+        laydate.render({
+            elem: '#timeStartShow',
+            trigger: 'click'
+            , done(value) {
+                $("#timeStart").val(new Date(value).getTime());
+            }
+        });
+        laydate.render({
+            elem: '#timeEndShow'
+            , trigger: 'click'
+            , done(value) {
+                $("#timeEnd").val(new Date(value).getTime());
+            }
+        });
+        laydate.render({
+            elem: '#thisTimeEndShow'
+            , trigger: 'click'
+            , done(value) {
+                $("#thisTimeEnd").val(new Date(value).getTime());
+            }
+        });
+        // $("#cancelbtn").click(function () {
+        //     // 关闭顶层框架tab
+        //     var id = self.frameElement.getAttribute("tab-id");
+        //     top.element.tabDelete('xbs_tab', id);
+        // });
+        $("#cancelbtn1").click(function () {
+            // 关闭顶层框架tab
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+        $("#auditBtn").click(function () {
+            console.log()
+            var param={};
+            param.auditResult=$('input[name="auditResult"]:checked').val();
+            param.auditReason=$('#auditReason').val();
+            param.reportId=id;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/content/impTemporaryTasksRecord/auditTasksList',
+                data: JSON.stringify(param),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('审核成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('审核失败')
+                    }
+                }
+            })
+        });
+    });
+    //展示动态字段信息。
+    function showDynField(dynInfo) {
+        if(dynInfo){
+            var taskInfosContainer = $("#taskInfos");
+            for (var index in dynInfo) {
+                genFormItem(dynInfo[index], taskInfosContainer);
+            }
+        }
+    }
+    function genFormItem(fieldInfo, container) {
+        console.log(fieldInfo,container);
+        if (fieldInfo && container) {
+            var fieldId = "id_" + parseInt(Math.random() * 100000) + new Date().getTime();
+            if (fieldInfo.fieldProperties.substr(2,3) == "0") {
+                // DWBSR(0,"短文本输入")
+                var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"100%\">" +
+                    "              <div class=\"layui-form-item\"> \n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                       <input id='" + fieldId + "' disabled  autocomplete=\"off\" class=\"layui-input\" value='" + fieldInfo.fieldData + "'>\n" +
+                    "                   </div>\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.unit + "</label>\n" +
+                    "               </div>" +
+                    "            </td>\n"+
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindDataTxt", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+                $("#" + fieldId).on("input", function (e) {
+                    fieldInfo.bindDataTxt = this.value;
+                    console.log(fieldInfo);
+                })
+                form.render();
+                    
+            }else if(fieldInfo.fieldProperties.substr(2,3) == "2"){
+                // SZSR(2,"数字输入")
+                var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"100%\">" +
+                    "              <div class=\"layui-form-item\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                       <input data-id='' disabled id='" + fieldId + "' lay-verify='number'  autocomplete=\"off\" class=\"layui-input\" value='" + fieldInfo.fieldData + "'>\n" +
+                    "                   </div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindData", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+                $("#" + fieldId).on("input", function (e) {
+                    fieldInfo.bindData = this.value;
+                })
+                form.render();
+            }else if(fieldInfo.fieldProperties.substr(2,3) == "3"){
+                 // CWBSR(3,"长文本输入")
+                var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"100%\">" +
+                    "              <div class=\"layui-form-item\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                       <input data-id='' disabled id='" + fieldId + "' lay-verify='number'  autocomplete=\"off\" class=\"layui-input\" value='" + fieldInfo.fieldData + "'>\n" +
+                    "                   </div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindData", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+                $("#" + fieldId).on("input", function (e) {
+                    fieldInfo.bindData = this.value;
+                })
+                form.render();
+            }else if(fieldInfo.fieldProperties.substr(2,3) == "4"){
+                  //  RQXZ(4,"日期选择(年月日)")
+                  var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"100%\">" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                        <input type=\"text\" disabled class=\"layui-input\" value='" + fieldInfo.fieldData + "' id=\"" + fieldId + "\">\n" +
+                    "                   </div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindData", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+                var option = {
+                    elem: '#' + fieldId
+                    , done: function (value, date, endDate) {
+                        var start_date= new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                        fieldInfo.bindData = start_date.getTime();
+                        console.log(fieldInfo)
+                    }
+                };
+                if (fieldInfo.fieldData) {
+                    option.value = new Date(parseInt(fieldInfo.fieldData)).format("yyyy-MM-dd");
+                }
+                laydate.render(option);
+                form.render();
+            }else if(fieldInfo.fieldProperties.substr(2,3) == "5"){
+                  // SJXZ(5,"时间选择(年月日时分秒)")
+                  var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"100%\">" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n" +
+                    "                        <input type=\"text\" disabled class=\"layui-input\" value='" + fieldInfo.fieldData + "' id=\"" + fieldId + "\">\n" +
+                    "                   </div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindData", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+
+                var option = {
+                    elem: '#' + fieldId
+                    , type: 'datetime'
+                    , done: function (value, date, endDate) {
+                        var start_date= new Date(date.year, date.month - 1, date.date, date.hours, date.minutes, date.seconds);
+                        fieldInfo.bindData = start_date.getTime();
+                        console.log(fieldInfo)
+                    }
+                };
+                if (fieldInfo.fieldData) {
+                    option.value = new Date(parseInt(fieldInfo.fieldData)).format("yyyy-MM-dd hh:mm:ss");
+                }
+                laydate.render(option);
+                form.render();
+            }else if (fieldInfo.fieldProperties.substr(2,3) == "6") {
+                // DX(6,"单选")
+                var checkArr = new Array();
+                if (fieldInfo.fieldData) {
+                    checkArr = fieldInfo.fieldData.split(",");
+                }
+                var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"100%\">" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n";
+                if (fieldInfo.fieldContent) {
+                    var dataArr = fieldInfo.fieldContent.split(",");
+                    for (var index in dataArr) {
+                        if (checkArr.indexOf(dataArr[index]) > -1) {
+                            itemHtml += "<input type=\"radio\" disabled name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + dataArr[index] + "\" title=\"" + dataArr[index] + "\" checked>";
+                        } else {
+                            itemHtml += "<input type=\"radio\" disabled name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + dataArr[index] + "\" title=\"" + dataArr[index] + "\" >";
+                        }
+                    }
+                }
+                itemHtml += "                   </div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindData", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+                form.on('radio(' + fieldId + ')', function (data) {
+                    fieldInfo.bindData = data.value;
+                    console.log("-------------")
+                    console.log("-------------")
+                    console.log("-------------")
+                    console.log(fieldInfo)
+                });
+                form.render();
+        }else if (fieldInfo.fieldProperties.substr(2,3) == "8") {
+                // DXX(8,"多选")
+                var checkArr = new Array();
+                if (fieldInfo.fieldData) {
+                    checkArr = fieldInfo.fieldData.split(",");
+                }
+                var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"50%\">" +
+                    "              <div class=\"layui-form-item layui-form-text\">\n" +
+                    "                   <label class=\"layui-form-label\">" + fieldInfo.fieldName + "</label>\n" +
+                    "                   <div class=\"layui-input-block\">\n";
+                if (fieldInfo.fieldContent) {
+                    var dataArr = fieldInfo.fieldContent.split(",");
+                    for (var index in dataArr) {
+                        if (checkArr.indexOf(dataArr[index]) > -1) {
+                            itemHtml += "<input type=\"checkbox\" disabled name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + dataArr[index] + "\" title=\"" + dataArr[index] + "\" checked>";
+                        } else {
+                            itemHtml += "<input type=\"checkbox\" disabled name=\"" + fieldId + "\" lay-filter=\"" + fieldId + "\" value=\"" + dataArr[index] + "\" title=\"" + dataArr[index] + "\">";
+                        }
+                    }
+                }
+                itemHtml += "                   </div>\n" +
+                    "                </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindData", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+                form.on('checkbox(' + fieldId + ')', function (data) {
+                    var chk_value =[];
+                    $('input[name="'+fieldId+'"]:checked').each(function(){
+                        chk_value.push($(this).val());
+                    });
+                    fieldInfo.bindData = chk_value.join(",");
+                });
+                form.render();
+            } else if (fieldInfo.fieldProperties.substr(2,3) == "10") {
+                // SCDT(10,"上传图片")
+                var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"50%\">" +
+                    "             <div class=\"layui-upload\">\n" +
+                    "               <div class=\"layui-upload-list\">\n" +
+                    "                   <img class=\"layui-upload-img\" id=\"img_view_\"" + fieldId + "\">\n" +
+                    "                   <p id=\"msgText_" + fieldId + "\"></p>\n" +
+                    "               </div>" +
+                    "               </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindData", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+                //TODO 数据绑定
+                // var uploadInst = upload.render({
+                //     elem: '#upload_' + fieldId
+                //     , url: apiPath + '/attached/file_upload' //改成您自己的上传接口
+                //     , before: function (obj) {
+                //         //预读本地文件示例，不支持ie8
+                //         obj.preview(function (index, file, result) {
+                //             $('#img_view_' + fieldId).attr('src', result); //图片链接（base64）
+                //         });
+                //     }
+                //     , done: function (res) {
+                //         //如果上传失败
+                //         if (res.code > 0) {
+                //             return top.layer.msg('上传失败');
+                //         }
+                //         //上传成功
+                //     }
+                //     , error: function () {
+                //         //演示失败状态，并实现重传
+                //         var demoText = $('#msgText_' + fieldId);
+                //         demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                //         demoText.find('.demo-reload').on('click', function () {
+                //             uploadInst.upload();
+                //         });
+                //     }
+                // });
+                if (fieldInfo.fieldData) {
+                    var f = fieldInfo.fieldData;
+                    var url = apiPath + '/attached/show/' + f;
+                    $('#img_view_' + fieldId).attr('src', url);
+                    
+                }
+                form.render();
+            }else if (fieldInfo.fieldProperties.substr(2,3) == "11") {
+                // SCTPBX(11,"上传图片（不限）")
+                var itemHtml = "<table width='100%'>\n" +
+                    "        <tr>\n" +
+                    "            <td width=\"50%\">" +
+                    "             <div class=\"layui-upload\">\n" +
+                    "               <blockquote class=\"layui-elem-quote layui-quote-nm\" style=\"margin-top: 10px;\">\n" +
+                    "                   预览图：\n" +
+                    "                   <div class=\"layui-upload-list\" id=\"img_view_" + fieldId + "\"></div>\n" +
+                    "               </blockquote>\n" +
+                    "               </div>" +
+                    "            </td>\n" +
+                    "        </tr>\n" +
+                    "    </table>";
+                container.append($(itemHtml));
+                Object.defineProperty(fieldInfo, "bindData", {
+                    get: function () {
+                        return this.fieldData;
+                    },
+                    set: function (val) {
+                        this.fieldData = val;
+                    }
+                })
+                //TODO 数据绑定
+                //多图片上传
+                // upload.render({
+                //     elem: '#upload_' + fieldId
+                //     , url: apiPath + '/attached/file_upload' //改成您自己的上传接口
+                //     , multiple: true
+                //     , before: function (obj) {
+                //         //预读本地文件示例，不支持ie8
+                //         obj.preview(function (index, file, result) {
+                //             $('#img_view_' + fieldId).append('<img style="width: 100px;height: 100px;" src="' + result + '" alt="' + file.name + '" class="layui-upload-img">')
+                //         });
+                //     }
+                //     , done: function (res) {
+                //         //上传完毕
+                //     }
+                // });
+                if (fieldInfo.fieldData) {
+                    var f = fieldInfo.fieldData.split(",");
+                    for(var i=0;i<f.length;i++){
+                        var url = apiPath + '/attached/show/' + f[i];
+                        $('#img_view_' + fieldId).append(
+                            '<img  style="width: 100px;height: 100px;" src='+ url +'>'  );
+                    }
+                }
+                form.render();
+            }
+    }
+}
+</script>
+
+
+</body>
+</html>

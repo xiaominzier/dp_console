@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>修改密码</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+
+    <script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+    <script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+    <script src="/staticResource/lib/common-js/util.js" charset="utf-8"></script>
+</head>
+<body>
+
+<style>
+    .layui-form-label.layui-required:after {
+        content: "*";
+        color: red;
+        position: absolute;
+    }
+
+    #divimg {
+        position: relative;
+        right: 5px;
+        top: 1px;
+        text-align: center;
+        width: 15px;
+        display: inline;
+        left: -36px;
+
+    }
+
+    #img {
+        width: 25px;
+        height: 15px;
+    }
+
+    .password {
+        position: relative;
+    }
+
+    .password .n-txtCss {
+        width: 90% !important;
+    }
+
+    .password .fa {
+        position: absolute;
+        right: 10px;
+        top: 15px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+</style>
+
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 20px;padding-right: 20px">
+
+    <form class="layui-form" id="formid" lay-filter="form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">当前密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="oldPassword" id="oldPwd" placeholder="当前密码" lay-verify="required"
+                       autocomplete="off"
+                       class="layui-input" style="display: inline;width: 90%;">
+                <input type="hidden" name="id" id="id">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">新密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="newPassword" id="newPwd1" placeholder="新密码" autocomplete="off"
+                       lay-verify="required|checkPwd"
+                       class="layui-input LAY-user-login-password" style="display: inline;width: 90%;">
+                <div id="divimg"><img id="img" class="showImg" onclick="hideShowPsw()"
+                                      src="/staticResource/images/icon-invisible.png"></div>
+            </div>
+            <span style="color: darkgrey;">6到18位数字、大小写字母、下划线组合，最少包含两种类型</span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">确认密码</label>
+            <div class="layui-input-block">
+                <input type="password" id="newPwd2" placeholder="确认密码" autocomplete="off" lay-verify="required|checkPwd"
+                       class="layui-input LAY-user-login-password" style="display: inline;width: 90%;">
+                <div id="divimg"><img id="img" class="showImg" onclick="hideShowPsw()"
+                                      src="/staticResource/images/icon-invisible.png"></div>
+            </div>
+            <span style="color: darkgrey;">6到18位数字、大小写字母、下划线组合，最少包含两种类型</span>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: right;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel">取消</button>
+                <button class="layui-btn" lay-submit lay-filter="edit">保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+
+    var demoImg = $(".showImg");
+    var PWD = $(".LAY-user-login-password");
+    
+    function hideShowPsw() {
+        PWD.each(function () {
+            var pwd = this;
+            if (pwd.type == "password") {
+                pwd.type = "text";
+                demoImg.each(function () {
+                    $(this).attr("src", "/staticResource/images/icon-visible.png");
+                })
+            } else {
+                pwd.type = "password";
+                demoImg.each(function () {
+                    $(this).attr("src", "/staticResource/images/icon-invisible.png");
+                })
+            }
+        })
+    }
+
+    var loginUser = getLoginUser();
+    var checkUserName;
+    layui.use(['form', 'jquery'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        if (loginUser) {
+            var id = loginUser.id;
+            $("#id").val(id);
+            $("#oldPwd").val("");
+            $("#newPwd1").val("");
+            $("#newPwd2").val("");
+        }
+
+        form.verify({
+            checkPwd: function (value, item) { //value：表单的值、item：表单的DOM对象
+                /*if (value == null || value.length < 6||value.length>18) {
+                    return "密码长度在6-18位之间";
+                }*/
+                var reg = new RegExp(/^(?!^[\d]+$)(?!^[-]+$)(?!^[_]+$)(?!^[a-zA-Z]+$)[\w-]{6,18}$/);
+                // var reg = new RegExp(/^\w+$/);
+                if (!reg.test(value)) {
+                    return "6到18位数字、大小写字母、下划线组合，最少包含两种类型";
+                }
+                var newPwd2 = $("#newPwd2").val();
+                var newPwd1 = $("#newPwd1").val();
+                if (newPwd1 != newPwd2) {
+                    return '两次密码输入不一致';
+                    $("#newPwd1").addClass("layui-form-danger");
+                    $("#newPwd1").focus();
+                }
+            }
+        });
+        form.on('submit(edit)', function (data) {
+            data = data.field;
+            console.log(JSON.stringify(data));
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath+'/user/impUserInfo/changePassword/'+id,
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res) {
+                        if (res.code == 0) {
+                            parent.layer.msg('修改成功');
+                            var id = self.frameElement.getAttribute("tab-id");
+                            top.element.tabDelete('xbs_tab', id);
+                        } else {
+                            if(res.message.trim()=="用密码错误"){
+                                res.message = "原密码错误";
+                            }
+                            parent.layer.msg('修改失败,' + res.message);
+                        }
+                    }
+                }
+
+            })
+            return false;
+        });
+        $("#newPwd2").blur(function () {
+            var newPwd2 = $("#newPwd2").val();
+            var newPwd1 = $("#newPwd1").val();
+            if (newPwd1 != newPwd2) {
+                parent.layer.msg('两次密码输入不一致');
+                $("#newPwd1").addClass("layui-form-danger");
+                $("#newPwd1").focus();
+            }
+        });
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>整改方案</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body style="height: 5000px;">
+<div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a style="font-size:3px">
+          <cite>整改方案</cite></a>
+      </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+
+<div class="layui-fluid" style="padding-top: 15px;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body " style="height: 5000px;">
+                    <form class="layui-form layui-form-pane" action="" id="searchForm" lay-filter="searchForm">
+                        <div class="layui-form-item" >
+                            <!-- <div class="layui-inline">
+                                <label id="l1" style="display: none;" class="layui-form-label"></label>
+                                <label id="l2" style="display: none;" class="layui-form-label"></label>
+                            </div> -->
+                            <div class="layui-input-block" style="margin-left: 0px !important;">
+                                <label class="layui-form-label" id="l1"></label>
+                                <div class="layui-input-block">
+                                    <input id="l2" readonly class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 130px;">已选整改方案</label>
+                            <label id="num" class="layui-form-label"></label>
+                            <label class="layui-form-label"><a onclick="viewCheckData()" style="color: blue;">点击查看</a>
+                            </label>
+                        </div>
+                        <div class="layui-form-item">
+                            <input type="radio" lay-filter="typeRadio1" id="fieldAll" checked="true" name="type1" title="整改方案库">
+                        </div>
+                        <div class="layui-form-item">
+
+                            <div class="layui-col-md8">
+                                <input type="text" id="title" placeholder="整改方案名称、关键词搜索" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                            <div class="layui-col-md1">
+                                <button class="layui-btn" type="button" id="searchBtn">搜索</button>
+                            </div>
+
+                        </div>
+                        <div class="layui-form-item">
+                            <input type="radio" name="type1" lay-filter="typeRadio2" id="onlyField" title="仅显示此字段关联整改方案">
+                        </div>
+                        <table id="table" lay-filter="table"></table>
+                        <div class="layui-form-item">
+                            <input type="radio" name="type1" lay-filter="typeRadio3" id="manualInput" title="手动录入">
+                        </div>
+                        <div class="layui-card" id="manualShow" style="display: none;">
+
+                            <div class="layui-form-item">
+                                    <label class="layui-form-label ">标题</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="title" lay-verify="required" autocomplete="off"
+                                               class="layui-input">
+                                    </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label ">关键词</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="keyword" lay-verify="required" autocomplete="off"
+                                           class="layui-input">
+                                    <span style="color: #2F4056">英文逗号区分</span>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label ">状态</label>
+                                <div class="layui-input-block">
+                                    <input type="radio" name="status" value="0" title="启用" checked>
+                                    <input type="radio" name="status" value="1" title="禁用" >
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">整改方案</label>
+                                <div class="layui-input-block">
+                                    <textarea id="comment" style="display: none;" name="comment" lay-verify="comment"
+                                                class="layui-textarea" ></textarea>
+                                </div>
+                            </div>
+                            <div class="layui-form-item" style="text-align: left;">
+                                <div class="layui-input-block" style="text-align: left;">
+                                    <button class="layui-btn layui-btn-danger" type="button" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                                    </button>
+                                    <button class="layui-btn" lay-submit lay-filter="add" id="add" type="button"><i class="layui-icon">&#xe61f;</i>保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckData" type="button">确定选择</button>
+        <button class="layui-btn layui-btn-sm" lay-event="cancel" type="button">取消</button>
+    </div>
+</script>
+<script type="text/html" id="bar">
+    {{#
+    var statusBtn = function(data){
+    var btnStr="";
+    btnStr+='<a class="layui-btn layui-btn-xs " lay-event="detail">查看</a>';
+    return btnStr;
+    }
+    }}
+    {{statusBtn(d)}}
+
+
+</script>
+
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/lay/modules/xm-select.js"></script>
+<script src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<script>
+    var num = 0;
+    var selectedId;
+    var plans = getParam('plans');//已选内容
+    if(plans){
+        selectedId = plans;
+        num=1;
+    }
+    // var fid = self.frameElement.getAttribute("tab-id");
+    var fid = getParam("fid");
+    var planBtn = getParam("planBtn");
+    // var industryFieldsId = getParam("industryFieldsId");
+    var fieldName = decodeURI(getParam('fieldName'));//字段名称
+    var content = decodeURI(getParam('content'));//字段内容
+    var fieldId = getParam("id");
+    var param;
+    layui.use(['table', 'form', 'element', 'layer', 'layedit'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+        var layer = layui.layer;
+        var layedit = layui.layedit;
+        $("#num").text(num+"条");
+        var tableData;
+        form.on('radio(typeRadio3)', function (data) {
+            $("#manualShow").show();
+            var layedit = layui.layedit;
+            layedit.set({
+                uploadImage: {
+                    url: apiPath + '/attached/lay_file_upload' //接口url
+                    , type: 'post' //默认post
+                }
+            });
+            var index = layedit.build('comment', {
+                height: 200 //设置编辑器高度
+            }); //建立编辑器
+            form.verify({
+                comment: function (value) {
+                    return layedit.sync(index);
+                }
+            })
+            layedit.getContent(index);
+
+        })
+        $('#cancelbtn').on('click', function () {
+            self.location.reload();
+        });
+        if (fieldName != "") {
+                $("#l1").css("display", "block").text(fieldName);
+                $("#l2").css("display", "block").val(content);
+            }
+        // $("#onlyField").prop("checked",true);
+        form.on('radio(typeRadio1)', function (data){
+            $("#fieldAll").prop("checked",true);
+            $("#onlyField").prop("checked",false);
+            $("#manualShow").hide();
+            $("#searchBtn").click();
+            form.render();
+        })
+        form.on('radio(typeRadio2)', function (data){
+            $("#onlyField").prop("checked",true);
+            $("#fieldAll").prop("checked",false);
+            $("#manualShow").hide();
+            $("#searchBtn").click();
+            form.render();
+        })
+        form.render();
+        param = getQueryParam();
+        var tableIns = table.render({
+            elem: '#table',
+            url: apiPath + '/content/impRectificationPlan/query_page',
+            method: "get",
+            even: true,
+            page: true,
+            toolbar: '#toolbarDemo',
+            where: param,
+            // toolbar: "#toolbar",
+            cols: [[
+                {
+                    type: 'radio', width: '5%', fixed: 'left', title: '选择'
+                },
+                {
+                    field: 'comment', title: '方案内容', width: '85%', align: 'center'
+                },
+                {
+                    title: '操作', toolbar: '#bar', width: '10%', align: 'center', fixed: 'right'
+                }
+
+            ]],
+            id: 'testReload',
+
+            parseData: function (res) {
+                return {
+                    "code": res.code,
+                    "data": res.data.records,
+                    "count": res.data.total,
+                    "msg": res.message
+                };
+
+            },
+            done: function (res, curr, count) {
+                //如果是异步请求数据方式，res即为你接口返回的信息。
+                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+                tableData = res.data;
+                $("[data-field='id']").css('display', 'none');
+                // $.each(tableData,function(i,e){
+                //     if(e.id == selectedId){
+                //          //下面三句是通过更改css来实现选中的效果
+                //         var index= e['LAY_TABLE_INDEX'];
+                //         $('tr[data-index=' + index + '] ').addClass('layui-table-click')
+                //         $('tr[data-index=' + index + '] input[type="radio"]').prop('checked', true);
+                //         $('tr[data-index=' + index + '] input[type="radio"]').next().addClass('layui-form-radioed');
+                //         $($('tr[data-index=' + index + '] input[type="radio"]').next().children("i").get(0)).addClass('layui-anim-scaleSpring')
+                //     }
+                // })
+            },
+
+            request: {
+                pageName: 'page',
+                limitName: 'size'
+            }
+
+        });
+
+        table.on('row(table)', function(obj){
+            console.log(obj.tr) //得到当前行元素对象
+            console.log(obj.data) //得到当前行数据
+            if ($(obj.tr).find(".layui-form-radioed").length>0) {
+                selectedId = obj.data.id;
+                num=1;
+            }
+            $("#num").text(num+"条");
+
+        });
+        function reload() {
+            param = getQueryParam();
+            if (tableIns != null) {
+                tableIns.where = {};  //置空where
+                tableIns.page = {};
+            }
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    currPage: 1 //重新从第 1 页开始
+                }
+                , where: param,
+                done: function () {
+                    tableIns = this;
+                }
+                // sysOperatorId: $("#sysOperatorId").val(),
+            });
+
+        }
+        function getQueryParam() {
+            param = {};
+            var onlyField = $("#onlyField");
+            if ($(onlyField).prop("checked")==true && fieldId != "") {
+                console.log("字段id："+fieldId);
+                param.industryFieldsId = fieldId;
+            }
+            var fieldAll = $("#fieldAll");
+            if ($(fieldAll).prop("checked")==true) {
+                console.log("所有")
+                param = {};
+            }
+            var title = $("#title").val();
+            if (title != "") {
+                param.LK_keyword = title;
+            }
+            return param;
+        }
+        form.on('submit(add)', function (data) {
+            data = data.field;
+            delete data.type1;
+            delete data.file;
+            data.impPlanFieldsRelationList = [];
+            console.log(JSON.stringify(data));
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath + '/content/impRectificationPlan/save',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var newId = res.data.id;
+                        parent.policyBtnClick(planBtn,newId);
+                        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                        parent.layer.close(index);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+            })
+            return false;
+        });
+        $(document).off('mousedown', '.layui-table-grid-down').on('mousedown', '.layui-table-grid-down', function (event) {
+            table._tableTrCurrr = $(this).closest('td');
+        });
+        $(document).off('click', '.layui-table-tips-main [lay-event]').on('click', '.layui-table-tips-main [lay-event]', function (event) {
+            var elem = $(this);
+            var tableTrCurrr = table._tableTrCurrr;
+            if (!tableTrCurrr) {
+                return;
+            }
+            var layerIndex = elem.closest('.layui-table-tips').attr('times');
+            layer.close(layerIndex);
+            table._tableTrCurrr.find('[lay-event="' + elem.attr('lay-event') + '"]').click();
+        });
+
+
+        $("#searchBtn").click(function () {
+            reload();
+        })
+        table.on('toolbar(table)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id); //获取选中行状态
+            console.log(checkStatus);
+            switch(obj.event){
+                case 'getCheckData':
+                    var data = checkStatus.data;  //获取选中行数据
+                    if (data.length==0){
+                        top.layer.msg("请选择整改方案!");
+                        return false;
+                    }
+                    parent.policyBtnClick(planBtn,data[0].id);
+                    var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    parent.layer.close(index);
+                    break;
+                case 'cancel':
+                    var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    parent.layer.close(index);
+                    break;
+            };
+            return false;
+        });
+
+        table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            console.log("%o", data);
+            if (obj.event == 'detail') {
+                top.layer.open({
+                    type: 2,
+                    skin: 'layui-layer-demo', //样式类名
+                    title: '整改方案内容',
+                    closeBtn: 1,
+                    anim: 2,
+                    area: ['893px', '600px'],
+                    shadeClose: true, //开启
+                    content: '/company/planContent.html?id=' + data.id //这里content是一个普通的String
+                });
+            }
+
+        })
+    })
+    function viewCheckData() {
+        layer.open({
+            type: 2,
+            skin: 'layui-layer-demo', //样式类名
+            title: '已选整改方案',
+            closeBtn: 1,
+            anim: 2,
+            area: ['893px', '600px'],
+            shadeClose: true, //开启
+            content: '/company/planContent.html?id=' + selectedId,//这里content是一个普通的String
+            success: function (layero, index) {
+                var body = layer.getChildFrame('body', index);
+                var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                var ids = body.find('input').val();
+            }
+        });
+    }
+</script>
+</body>
+
+
+</html>

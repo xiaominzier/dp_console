@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加政策法规</title>
+    <link rel="stylesheet" href="/staticResource/css/font.css">
+    <link rel="stylesheet" href="/staticResource/css/xadmin.css">
+</head>
+<body>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/jsencrypt.js"></script>
+<script type="text/javascript" src="/staticResource/lib/jsencrypt/aes.mini.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/jquery.min.js"></script>
+<script type="text/javascript" src="/staticResource/lib/layui/layui.js"></script>
+<script src="/staticResource/lib/common-js/util.js"></script>
+<script type="text/javascript" src="/staticResource/lib/common-js/xadmin.js" charset="utf-8"></script>
+
+<script src="/staticResource/lib/sanjiliandong/js/select.js" charset="utf-8"></script>
+<script src="/staticResource/lib/sanjiliandong/js/area.js" charset="utf-8"></script>
+
+<div class="layui-fluid" style="padding-top: 15px;padding-bottom: 15px;padding-left: 50px;padding-right: 50px">
+    <form class="layui-form layui-form-pane" id="formid">
+
+        <style>
+            .layui-form-label.layui-required:after {
+                content: "*";
+                color: red;
+                position: absolute;
+            }
+
+        </style>
+
+
+        <div class="layui-row ">
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="policiesName" lay-verify="required" placeholder="请输入" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">法规类型</label>
+                <div class="layui-input-block">
+                    <select name="policiesType" lay-verify="required" lay-search="" lay-filter="policiesType" id="policiesType">
+                        <option value="">请选择</option>
+                        <option value="0">国家</option>
+                        <option value="1">地方</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="layui-row ">
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">颁布时间</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" name="issueTimeShow" id="issueTimeShow"
+                           autocomplete="off" lay-verify="required" placeholder="年/月/日">
+                    <input type="hidden" id="issueTime" name="issueTime" autocomplete="off"
+                           class="layui-input">
+
+                </div>
+            </div>
+
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">实施时间</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" name="implementationTimeShow" id="implementationTimeShow"
+                           autocomplete="off" lay-verify="required" placeholder="年/月/日">
+                    <input type="hidden" id="implementationTime" name="implementationTime" autocomplete="off"
+                           class="layui-input">
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="layui-row ">
+            <div class=" layui-col-md5">
+                <label class="layui-form-label ">状态</label>
+                <div class="layui-input-block">
+                    <select name="status" lay-verify="required" lay-search="" lay-filter="status" id="status">
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: left;">
+                <button class="layui-btn layui-btn-danger" id="cancelbtn" lay-filter="cancel"><i class="layui-icon">&#x1006;</i>取消
+                </button>
+                <button class="layui-btn" lay-submit lay-filter="add"><i class="layui-icon">&#xe61f;</i>保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    var fid = getParam("fid");
+    layui.use(['form', 'jquery', 'laydate', 'upload'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+
+
+        laydate.render({
+            elem: '#issueTimeShow'
+            , type: 'datetime'
+            , format: 'yyyy/MM/dd'
+            , done(value, date, endDate) {
+                $("#issueTime").val(new Date(value).getTime());
+            }
+        });
+
+        laydate.render({
+            elem: '#implementationTimeShow'
+            , type: 'datetime'
+            , format: 'yyyy/MM/dd'
+            , done(value, date, endDate) {
+                $("#implementationTime").val(new Date(value).getTime());
+            }
+        });
+
+
+
+        form.on('submit(add)', function (data) {
+            data = data.field;
+            delete data.issueTimeShow;
+            delete data.implementationTimeShow;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: apiPath+'/content/impPoliciesInfo/save',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.code == 0) {
+                        top.layer.msg('保存成功');
+                        var src = $(top.document).find("iframe[tab-id='" + fid + "']").attr("src");
+                        $(top.document).find("iframe[tab-id='" + fid + "']").attr("src", src);
+                        // 切换到对应到选项卡下
+                        top.element.tabChange('xbs_tab', fid);
+                        // 关闭顶层框架tab
+                        var id = self.frameElement.getAttribute("tab-id");
+                        top.element.tabDelete('xbs_tab', id);
+                    } else {
+                        top.layer.msg('保存失败');
+                    }
+                }
+
+            })
+            return false;
+        });
+
+        $('#cancelbtn').on('click', function () {
+            var id = self.frameElement.getAttribute("tab-id");
+            top.element.tabDelete('xbs_tab', id);
+        });
+
+    });
+</script>
+
+
+</body>
+</html>
